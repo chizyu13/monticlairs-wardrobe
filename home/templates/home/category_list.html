@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0">Categories</h2>
+        <a href="{% url 'home:create_category' %}" class="btn btn-success">+ Create New Category</a>
+    </div>
+
+    {% if categories %}
+        <div class="card shadow-sm">
+            <ul class="list-group list-group-flush">
+                {% for category in categories %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <strong>{{ category.name }}</strong>
+                        <span class="badge bg-primary rounded-pill">
+                            {{ category.products.count }} product{{ category.products.count|pluralize }}
+                        </span>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% else %}
+        <div class="alert alert-warning" role="alert">
+            No categories available.
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

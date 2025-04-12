@@ -1,0 +1,226 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        font-size: 12pt;
+        color: #333;
+    }
+    .container {
+        max-width: 1000px;
+        margin: 20px auto;
+        padding: 20px;
+    }
+    .header {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+    .header img {
+        max-width: 150px;
+        margin-bottom: 10px;
+    }
+    .filters {
+        margin-bottom: 20px;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+    }
+    .filters p {
+        margin: 5px 0;
+    }
+    .summary {
+        margin-bottom: 20px;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 10px;
+    }
+    .summary-box {
+        padding: 15px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        text-align: center;
+        background-color: #f9f9f9;
+    }
+    .summary-box h5 {
+        margin: 0 0 5px;
+        font-size: 14pt;
+        color: #007bff;
+    }
+    .summary-box p {
+        margin: 0;
+        font-size: 12pt;
+        font-weight: bold;
+    }
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 20px;
+    }
+    th, td {
+        border: 1px solid #ddd;
+        padding: 10px;
+        text-align: left;
+    }
+    th {
+        background-color: #007bff;
+        color: white;
+        font-weight: bold;
+    }
+    tr:nth-child(even) {
+        background-color: #f2f2f2;
+    }
+    .text-end {
+        text-align: right;
+    }
+    .text-center {
+        text-align: center;
+    }
+    .badge {
+        padding: 5px 10px;
+        border-radius: 12px;
+        font-size: 10pt;
+        color: white;
+        display: inline-block;
+    }
+    .badge-success { background-color: #28a745; }
+    .badge-danger { background-color: #dc3545; }
+    .badge-warning { background-color: #ffc107; }
+    .footer {
+        margin-top: 30px;
+        text-align: center;
+        font-size: 10pt;
+        color: #777;
+    }
+    @media print {
+        .no-print {
+            display: none;
+        }
+        body {
+            margin: 0;
+        }
+        .container {
+            margin: 0;
+            padding: 10px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block title %}Sales Report Preview - EHC Marketplace{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Header -->
+    <div class="header">
+        {% if logo %}
+        <img src="{{ logo.url }}" alt="EHC Marketplace Logo">
+        {% else %}
+        <img src="{% static 'images/logo.png' %}" alt="EHC Marketplace Logo">
+        {% endif %}
+        <h1>EHC Marketplace Sales Report</h1>
+        <p>Generated on: {{ generated_date|date:"F d, Y H:i" }}</p>
+    </div>
+
+    <!-- Filters Applied -->
+    <div class="filters">
+        <h4>Filters Applied</h4>
+        <p><strong>Date Range:</strong> 
+            {% if start_date %}
+                {{ start_date|date:"F d, Y" }} to 
+                {% if end_date %}
+                    {{ end_date|date:"F d, Y" }}
+                {% else %}
+                    Present
+                {% endif %}
+            {% else %}
+                All Time
+            {% endif %}
+        </p>
+        <p><strong>Product:</strong> 
+            {% if product_name %}
+                {{ product_name }}
+            {% else %}
+                All Products
+            {% endif %}
+        </p>
+    </div>
+
+    <!-- Summary Statistics -->
+    <div class="summary">
+        <div class="summary-box">
+            <h5>Total Sales</h5>
+            <p>{{ total_sales_count|default:0 }}</p>
+        </div>
+        <div class="summary-box">
+            <h5>Total Revenue</h5>
+            <p>ZMW {{ total_revenue|floatformat:2|default:"0.00" }}</p>
+        </div>
+        <div class="summary-box">
+            <h5>Average Sale</h5>
+            <p>ZMW {{ average_sale|floatformat:2|default:"0.00" }}</p>
+        </div>
+        <div class="summary-box">
+            <h5>This Month</h5>
+            <p>ZMW {{ monthly_revenue|floatformat:2|default:"0.00" }}</p>
+        </div>
+    </div>
+
+    <!-- Sales Table -->
+    <table>
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Product</th>
+                <th>Buyer</th>
+                <th>Date</th>
+                <th class="text-end">Qty</th>
+                <th class="text-end">Unit Price</th>
+                <th class="text-end">Total</th>
+                <th class="text-center">Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for sale in sales %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ sale.product.name|truncatechars:50 }}</td>
+                <td>{{ sale.buyer.username|default:"Unknown" }}</td>
+                <td>{{ sale.sale_date|date:"M d, Y"|default:"N/A" }}</td>
+                <td class="text-end">{{ sale.quantity|default:0 }}</td>
+                <td class="text-end">ZMW {{ sale.unit_price|floatformat:2|default:"0.00" }}</td>
+                <td class="text-end">ZMW {{ sale.total_amount|floatformat:2|default:"0.00" }}</td>
+                <td class="text-center">
+                    <span class="badge {% if sale.status == 'sold' %}badge-danger{% elif sale.status == 'pending' %}badge-warning{% else %}badge-success{% endif %}">
+                        {{ sale.status|title|default:"Active" }}
+                    </span>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="8" class="text-center">No sales records available</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="6" class="text-end"><strong>Total Revenue:</strong></td>
+                <td class="text-end"><strong>ZMW {{ total_revenue|floatformat:2|default:"0.00" }}</strong></td>
+                <td></td>
+            </tr>
+        </tfoot>
+    </table>
+
+    <!-- Footer -->
+    <div class="footer">
+        <p>EHC Marketplace &copy; {{ generated_date|date:"Y" }}. All rights reserved.</p>
+        <p>Generated by: {{ request.user.username|default:"System" }}</p>
+    </div>
+
+    <!-- Print Button (Hidden in Print) -->
+    <div class="text-center no-print">
+        <button onclick="window.print()" class="btn btn-primary">Print / Save as PDF</button>
+    </div>
+</div>
+{% endblock %}

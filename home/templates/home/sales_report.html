@@ -1,0 +1,344 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+<style>
+    .bg-purple {
+        background-color: #6f42c1 !important;
+    }
+    .card {
+        transition: transform 0.2s;
+    }
+    .card:hover {
+        transform: translateY(-5px);
+    }
+    .table th, .table td {
+        vertical-align: middle;
+    }
+    .badge {
+        font-size: 0.9em;
+        padding: 0.5em 1em;
+    }
+    .pagination .btn {
+        margin: 0 5px;
+    }
+</style>
+{% endblock %}
+
+{% block title %}Sales Report - EHC Marketplace{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <!-- Header Section -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0">
+            <i class="fas fa-chart-line text-primary me-2"></i>Sales Report
+        </h2>
+        <div>
+            <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#exportModal">
+                <i class="fas fa-download me-1"></i>Export
+            </button>
+        </div>
+    </div>
+
+    <!-- Summary Statistics Cards -->
+    <div class="row mb-4 g-4">
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-primary bg-gradient text-white shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-subtitle mb-2">Total Sales</h6>
+                            <h3 class="card-title mb-0">{{ total_sales_count|default:0 }}</h3>
+                        </div>
+                        <i class="fas fa-shopping-cart fa-2x opacity-50"></i>
+                    </div>
+                    <div class="mt-2">
+                        <small class="text-white-50">Filtered transactions</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-success bg-gradient text-white shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-subtitle mb-2">Total Revenue</h6>
+                            <h3 class="card-title mb-0">ZMW {{ total_revenue|floatformat:2|default:"0.00" }}</h3>
+                        </div>
+                        <i class="fas fa-dollar-sign fa-2x opacity-50"></i>
+                    </div>
+                    <div class="mt-2">
+                        <small class="text-white-50">Filtered gross revenue</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-info bg-gradient text-white shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-subtitle mb-2">Avg. Sale</h6>
+                            <h3 class="card-title mb-0">ZMW {{ average_sale|floatformat:2|default:"0.00" }}</h3>
+                        </div>
+                        <i class="fas fa-calculator fa-2x opacity-50"></i>
+                    </div>
+                    <div class="mt-2">
+                        <small class="text-white-50">Per filtered transaction</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-purple bg-gradient text-white shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-subtitle mb-2">This Month</h6>
+                            <h3 class="card-title mb-0">ZMW {{ monthly_revenue|floatformat:2|default:"0.00" }}</h3>
+                        </div>
+                        <i class="fas fa-calendar-alt fa-2x opacity-50"></i>
+                    </div>
+                    <div class="mt-2">
+                        <small class="text-white-50">{{ current_month|default:"Current Month" }} revenue</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter Section -->
+    <div class="card mb-4 shadow-sm">
+        <div class="card-header bg-light">
+            <h5 class="mb-0">
+                <i class="fas fa-filter me-2"></i>Filters
+            </h5>
+        </div>
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-3">
+                    <label for="start_date" class="form-label">From Date</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="far fa-calendar-alt"></i></span>
+                        <input type="date" class="form-control" id="start_date" name="start_date" value="{{ start_date|default_if_none:'' }}">
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <label for="end_date" class="form-label">To Date</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="far fa-calendar-alt"></i></span>
+                        <input type="date" class="form-control" id="end_date" name="end_date" value="{{ end_date|default_if_none:'' }}">
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <label for="product" class="form-label">Product</label>
+                    <select class="form-select" id="product" name="product">
+                        <option value="">All Products</option>
+                        {% for product in products %}
+                        <option value="{{ product.id }}" {% if product_id == product.id|stringformat:"s" %}selected{% endif %}>
+                            {{ product.name }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary me-2">
+                        <i class="fas fa-search me-1"></i>Apply
+                    </button>
+                    <a href="{% url 'home:sales_report' %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-undo me-1"></i>Reset
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Sales Table -->
+    <div class="card shadow-sm">
+        <div class="card-header bg-light d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">
+                <i class="fas fa-table me-2"></i>Sales Records
+            </h5>
+            <div class="text-muted">
+                Showing {{ sales.start_index|default:0 }} to {{ sales.end_index|default:0 }} of {{ sales.paginator.count|default:0 }} entries
+            </div>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th width="5%">#</th>
+                            <th width="25%">Product</th>
+                            <th width="20%">Buyer</th>
+                            <th width="15%">Date</th>
+                            <th width="10%" class="text-end">Qty</th>
+                            <th width="15%" class="text-end">Total</th>
+                            <th width="15%" class="text-center">Status</th>
+                            <th width="15%" class="text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for sale in sales %}
+                        <tr>
+                            <td>{{ forloop.counter0|add:sales.start_index }}</td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    {% if sale.product.image %}
+                                    <img src="{{ sale.product.image.url }}" alt="{{ sale.product.name }}" class="rounded me-2" width="40" style="object-fit: cover;">
+                                    {% else %}
+                                    <img src="{% static 'images/placeholder.png' %}" alt="No image" class="rounded me-2" width="40" style="object-fit: cover;">
+                                    {% endif %}
+                                    <span>{{ sale.product.name|truncatechars:30 }}</span>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="avatar-sm me-2">
+                                        <span class="avatar-title bg-soft-primary rounded-circle text-primary">
+                                            {{ sale.buyer.username|first|upper|default:"?" }}
+                                        </span>
+                                    </div>
+                                    {{ sale.buyer.username|default:"Unknown" }}
+                                </div>
+                            </td>
+                            <td>{{ sale.sale_date|date:"M d, Y"|default:"N/A" }}</td>
+                            <td class="text-end">{{ sale.quantity|default:0 }}</td>
+                            <td class="text-end fw-bold">ZMW {{ sale.total_amount|floatformat:2|default:"0.00" }}</td>
+                            <td class="text-center">
+                                <span class="badge {% if sale.status == 'sold' %}bg-danger{% elif sale.status == 'pending' %}bg-warning{% else %}bg-success{% endif %}">
+                                    {{ sale.status|title|default:"Active" }}
+                                </span>
+                            </td>
+                            <td class="text-center">
+                                <div class="btn-group btn-group-sm" role="group">
+                                    <a href="{% url 'home:generate_receipt' sale.id %}" class="btn btn-outline-success" title="Generate Receipt">
+                                        <i class="fas fa-file-pdf"></i>
+                                    </a>
+                                    <a href="{% url 'home:sale_detail' sale.id %}" class="btn btn-outline-info" title="View Details">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a href="{% url 'home:delete_product' sale.product.id %}" class="btn btn-outline-danger" title="Delete Product" onclick="return confirm('Are you sure you want to delete this product?');">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="8" class="text-center py-5">
+                                <div class="py-4">
+                                    <i class="fas fa-exclamation-circle fa-3x text-muted"></i>
+                                    <p class="lead text-muted">No sales records available</p>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pagination -->
+    {% if sales.has_other_pages %}
+    <div class="pagination mt-4 d-flex justify-content-center align-items-center">
+        <span class="me-3">Page {{ sales.number }} of {{ sales.paginator.num_pages }}</span>
+        <div>
+            {% if sales.has_previous %}
+            <a href="?page=1{% if start_date %}&start_date={{ start_date }}{% endif %}{% if end_date %}&end_date={{ end_date }}{% endif %}{% if product_id %}&product={{ product_id }}{% endif %}" class="btn btn-outline-secondary">
+                <i class="fas fa-angle-double-left"></i>
+            </a>
+            <a href="?page={{ sales.previous_page_number }}{% if start_date %}&start_date={{ start_date }}{% endif %}{% if end_date %}&end_date={{ end_date }}{% endif %}{% if product_id %}&product={{ product_id }}{% endif %}" class="btn btn-outline-secondary">
+                <i class="fas fa-angle-left"></i>
+            </a>
+            {% endif %}
+            {% for num in sales.paginator.page_range %}
+            <a href="?page={{ num }}{% if start_date %}&start_date={{ start_date }}{% endif %}{% if end_date %}&end_date={{ end_date }}{% endif %}{% if product_id %}&product={{ product_id }}{% endif %}" class="btn btn-outline-secondary {% if sales.number == num %}active{% endif %}">
+                {{ num }}
+            </a>
+            {% endfor %}
+            {% if sales.has_next %}
+            <a href="?page={{ sales.next_page_number }}{% if start_date %}&start_date={{ start_date }}{% endif %}{% if end_date %}&end_date={{ end_date }}{% endif %}{% if product_id %}&product={{ product_id }}{% endif %}" class="btn btn-outline-secondary">
+                <i class="fas fa-angle-right"></i>
+            </a>
+            <a href="?page={{ sales.paginator.num_pages }}{% if start_date %}&start_date={{ start_date }}{% endif %}{% if end_date %}&end_date={{ end_date }}{% endif %}{% if product_id %}&product={{ product_id }}{% endif %}" class="btn btn-outline-secondary">
+                <i class="fas fa-angle-double-right"></i>
+            </a>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Export Modal -->
+    <div class="modal fade" id="exportModal" tabindex="-1" aria-labelledby="exportModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exportModalLabel">Export Sales Report</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Select the format to export the sales report:</p>
+                    <div class="d-flex flex-column gap-3">
+                        <button class="btn btn-primary" onclick="exportToPDF()">
+                            <i class="fas fa-file-pdf me-2"></i>Export as PDF
+                        </button>
+                        <!-- Placeholder for other export formats if needed -->
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+// Export to PDF function
+function exportToPDF() {
+    const startDate = document.getElementById('start_date').value;
+    const endDate = document.getElementById('end_date').value;
+    const product = document.getElementById('product').value;
+    let queryParams = 'format=pdf';
+    if (startDate) queryParams += `&start_date=${startDate}`;
+    if (endDate) queryParams += `&end_date=${endDate}`;
+    if (product) queryParams += `&product=${product}`;
+    window.location.href = `{% url 'home:export_sales' %}?${queryParams}`;
+}
+
+// Validate date inputs
+document.getElementById('start_date').addEventListener('change', function() {
+    const startDate = this.value;
+    const endDateInput = document.getElementById('end_date');
+    if (startDate && endDateInput.value && new Date(startDate) > new Date(endDateInput.value)) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Invalid Date Range',
+            text: 'Start date cannot be later than end date.',
+        });
+        this.value = '';
+    }
+});
+
+document.getElementById('end_date').addEventListener('change', function() {
+    const endDate = this.value;
+    const startDateInput = document.getElementById('start_date');
+    if (endDate && startDateInput.value && new Date(endDate) < new Date(startDateInput.value)) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Invalid Date Range',
+            text: 'End date cannot be earlier than start date.',
+        });
+        this.value = '';
+    }
+});
+</script>
+{% endblock %}
+{% endblock %}

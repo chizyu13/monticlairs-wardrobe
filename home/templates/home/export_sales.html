@@ -1,0 +1,17 @@
+<div class="dropdown">
+    <button class="btn btn-outline-primary dropdown-toggle" type="button" id="exportDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+        <i class="fas fa-download me-1"></i>Export
+    </button>
+    <ul class="dropdown-menu" aria-labelledby="exportDropdown">
+        <li>
+            <a class="dropdown-item" href="{% url 'export_sales' %}?format=csv{% for key, value in request.GET.items %}&{{ key }}={{ value }}{% endfor %}">
+                <i class="fas fa-file-csv text-success me-2"></i>Export as CSV
+            </a>
+        </li>
+        <li>
+            <a class="dropdown-item" href="{% url 'export_sales' %}?format=pdf{% for key, value in request.GET.items %}&{{ key }}={{ value }}{% endfor %}">
+                <i class="fas fa-file-pdf text-danger me-2"></i>Export as PDF
+            </a>
+        </li>
+    </ul>
+</div>

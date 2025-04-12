@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="mb-4">Checkout Process</h2>
+
+    {% if checkouts %}
+        <table class="table table-bordered table-hover">
+            <thead class="table-dark">
+                <tr>
+                    <th>#</th>
+                    <th>Customer</th>
+                    <th>Location Type</th>
+                    <th>Phone Number</th>
+                    <th>Payment Method</th>
+                    <th>Delivery Fee</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for checkout in checkouts %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ checkout.user.get_full_name }}</td>
+                    <td>{{ checkout.location_type }}</td>
+                    <td>{{ checkout.phone_number }}</td>
+                    <td>{{ checkout.payment_method }}</td>
+                    <td>ZMW {{ checkout.delivery_fee }}</td>
+                    <td>
+                        <a href="{% url 'home:checkout_detail' checkout.id %}" class="btn btn-primary btn-sm">View Details</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No checkouts have been made yet.</p>
+    {% endif %}
+</div>
+{% endblock %}

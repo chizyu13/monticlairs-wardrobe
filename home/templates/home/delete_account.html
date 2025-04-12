@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Delete Account - EHC Marketplace{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="card shadow-sm">
+                <div class="card-header bg-danger text-white">
+                    <h3 class="mb-0">
+                        <i class="fas fa-exclamation-triangle me-2"></i>Delete Account
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <h5 class="text-danger">Are you sure you want to permanently delete your account?</h5>
+                    <p class="mb-0">This action is irreversible and will delete all of your data:</p>
+                    <ul>
+                        <li>Your profile information</li>
+                        <li>Your product listings</li>
+                        <li>Your order history</li>
+                    </ul>
+                    <p>Please enter your password to confirm the deletion of your account.</p>
+
+                    <form method="POST" action="{% url 'delete_account' %}">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Password</label>
+                            <input type="password" class="form-control" id="password" name="password" placeholder="Enter your password" required>
+                        </div>
+                        
+                        <div class="d-flex justify-content-end gap-2">
+                            <button type="button" class="btn btn-secondary" onclick="window.history.back();">Cancel</button>
+                            <button type="submit" class="btn btn-danger">Delete My Account</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

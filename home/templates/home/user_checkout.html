@@ -1,0 +1,355 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/checkouts.css' %}">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+<style>
+    .filter-container {
+        background: #f8f9fa;
+        padding: 20px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+    }
+    .table-container {
+        max-height: 600px;
+        overflow-y: auto;
+    }
+    .status-filter {
+        min-width: 150px;
+    }
+    .sort-btn {
+        cursor: pointer;
+        color: #007bff;
+    }
+    .sort-btn:hover {
+        color: #0056b3;
+        text-decoration: underline;
+    }
+    .table th, .table td {
+        vertical-align: middle;
+    }
+    .badge {
+        font-size: 0.9em;
+    }
+</style>
+{% endblock %}
+
+{% block title %}My Checkouts - EHC Marketplace{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <h2 class="text-center mb-4">My Checkouts</h2>
+
+    <!-- Filter and Search Section -->
+    <div class="filter-container">
+        <div class="row g-3 align-items-center">
+            <div class="col-md-3">
+                <select id="statusFilter" class="form-select status-filter">
+                    <option value="">All Statuses</option>
+                    <option value="pending">Pending</option>
+                    <option value="delivered">Delivered</option>
+                    <option value="cancelled">Cancelled</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <select id="dateFilter" class="form-select">
+                    <option value="">All Dates</option>
+                    <option value="today">Today</option>
+                    <option value="week">This Week</option>
+                    <option value="month">This Month</option>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <input type="text" id="searchInput" class="form-control" placeholder="Search by product name...">
+            </div>
+            <div class="col-md-2">
+                <button class="btn btn-outline-primary w-100" onclick="resetFilters()">Reset</button>
+            </div>
+        </div>
+    </div>
+
+    {% if checkouts %}
+        <div class="table-container">
+            <table class="table table-hover table-bordered align-middle" id="checkoutTable">
+                <thead class="table-dark sticky-top">
+                    <tr>
+                        <th scope="col">#</th>
+                        <th scope="col">
+                            Product
+                            <i class="bi bi-sort-alpha-down sort-btn" onclick="sortTable('product')"></i>
+                        </th>
+                        <th scope="col">
+                            Price (ZMW)
+                            <i class="bi bi-sort-numeric-down sort-btn" onclick="sortTable('price')"></i>
+                        </th>
+                        <th scope="col">Quantity</th>
+                        <th scope="col">Total</th>
+                        <th scope="col">Delivery Method</th>
+                        <th scope="col">Payment Type</th>
+                        <th scope="col">Status</th>
+                        <th scope="col">
+                            Date
+                            <i class="bi bi-sort-down sort-btn" onclick="sortTable('date')"></i>
+                        </th>
+                        <th scope="col">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="checkoutTableBody">
+                    {% for checkout in checkouts %}
+                    <tr data-status="{{ checkout.status|lower }}" data-date="{{ checkout.created_at|date:'Y-m-d' }}" data-product="{{ checkout.product.name|lower }}">
+                        <td>{{ forloop.counter }}</td>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                {% if checkout.product.image %}
+                                    <img src="{{ checkout.product.image.url }}" alt="{{ checkout.product.name }}" class="me-2" style="width: 50px; height: 50px; object-fit: cover; border-radius: 5px;">
+                                {% else %}
+                                    <img src="{% static 'images/placeholder.png' %}" alt="No image" class="me-2" style="width: 50px; height: 50px; object-fit: cover; border-radius: 5px;">
+                                {% endif %}
+                                {{ checkout.product.name }}
+                            </div>
+                        </td>
+                        <td data-price="{{ checkout.product.price }}">ZMW {{ checkout.product.price|floatformat:2 }}</td>
+                        <td>{{ checkout.quantity }}</td>
+                        <td>ZMW {{ checkout.total_price|floatformat:2 }}</td>
+                        <td>{{ checkout.get_delivery_method_display|default:"N/A" }}</td>
+                        <td>{{ checkout.get_payment_method_display|default:"N/A" }}</td>
+                        <td>
+                            {% if checkout.status == 'pending' %}
+                                <span class="badge bg-warning text-dark">Pending</span>
+                            {% elif checkout.status == 'delivered' %}
+                                <span class="badge bg-success">Delivered</span>
+                            {% elif checkout.status == 'cancelled' %}
+                                <span class="badge bg-danger">Cancelled</span>
+                            {% else %}
+                                <span class="badge bg-secondary">{{ checkout.status|title }}</span>
+                            {% endif %}
+                        </td>
+                        <td data-date="{{ checkout.created_at|date:'c' }}">{{ checkout.created_at|date:"M d, Y H:i" }}</td>
+                        <td>
+                            {% if checkout.status == 'pending' %}
+                                <button class="btn btn-sm btn-danger cancel-order" data-id="{{ checkout.id }}">Cancel</button>
+                            {% else %}
+                                <button class="btn btn-sm btn-secondary" disabled>Cancel</button>
+                            {% endif %}
+                            <a href="{% url 'home:checkout_detail' checkout.id %}" class="btn btn-sm btn-info">View</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        {% if checkouts.has_other_pages %}
+        <nav aria-label="Checkout pagination" class="mt-4">
+            <ul class="pagination justify-content-center">
+                {% if checkouts.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ checkouts.previous_page_number }}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}">Previous</a>
+                    </li>
+                {% endif %}
+                
+                {% for num in checkouts.paginator.page_range %}
+                    <li class="page-item {% if checkouts.number == num %}active{% endif %}">
+                        <a class="page-link" href="?page={{ num }}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}">{{ num }}</a>
+                    </li>
+                {% endfor %}
+                
+                {% if checkouts.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ checkouts.next_page_number }}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}">Next</a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+
+    {% else %}
+        <div class="alert alert-info text-center" role="alert">
+            You have no checkouts yet. Start shopping now!
+        </div>
+    {% endif %}
+
+    <div class="mt-4 text-center">
+        <a href="{% url 'home:products' %}" class="btn btn-primary btn-lg">Continue Shopping</a>
+    </div>
+</div>
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+// Sorting state
+let sortDirection = {
+    'product': true,
+    'price': true,
+    'date': true
+};
+
+// Sort table by column
+function sortTable(column) {
+    const tbody = document.getElementById('checkoutTableBody');
+    const rows = Array.from(tbody.getElementsByTagName('tr'));
+    
+    rows.sort((a, b) => {
+        let aValue, bValue;
+        
+        if (column === 'product') {
+            aValue = a.dataset.product;
+            bValue = b.dataset.product;
+        } else if (column === 'price') {
+            aValue = parseFloat(a.querySelector('[data-price]').dataset.price);
+            bValue = parseFloat(b.querySelector('[data-price]').dataset.price);
+        } else if (column === 'date') {
+            aValue = new Date(a.querySelector('[data-date]').dataset.date);
+            bValue = new Date(b.querySelector('[data-date]').dataset.date);
+        }
+        
+        if (sortDirection[column]) {
+            return aValue > bValue ? 1 : -1;
+        } else {
+            return aValue < bValue ? 1 : -1;
+        }
+    });
+    
+    sortDirection[column] = !sortDirection[column];
+    
+    tbody.innerHTML = '';
+    rows.forEach(row => tbody.appendChild(row));
+}
+
+// Filter table based on inputs
+function filterTable() {
+    const statusFilter = document.getElementById('statusFilter').value;
+    const dateFilter = document.getElementById('dateFilter').value;
+    const searchInput = document.getElementById('searchInput').value.toLowerCase();
+    const rows = document.querySelectorAll('#checkoutTableBody tr');
+    
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    rows.forEach(row => {
+        const status = row.dataset.status;
+        const date = new Date(row.dataset.date);
+        const productName = row.dataset.product;
+        
+        let showRow = true;
+        
+        // Status filter
+        if (statusFilter && status !== statusFilter) {
+            showRow = false;
+        }
+        
+        // Date filter
+        if (dateFilter) {
+            if (dateFilter === 'today' && date.toDateString() !== today.toDateString()) {
+                showRow = false;
+            } else if (dateFilter === 'week') {
+                const weekAgo = new Date(today);
+                weekAgo.setDate(today.getDate() - 7);
+                if (date < weekAgo) {
+                    showRow = false;
+                }
+            } else if (dateFilter === 'month') {
+                const monthAgo = new Date(today);
+                monthAgo.setMonth(today.getMonth() - 1);
+                if (date < monthAgo) {
+                    showRow = false;
+                }
+            }
+        }
+        
+        // Search filter
+        if (searchInput && !productName.includes(searchInput)) {
+            showRow = false;
+        }
+        
+        row.style.display = showRow ? '' : 'none';
+    });
+}
+
+// Reset all filters
+function resetFilters() {
+    document.getElementById('statusFilter').value = '';
+    document.getElementById('dateFilter').value = '';
+    document.getElementById('searchInput').value = '';
+    filterTable();
+}
+
+// Debounce function for search input
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
+
+// Event listeners
+document.getElementById('statusFilter').addEventListener('change', filterTable);
+document.getElementById('dateFilter').addEventListener('change', filterTable);
+document.getElementById('searchInput').addEventListener('input', debounce(filterTable, 300));
+
+// Cancel order functionality
+document.querySelectorAll('.cancel-order').forEach(button => {
+    button.addEventListener('click', function() {
+        const checkoutId = this.dataset.id;
+        
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "Do you want to cancel this order?",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#dc3545',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Yes, cancel it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                fetch(`/marketplace/cancel-checkout/${checkoutId}/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        Swal.fire(
+                            'Cancelled!',
+                            'Your order has been cancelled.',
+                            'success'
+                        ).then(() => {
+                            location.reload();
+                        });
+                    } else {
+                        Swal.fire(
+                            'Error!',
+                            data.message || 'Unable to cancel order.',
+                            'error'
+                        );
+                    }
+                })
+                .catch(error => {
+                    Swal.fire(
+                        'Error!',
+                        'Something went wrong. Please try again.',
+                        'error'
+                    );
+                });
+            }
+        });
+    });
+});
+
+// Initialize table filtering on load
+document.addEventListener('DOMContentLoaded', () => {
+    filterTable();
+});
+</script>
+{% endblock %}
+{% endblock %}

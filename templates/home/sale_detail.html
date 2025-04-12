@@ -1,0 +1,33 @@
+<!-- templates/sale_detail.html -->
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sale Detail - {{ sale.product.name }}</title>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+</head>
+<body>
+    <header>
+        <h1>Sale Details</h1>
+    </header>
+
+    <div class="container">
+        <img src="{% get_media_prefix %}profiles/default_profile.png" alt="Profile" class="profile-img">
+        <h2>{{ sale.product.name }}</h2>
+        <p><strong>Price:</strong> ZMW{{ sale.price }}</p>
+        <p><strong>Buyer:</strong> {{ sale.buyer.username }}</p>
+        <p><strong>Status:</strong> {{ sale.status }}</p>
+        <!-- Add other relevant sale details here -->
+        <button id="toggle-btn">Toggle Image</button>
+    </div>
+
+    <footer>
+        <p>© 2025 My Site</p>
+    </footer>
+
+    <script src="{% static 'js/main.js' %}"></script>
+</body>
+</html>

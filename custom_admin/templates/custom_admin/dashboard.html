@@ -1,0 +1,111 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+    /* Ensure readability in light and dark modes */
+    .card.bg-light {
+        transition: background-color 0.3s, color 0.3s;
+    }
+    .dark-mode .card.bg-light {
+        background-color: #343a40 !important; /* Dark background for cards */
+    }
+    .dark-mode .card .card-title,
+    .dark-mode .card .card-text {
+        color: #f8f9fa !important; /* Light text for readability */
+    }
+    /* Optional: Adjust other elements in dark mode */
+    .dark-mode .card-header.bg-primary {
+        background-color: #1a3c6d !important; /* Darker primary for dark mode */
+    }
+    .dark-mode .card-header .text-white {
+        color: #e9ecef !important; /* Slightly lighter for contrast */
+    }
+    .dark-mode .list-group-item {
+        background-color: #495057 !important;
+        color: #f8f9fa !important;
+    }
+    .dark-mode .list-group-item.active {
+        background-color: #007bff !important;
+        border-color: #007bff !important;
+    }
+    .dark-mode .card-footer.text-muted {
+        color: #adb5bd !important; /* Lighter muted text */
+    }
+</style>
+
+<div class="container mt-5">
+    <div class="card shadow-lg border-0 rounded-4">
+        <div class="card-header bg-primary text-white text-center py-3">
+            <h2 class="mb-0">Custom Admin Dashboard</h2>
+        </div>
+        <div class="card-body text-center">
+            <p class="lead mb-4">Welcome, <strong>{{ request.user.username }}</strong>!</p>
+
+            <!-- User Info -->
+            <div class="row justify-content-center mb-4">
+                <div class="col-md-6">
+                    <p><strong>Email:</strong> {{ request.user.email|default:"Not provided" }}</p>
+                    <p><strong>Full Name:</strong> {{ request.user.get_full_name|default:request.user.username }}</p>
+                    <p><strong>Bio:</strong> {{ request.user.profile.bio|default:"No bio available" }}</p>
+                    {% if request.user.profile.profile_picture %}
+                        <img src="{{ request.user.profile.profile_picture.url }}" alt="Profile Picture" class="rounded-circle mb-3" style="width: 100px; height: 100px; object-fit: cover;">
+                    {% else %}
+                        <p><small>No profile picture uploaded.</small></p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Dashboard Stats -->
+            <div class="row justify-content-center mb-4">
+                <div class="col-md-4">
+                    <div class="card bg-light">
+                        <div class="card-body">
+                            <h5 class="card-title">Total Users</h5>
+                            <p class="card-text fs-3">{{ total_users }}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card bg-light">
+                        <div class="card-body">
+                            <h5 class="card-title">Total Products</h5>
+                            <p class="card-text fs-3">{{ total_products }}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card bg-light">
+                        <div class="card-body">
+                            <h5 class="card-title">Total Orders</h5>
+                            <p class="card-text fs-3">{{ total_orders }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navigation Links -->
+            <div class="row justify-content-center">
+                <div class="col-md-6">
+                    <div class="list-group">
+                        <a href="{% url 'admin:index' %}" class="list-group-item list-group-item-action">
+                            <i class="bi bi-speedometer2 me-2"></i> Go to Django Admin
+                        </a>
+                        <a href="{% url 'home:custom_admin_dashboard' %}" class="list-group-item list-group-item-action active" aria-current="true">
+                            <i class="bi bi-person-badge me-2"></i> Custom Admin Dashboard
+                        </a>
+                        <a href="{% url 'home:manage_users' %}" class="list-group-item list-group-item-action">
+                            <i class="bi bi-people me-2"></i> Manage Users
+                        </a>
+                        <a href="{% url 'home:sales_report' %}" class="list-group-item list-group-item-action">
+                            <i class="bi bi-bar-chart me-2"></i> Sales Reports
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card-footer text-muted text-center py-2">
+            <small>© 2025 EHC Marketplace | Admin Panel</small>
+        </div>
+    </div>
+</div>
+{% endblock %}

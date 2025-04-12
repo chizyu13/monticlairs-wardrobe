@@ -1,0 +1,130 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Checkout Details - EHC Marketplace</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            padding-top: 80px;
+        }
+        .card {
+            border-radius: 1rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        .form-section {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+    <div class="container">
+        <a class="navbar-brand" href="{% url 'home' %}">EHC Marketplace</a>
+    </div>
+</nav>
+
+<!-- Checkout Form -->
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card p-4">
+                <h2 class="mb-4">Checkout Details</h2>
+
+                <form method="post" action="{% url 'home:checkout_process' %}">
+                    {% csrf_token %}
+
+                    <!-- Delivery Location -->
+                    <div class="mb-3">
+                        <label class="form-label">Where are you located?</label>
+                        <select id="location-type" name="location_type" class="form-select" required>
+                            <option value="" disabled selected>Select your location</option>
+                            <option value="inside">Inside Campus</option>
+                            <option value="outside">Outside Campus</option>
+                        </select>
+                    </div>
+
+                    <!-- Inside Campus Section -->
+                    <div id="inside-section" class="form-section">
+                        <div class="mb-3">
+                            <label class="form-label">Room Number</label>
+                            <input type="text" name="room_number" class="form-control">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Phone Number</label>
+                            <input type="tel" name="phone_inside" class="form-control">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">GPS Location</label>
+                            <input type="text" name="gps_inside" class="form-control" placeholder="Paste location coordinates">
+                        </div>
+                    </div>
+
+                    <!-- Outside Campus Section -->
+                    <div id="outside-section" class="form-section">
+                        <div class="mb-3">
+                            <label class="form-label">Phone Number</label>
+                            <input type="tel" name="phone_outside" class="form-control">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">GPS Location</label>
+                            <input type="text" name="gps_outside" class="form-control" placeholder="Paste location coordinates">
+                        </div>
+                    </div>
+
+                    <!-- Payment Method -->
+                    <div class="mb-3">
+                        <label class="form-label">Select Payment Method</label>
+                        <select id="payment-method" name="payment_method" class="form-select" required>
+                            <option value="" disabled selected>Select a method</option>
+                            <option value="cash">Cash</option>
+                            <option value="delivery">Payment on Delivery</option>
+                        </select>
+                    </div>
+
+                    <!-- Delivery Fee (visible only for Payment on Delivery) -->
+                    <div id="delivery-fee-section" class="form-section">
+                        <p class="text-danger fw-bold">Note: Delivery fee will apply.</p>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100">Confirm Order</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Scripts -->
+<script>
+    const locationSelect = document.getElementById("location-type");
+    const insideSection = document.getElementById("inside-section");
+    const outsideSection = document.getElementById("outside-section");
+
+    locationSelect.addEventListener("change", function () {
+        if (this.value === "inside") {
+            insideSection.style.display = "block";
+            outsideSection.style.display = "none";
+        } else if (this.value === "outside") {
+            insideSection.style.display = "none";
+            outsideSection.style.display = "block";
+        } else {
+            insideSection.style.display = "none";
+            outsideSection.style.display = "none";
+        }
+    });
+
+    const paymentMethod = document.getElementById("payment-method");
+    const deliveryFeeSection = document.getElementById("delivery-fee-section");
+
+    paymentMethod.addEventListener("change", function () {
+        deliveryFeeSection.style.display = this.value === "delivery" ? "block" : "none";
+    });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

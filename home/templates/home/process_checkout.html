@@ -1,0 +1,170 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <div class="container">
+    <h1>Checkout</h1>
+    <form method="POST" action="{% url 'process_checkout' %}">
+      {% csrf_token %}
+      
+      <!-- Display order summary -->
+      <h3>Order Summary</h3>
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Product</th>
+            <th>Quantity</th>
+            <th>Price</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in cart_items %}
+            <tr>
+              <td>{{ item.product.name }}</td>
+              <td>{{ item.quantity }}</td>
+              <td>ZMW{{ item.product.price }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      <p><strong>Total: ZMW{{ total_price }}</strong></p>
+
+      <!-- Shipping Information -->
+      <h3>Shipping Information</h3>
+      <div class="form-group">
+        <label for="location">Where are you located?</label>
+        <select name="location" id="location" class="form-control" required>
+          <option value="inside_campus">Inside Campus</option>
+          <option value="outside_campus">Outside Campus</option>
+        </select>
+      </div>
+      
+      <!-- Inside Campus Details -->
+      <div id="campus_details" class="form-group" style="display: none;">
+        <label for="hostel_name">Hostel Name</label>
+        <input type="text" name="hostel_name" id="hostel_name" class="form-control" required>
+
+        <label for="room_number">Room Number</label>
+        <input type="text" name="room_number" id="room_number" class="form-control" required>
+
+        <label for="phone_number">Phone Number</label>
+        <input type="text" name="phone_number" id="phone_number" class="form-control" required>
+
+        <label for="gps_location">GPS Location</label>
+        <input type="text" name="gps_location" id="gps_location" class="form-control" required>
+        
+        <!-- Leaflet Map for GPS -->
+        <div id="map" style="height: 400px; width: 100%;"></div>
+        <button type="button" id="set_location" class="btn btn-secondary mt-2">Set GPS Location</button>
+      </div>
+
+      <!-- Outside Campus Details -->
+      <div id="outside_details" class="form-group" style="display: none;">
+        <label for="phone_number_outside">Phone Number</label>
+        <input type="text" name="phone_number_outside" id="phone_number_outside" class="form-control" required>
+        
+        <label for="gps_location_outside">GPS Location</label>
+        <input type="text" name="gps_location_outside" id="gps_location_outside" class="form-control" required>
+      </div>
+
+      <!-- Payment Information -->
+      <h3>Payment Method</h3>
+      <div class="form-group">
+        <label for="payment_method">Choose Payment Method</label>
+        <select name="payment_method" id="payment_method" class="form-control" required>
+          <option value="cash">Cash</option>
+          <option value="payment_on_delivery">Payment on Delivery</option>
+        </select>
+      </div>
+
+      <!-- Delivery Fee -->
+      <div id="delivery_fee_section" class="form-group" style="display: none;">
+        <label for="delivery_fee">Delivery Fee</label>
+        <input type="text" name="delivery_fee" id="delivery_fee" class="form-control" readonly value="10">
+      </div>
+
+      <button type="submit" class="btn btn-primary">Complete Checkout</button>
+    </form>
+  </div>
+
+  <!-- Leaflet JS and CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+  <script>
+    let map;
+    let marker;
+
+    function initMap() {
+      const initialLocation = { lat: 51.505, lng: -0.09 }; // Default location (can be changed)
+
+      // Initialize the map
+      map = L.map('map').setView([initialLocation.lat, initialLocation.lng], 15);
+
+      // Add OpenStreetMap tiles (using Leaflet's built-in tile layer)
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+      }).addTo(map);
+
+      // Add a draggable marker to the map
+      marker = L.marker([initialLocation.lat, initialLocation.lng], { draggable: true }).addTo(map);
+
+      // When the marker is dragged, update the GPS location input field
+      marker.on('dragend', function (event) {
+        const lat = event.latlng.lat;
+        const lng = event.latlng.lng;
+        document.getElementById("gps_location").value = lat + ", " + lng;
+      });
+    }
+
+    // Show map and set location when the button is clicked
+    document.getElementById("set_location").addEventListener("click", function() {
+      const gpsLocation = document.getElementById("gps_location").value;
+      if (gpsLocation) {
+        const [lat, lng] = gpsLocation.split(',').map(coord => parseFloat(coord.trim()));
+        const position = { lat: lat, lng: lng };
+
+        marker.setLatLng(position); // Update marker position
+        map.setView(position, 15); // Update map center
+      }
+    });
+
+    // Initialize map when the page loads
+    document.addEventListener("DOMContentLoaded", function() {
+      initMap();
+    });
+
+    // Show campus details when location is "Inside Campus"
+    document.getElementById('location').addEventListener('change', function() {
+      var location = this.value;
+      if (location === 'inside_campus') {
+        document.getElementById('campus_details').style.display = 'block';
+        document.getElementById('outside_details').style.display = 'none';
+      } else {
+        document.getElementById('campus_details').style.display = 'none';
+        document.getElementById('outside_details').style.display = 'block';
+      }
+    });
+
+    // Toggle delivery fee section based on payment method selection
+    document.getElementById('payment_method').addEventListener('change', function() {
+      var paymentMethod = this.value;
+      if (paymentMethod === 'payment_on_delivery') {
+        document.getElementById('delivery_fee_section').style.display = 'block';
+      } else {
+        document.getElementById('delivery_fee_section').style.display = 'none';
+      }
+    });
+
+    // Ensure "Inside Campus" fields are visible by default when the page loads
+    document.addEventListener('DOMContentLoaded', function() {
+      var location = document.getElementById('location').value;
+      if (location === 'inside_campus') {
+        document.getElementById('campus_details').style.display = 'block';
+        document.getElementById('outside_details').style.display = 'none';
+      } else {
+        document.getElementById('campus_details').style.display = 'none';
+        document.getElementById('outside_details').style.display = 'block';
+      }
+    });
+  </script>
+{% endblock %}

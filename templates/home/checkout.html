@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout - EHC Marketplace</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <style>
+        #map { height: 400px; width: 100%; }
+        #hostel-container { display: none; }
+        #delivery-fee-container { display: none; }
+        #room-number-container { display: block; }
+        .spinner { display: none; margin-left: 10px; }
+        .is-invalid ~ .invalid-feedback { display: block; }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <h2>Checkout</h2>
+        <p>Total Price (including delivery): ZMW <span id="total-price">{{ total_price }}</span></p>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}" role="alert">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+
+        <form method="POST" id="checkout-form" novalidate>
+            {% csrf_token %}
+            <div class="mb-3">
+                <label for="location" class="form-label">Location:</label>
+                <select id="location" name="location" class="form-select" required aria-describedby="locationHelp">
+                    <option value="inside">Inside Campus</option>
+                    <option value="outside">Outside Campus</option>
+                </select>
+                <div id="locationHelp" class="form-text">Select your delivery location.</div>
+            </div>
+
+            <div id="hostel-container" class="mb-3">
+                <label for="hostel_name" class="form-label">Hostel Name:</label>
+                <input type="text" id="hostel_name" name="hostel_name" class="form-control" aria-describedby="hostelHelp">
+                <div id="hostelHelp" class="form-text">Enter your hostel name if applicable.</div>
+            </div>
+
+            <div id="room-number-container" class="mb-3">
+                <label for="room_number" class="form-label">Room Number (if applicable):</label>
+                <input type="text" id="room_number" name="room_number" class="form-control">
+            </div>
+
+            <div class="mb-3">
+                <label for="phone_number" class="form-label">Phone Number:</label>
+                <input type="tel" id="phone_number" name="phone_number" class="form-control" required placeholder="+260XXXXXXXXX" pattern="^\+260\d{9}$" aria-describedby="phoneHelp">
+                <div id="phoneHelp" class="form-text">Enter a valid Zambian number (e.g., +260971234567).</div>
+                <div class="invalid-feedback">Please enter a valid phone number starting with +260 followed by 9 digits.</div>
+            </div>
+
+            <div class="mb-3">
+                <label for="gps_location" class="form-label">GPS Location:</label>
+                <input type="text" id="gps_location" name="gps_location" class="form-control" required readonly aria-describedby="gpsHelp">
+                <button type="button" id="use-current-location" class="btn btn-secondary mt-2">Use Current Location</button>
+                <div id="gpsHelp" class="form-text">Click the map or drag the marker to set your location.</div>
+            </div>
+
+            <div id="map" class="mb-3"></div>
+
+            <div class="mb-3">
+                <label for="payment-method" class="form-label">Payment Method:</label>
+                <select id="payment-method" name="payment_method" class="form-select" required aria-describedby="paymentHelp">
+                    <option value="cash">Cash</option>
+                    <option value="delivery">Payment on Delivery</option>
+                    <option value="mtn">MTN Mobile Money</option>
+                    <option value="airtel">Airtel Money</option>
+                </select>
+                <div id="paymentHelp" class="form-text">Choose how you’d like to pay.</div>
+            </div>
+
+            <div id="delivery-fee-container" class="mb-3">
+                <label for="delivery-fee" class="form-label">Delivery Fee:</label>
+                <input type="text" id="delivery-fee" class="form-control" value="50" readonly aria-describedby="feeHelp">
+                <div id="feeHelp" class="form-text">Fee varies based on location.</div>
+            </div>
+
+            <button type="submit" class="btn btn-success" id="submit-btn">
+                Complete Checkout
+                <span class="spinner-border spinner-border-sm spinner" role="status" aria-hidden="true"></span>
+            </button>
+        </form>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script>
+        let map;
+        let marker;
+        const cartTotal = {{ total_price }} - 2000; // Base price without the view's default 2000 fee
+
+        function initMap() {
+            const initialLocation = { lat: -15.4081, lng: 28.2871 };
+            map = L.map('map').setView([initialLocation.lat, initialLocation.lng], 15);
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            }).addTo(map);
+
+            marker = L.marker([initialLocation.lat, initialLocation.lng], { draggable: true }).addTo(map);
+            document.getElementById('gps_location').value = `${initialLocation.lat}, ${initialLocation.lng}`;
+
+            marker.on('dragend', function () {
+                const position = marker.getLatLng();
+                document.getElementById('gps_location').value = `${position.lat}, ${position.lng}`;
+            });
+
+            map.on('click', function (event) {
+                marker.setLatLng(event.latlng);
+                document.getElementById('gps_location').value = `${event.latlng.lat}, ${event.latlng.lng}`;
+            });
+        }
+
+        // Location change handler
+        document.getElementById('location').addEventListener('change', function () {
+            const location = this.value;
+            const hostelContainer = document.getElementById('hostel-container');
+            const roomNumberContainer = document.getElementById('room-number-container');
+            const deliveryFee = document.getElementById('delivery-fee');
+            const totalPriceSpan = document.getElementById('total-price');
+
+            if (location === 'inside') {
+                hostelContainer.style.display = 'block';
+                roomNumberContainer.style.display = 'block';
+                deliveryFee.value = '20';
+                totalPriceSpan.textContent = (cartTotal + 20).toFixed(2); // Inside: 15 + 20 = 35
+            } else {
+                hostelContainer.style.display = 'none';
+                roomNumberContainer.style.display = 'none';
+                deliveryFee.value = '50';
+                totalPriceSpan.textContent = (cartTotal + 50).toFixed(2); // Outside: 15 + 50 = 65
+            }
+        });
+
+        // Payment method change handler
+        document.getElementById('payment-method').addEventListener('change', function () {
+            const paymentMethod = this.value;
+            const deliveryFeeContainer = document.getElementById('delivery-fee-container');
+            if (paymentMethod === 'delivery') {
+                deliveryFeeContainer.style.display = 'block';
+            } else {
+                deliveryFeeContainer.style.display = 'none';
+            }
+        });
+
+        // Use Current Location button
+        document.getElementById('use-current-location').addEventListener('click', function () {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        const pos = { lat: position.coords.latitude, lng: position.coords.longitude };
+                        map.setView(pos);
+                        marker.setLatLng(pos);
+                        document.getElementById('gps_location').value = `${pos.lat}, ${pos.lng}`;
+                    },
+                    () => { alert('Error: Unable to retrieve your location.'); }
+                );
+            } else {
+                alert('Error: Geolocation not supported.');
+            }
+        });
+
+        // Form submission with spinner
+        document.getElementById('checkout-form').addEventListener('submit', function (e) {
+            if (this.checkValidity()) {
+                document.querySelector('.spinner').style.display = 'inline-block';
+            } else {
+                e.preventDefault();
+                e.stopPropagation();
+                this.classList.add('was-validated');
+            }
+        });
+
+        // Phone number validation
+        document.getElementById('phone_number').addEventListener('input', function () {
+            const phonePattern = /^\+260\d{9}$/;
+            if (!phonePattern.test(this.value)) {
+                this.classList.add('is-invalid');
+            } else {
+                this.classList.remove('is-invalid');
+            }
+        });
+
+        // Initialize total price based on default location (inside campus)
+        document.getElementById('total-price').textContent = (cartTotal + 20).toFixed(2);
+
+        // Initialize map
+        initMap();
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

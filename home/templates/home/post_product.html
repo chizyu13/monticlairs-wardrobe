@@ -1,0 +1,120 @@
+{% extends 'base.html' %}
+{% load widget_tweaks static %}
+
+{% block title %}Post a New Product - EHC Marketplace{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <h2 class="text-center mb-4">Post a New Product</h2>
+
+    <!-- Messages -->
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <!-- Form Errors -->
+    {% if form.errors %}
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <strong>Please correct the following errors:</strong>
+            <ul>
+                {% for field in form %}
+                    {% for error in field.errors %}
+                        <li>{{ field.label }}: {{ error }}</li>
+                    {% endfor %}
+                {% endfor %}
+                {% for error in form.non_field_errors %}
+                    <li>{{ error }}</li>
+                {% endfor %}
+            </ul>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    {% endif %}
+
+    <!-- Product Post Form -->
+    <form method="POST" enctype="multipart/form-data" class="needs-validation" novalidate>
+        {% csrf_token %}
+
+        <!-- Product Name -->
+        <div class="mb-3">
+            <label for="{{ form.name.id_for_label }}" class="form-label fw-bold">Product Name</label>
+            {{ form.name|add_class:"form-control" }}
+            <div class="form-text">Enter the name of your product (required).</div>
+            <div class="invalid-feedback">Please enter a product name.</div>
+        </div>
+
+        <!-- Product Description -->
+        <div class="mb-3">
+            <label for="{{ form.description.id_for_label }}" class="form-label fw-bold">Description</label>
+            {{ form.description|add_class:"form-control" }}
+            <div class="form-text">Provide a brief description of the product (optional).</div>
+        </div>
+
+        <!-- Product Price -->
+        <div class="mb-3">
+            <label for="{{ form.price.id_for_label }}" class="form-label fw-bold">Price (ZMW)</label>
+            {{ form.price|add_class:"form-control" }}
+            <div class="form-text">Enter the price in Zambian Kwacha (minimum 0.01 ZMW).</div>
+            <div class="invalid-feedback">Please enter a valid price.</div>
+        </div>
+
+        <!-- Product Category -->
+        <div class="mb-3">
+            <label for="{{ form.category.id_for_label }}" class="form-label fw-bold">Category</label>
+            {{ form.category|add_class:"form-select" }}
+            <div class="form-text">Select a category for your product (optional).</div>
+            <div class="invalid-feedback">Please select a valid category if applicable.</div>
+        </div>
+
+        <!-- Product Image -->
+        <div class="mb-3">
+            <label for="{{ form.image.id_for_label }}" class="form-label fw-bold">Product Image</label>
+            {{ form.image|add_class:"form-control" }}
+            <div class="form-text">Upload an image (optional, max 2MB, formats: JPG, PNG).</div>
+            <div class="invalid-feedback">Please upload a valid image file.</div>
+        </div>
+
+        <!-- Product Stock -->
+        <div class="mb-3">
+            <label for="{{ form.stock.id_for_label }}" class="form-label fw-bold">Stock Quantity</label>
+            {{ form.stock|add_class:"form-control" }}
+            <div class="form-text">Enter the available stock (default is 0).</div>
+            <div class="invalid-feedback">Please enter a valid stock quantity.</div>
+        </div>
+
+        <!-- Product Status -->
+        <div class="mb-3">
+            <label for="{{ form.status.id_for_label }}" class="form-label fw-bold">Status</label>
+            {{ form.status|add_class:"form-select" }}
+            <div class="form-text">Choose the product status (default is Draft; select "Active" to display immediately).</div>
+        </div>
+
+        <!-- Submit and Cancel Buttons -->
+        <div class="d-flex justify-content-between">
+            <button type="submit" class="btn btn-primary">Post Product</button>
+            <a href="{% url 'home:products' %}" class="btn btn-secondary">Cancel</a>
+        </div>
+    </form>
+</div>
+
+<!-- Bootstrap Form Validation Script -->
+<script>
+    (function () {
+        'use strict';
+        var forms = document.querySelectorAll('.needs-validation');
+        Array.prototype.slice.call(forms).forEach(function (form) {
+            form.addEventListener('submit', function (event) {
+                if (!form.checkValidity()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            }, false);
+        });
+    })();
+</script>
+{% endblock %}

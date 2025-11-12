@@ -10,18 +10,18 @@
     
     <style>
         body {
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
-            color: #e0e6ed;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 50%, #0f0f0f 100%);
+            color: #ffffff;
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             min-height: 100vh;
         }
         
         .profile-hero {
-            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+            background: linear-gradient(135deg, rgba(212, 175, 55, 0.1) 0%, rgba(26, 26, 26, 0.8) 100%);
             border-radius: 20px;
             padding: 3rem 2rem;
             margin-bottom: 2rem;
-            border: 1px solid rgba(255,255,255,0.1);
+            border: 1px solid rgba(212, 175, 55, 0.2);
             position: relative;
             overflow: hidden;
         }
@@ -33,7 +33,7 @@
             left: 0;
             right: 0;
             height: 4px;
-            background: linear-gradient(90deg, #667eea, #764ba2, #f093fb, #667eea);
+            background: linear-gradient(90deg, #d4af37, #f4e4a6, #d4af37);
             background-size: 200% 100%;
             animation: shimmer 3s ease-in-out infinite;
         }
@@ -56,8 +56,8 @@
         
         .profile-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 25px 70px rgba(0,0,0,0.5);
-            border-color: rgba(102, 126, 234, 0.3);
+            box-shadow: 0 25px 70px rgba(212, 175, 55, 0.3);
+            border-color: rgba(212, 175, 55, 0.4);
         }
         
         .profile-avatar {
@@ -65,8 +65,8 @@
             height: 200px;
             border-radius: 50%;
             border: 6px solid transparent;
-            background: linear-gradient(135deg, #667eea, #764ba2) padding-box, 
-                        linear-gradient(135deg, #667eea, #764ba2) border-box;
+            background: linear-gradient(135deg, #d4af37, #f4e4a6) padding-box, 
+                        linear-gradient(135deg, #d4af37, #f4e4a6) border-box;
             object-fit: cover;
             transition: all 0.4s ease;
             position: relative;
@@ -74,26 +74,26 @@
         
         .profile-avatar:hover {
             transform: scale(1.05);
-            box-shadow: 0 15px 40px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 15px 40px rgba(212, 175, 55, 0.5);
         }
         
         .avatar-placeholder {
             width: 200px;
             height: 200px;
             border-radius: 50%;
-            background: linear-gradient(135deg, #667eea, #764ba2);
+            background: linear-gradient(135deg, #d4af37, #b8941f);
             display: flex;
             align-items: center;
             justify-content: center;
-            color: white;
+            color: #000;
             font-size: 4rem;
-            border: 6px solid rgba(255,255,255,0.2);
+            border: 6px solid rgba(212, 175, 55, 0.3);
             transition: all 0.4s ease;
         }
         
         .avatar-placeholder:hover {
             transform: scale(1.05);
-            box-shadow: 0 15px 40px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 15px 40px rgba(212, 175, 55, 0.5);
         }
         
         .edit-avatar-btn {
@@ -103,9 +103,9 @@
             width: 50px;
             height: 50px;
             border-radius: 50%;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            border: 3px solid white;
-            color: white;
+            background: linear-gradient(135deg, #d4af37, #b8941f);
+            border: 3px solid #000;
+            color: #000;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -116,8 +116,8 @@
         
         .edit-avatar-btn:hover {
             transform: scale(1.1);
-            color: white;
-            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+            color: #000;
+            box-shadow: 0 6px 20px rgba(212, 175, 55, 0.6);
         }
         
         .info-section {
@@ -131,17 +131,15 @@
         
         .info-section:hover {
             background: rgba(45, 55, 72, 0.8);
-            border-color: rgba(102, 126, 234, 0.3);
+            border-color: rgba(212, 175, 55, 0.3);
         }
         
         .section-title {
-            background: linear-gradient(135deg, #667eea, #764ba2, #f093fb);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            color: #d4af37;
             font-weight: bold;
             margin-bottom: 1.5rem;
             font-size: 1.5rem;
+            font-family: 'Playfair Display', serif;
         }
         
         .stat-card {
@@ -156,8 +154,8 @@
         
         .stat-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 15px 35px rgba(0,0,0,0.3);
-            border-color: rgba(102, 126, 234, 0.4);
+            box-shadow: 0 15px 35px rgba(212, 175, 55, 0.3);
+            border-color: rgba(212, 175, 55, 0.4);
         }
         
         .stat-icon {
@@ -201,12 +199,12 @@
             width: 40px;
             height: 40px;
             border-radius: 50%;
-            background: linear-gradient(135deg, #667eea, #764ba2);
+            background: linear-gradient(135deg, #d4af37, #b8941f);
             display: flex;
             align-items: center;
             justify-content: center;
             margin-right: 1rem;
-            color: white;
+            color: #000;
         }
         
         .btn-custom {
@@ -240,19 +238,20 @@
         }
         
         .btn-primary-custom {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
+            background: linear-gradient(135deg, #d4af37, #b8941f);
+            color: #000;
+            font-weight: 600;
         }
         
         .btn-outline-custom {
             background: transparent;
-            color: #667eea;
-            border: 2px solid #667eea;
+            color: #d4af37;
+            border: 2px solid #d4af37;
         }
         
         .btn-outline-custom:hover {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
+            background: linear-gradient(135deg, #d4af37, #b8941f);
+            color: #000;
             border-color: transparent;
         }
         
@@ -263,11 +262,9 @@
         }
         
         .navbar-brand {
-            background: linear-gradient(135deg, #667eea, #764ba2, #f093fb);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            color: #d4af37 !important;
             font-weight: bold;
+            font-family: 'Playfair Display', serif;
         }
         
         .nav-link {
@@ -277,13 +274,13 @@
         }
         
         .nav-link:hover {
-            background: rgba(102, 126, 234, 0.2);
+            background: rgba(212, 175, 55, 0.2);
             color: white !important;
         }
         
         .nav-link.active {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white !important;
+            background: linear-gradient(135deg, #d4af37, #b8941f);
+            color: #000 !important;
         }
         
         .footer-dark {
@@ -307,8 +304,8 @@
         }
         
         .social-link:hover {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
+            background: linear-gradient(135deg, #d4af37, #b8941f);
+            color: #000;
             transform: translateY(-3px);
         }
         

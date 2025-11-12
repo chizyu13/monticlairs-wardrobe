@@ -252,8 +252,8 @@ EMAIL_HOST_PASSWORD = 'dpov thid tqfr xtbm'   # use App Password or env var
 import stripe
 
 # Stripe API Keys
-
-STRIPE_SECRET_KEY = os.getenv('STRIPE_SECRET_KEY', 'sk_test_51RF8Qg4fsNGmT5PiLlT64QiXrpzO7F83qdYfbywV0bjDrQQVa09QXCGNjYECk2B1IKsrQYGxjfkfdxe2R5Iz7YLz00ZAtw0xiF')
-STRIPE_PUBLISHABLE_KEY = os.getenv('STRIPE_PUBLISHABLE_KEY', 'sk_test_51RF8Qg4fsNGmT5PiLlT64QiXrpzO7F83qdYfbywV0bjDrQQVa09QXCGNjYECk2B1IKsrQYGxjfkfdxe2R5Iz7YLz00ZAtw0xiF')
+# IMPORTANT: Set these in your .env file, never commit real keys!
+STRIPE_SECRET_KEY = os.getenv('STRIPE_SECRET_KEY', '')
+STRIPE_PUBLISHABLE_KEY = os.getenv('STRIPE_PUBLISHABLE_KEY', '')
 
 

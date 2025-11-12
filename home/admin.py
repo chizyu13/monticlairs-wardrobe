@@ -10,12 +10,12 @@ admin.site.unregister(User)  # Unregister the default User admin
 # Register Product model
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
-    list_display = ['name', 'price', 'seller', 'category', 'status', 'stock', 'has_image', 'created_at', 'updated_at']
+    list_display = ['image_thumbnail', 'name', 'price', 'seller', 'category', 'status', 'stock', 'created_at', 'updated_at']
     search_fields = ['name', 'description', 'seller__username']
     list_filter = ['status', 'category', 'seller', 'created_at', 'updated_at']
     ordering = ['-created_at']
     list_editable = ['price', 'status', 'stock']
-    readonly_fields = ['created_at', 'updated_at']
+    readonly_fields = ['created_at', 'updated_at', 'image_preview']
     date_hierarchy = 'created_at'
     list_per_page = 20
     autocomplete_fields = ['seller', 'category']
@@ -26,7 +26,7 @@ class ProductAdmin(admin.ModelAdmin):
             'fields': ('name', 'description', 'price', 'category', 'seller')
         }),
         ('Images', {
-            'fields': ('image', 'static_image'),
+            'fields': ('image', 'image_preview', 'static_image'),
             'description': 'Upload an image OR specify a path to static image (e.g., images/Jewerly/watch1.jpg)'
         }),
         ('Inventory', {
@@ -38,10 +38,33 @@ class ProductAdmin(admin.ModelAdmin):
         }),
     )
     
-    def has_image(self, obj):
-        return bool(obj.image or obj.static_image)
-    has_image.short_description = 'Has Image'
-    has_image.boolean = True  # Note: This is unusual; typically used with slugs
+    def image_thumbnail(self, obj):
+        """Display small thumbnail in product list"""
+        from django.utils.html import format_html
+        from django.templatetags.static import static
+        
+        image_url = obj.get_image_url()
+        if image_url:
+            return format_html(
+                '<img src="{}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 5px;" />',
+                image_url
+            )
+        return format_html('<span style="color: #999;">No image</span>')
+    image_thumbnail.short_description = 'Image'
+    
+    def image_preview(self, obj):
+        """Display larger preview in product edit form"""
+        from django.utils.html import format_html
+        from django.templatetags.static import static
+        
+        image_url = obj.get_image_url()
+        if image_url:
+            return format_html(
+                '<img src="{}" style="max-width: 300px; max-height: 300px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);" />',
+                image_url
+            )
+        return format_html('<p style="color: #999;">No image uploaded or assigned</p>')
+    image_preview.short_description = 'Current Image Preview'  # Note: This is unusual; typically used with slugs
 
     def mark_as_sold(self, request, queryset):
         updated = queryset.update(status='sold', stock=0)

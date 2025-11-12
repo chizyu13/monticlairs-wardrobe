@@ -16,4 +16,12 @@ python manage.py collectstatic --no-input
 echo "Running migrations..."
 python manage.py migrate
 
+# Assign static images to products (if script exists)
+echo "Assigning static images to products..."
+if [ -f "assign_static_images.py" ]; then
+    python assign_static_images.py || echo "Image assignment skipped or failed"
+else
+    echo "assign_static_images.py not found, skipping..."
+fi
+
 echo "Build complete!"

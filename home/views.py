@@ -302,6 +302,12 @@ def delete_product(request, product_id):
 @login_required
 def manage_products(request):
     products = Product.objects.filter(seller=request.user)
+    # Debug: Print product info
+    for product in products:
+        print(f"Product: {product.name}")
+        print(f"  - Has image: {bool(product.image)}")
+        print(f"  - Static image: {product.static_image}")
+        print(f"  - get_image_url(): {product.get_image_url()}")
     return render(request, 'home/manage_products.html', {'products': products})
 
 

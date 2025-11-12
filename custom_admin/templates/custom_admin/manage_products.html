@@ -329,13 +329,19 @@
                 <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
                     <div class="product-card">
                         <div class="product-image-wrapper">
-                            {% if product.image %}
-                                <img src="{{ product.image.url }}" class="product-image" alt="{{ product.name }}">
-                            {% else %}
-                                <div class="product-image-placeholder">
-                                    <i class="fas fa-image fa-4x" style="color: var(--gold-accent); opacity: 0.3;"></i>
-                                </div>
-                            {% endif %}
+                            {% with image_url=product.get_image_url %}
+                                {% if image_url %}
+                                    <img src="{{ image_url }}" class="product-image" alt="{{ product.name }}"
+                                         onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                    <div class="product-image-placeholder" style="display: none;">
+                                        <i class="fas fa-image fa-4x" style="color: var(--gold-accent); opacity: 0.3;"></i>
+                                    </div>
+                                {% else %}
+                                    <div class="product-image-placeholder">
+                                        <i class="fas fa-image fa-4x" style="color: var(--gold-accent); opacity: 0.3;"></i>
+                                    </div>
+                                {% endif %}
+                            {% endwith %}
                         </div>
                         
                         <div class="product-card-body">

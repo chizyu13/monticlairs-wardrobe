@@ -297,8 +297,18 @@
     {% for product in products %}
     <div class="col-lg-3 col-md-4 col-sm-6">
         <div class="card product-card">
-            <img src="{{ product.image.url|default:'/static/images/default-product.jpg' }}"
-                alt="{{ product.name }}" class="card-img-top" loading="lazy">
+            {% if product.image %}
+                <img src="{{ product.image.url }}" 
+                     alt="{{ product.name }}" 
+                     class="card-img-top" 
+                     loading="lazy"
+                     onerror="this.src='{% static 'images/default-product.jpg' %}'">
+            {% else %}
+                <img src="{% static 'images/default-product.jpg' %}" 
+                     alt="{{ product.name }}" 
+                     class="card-img-top" 
+                     loading="lazy">
+            {% endif %}
             <div class="card-body">
                 <h5 class="card-title">{{ product.name }}</h5>
                 <p class="card-text">{{ product.description|truncatewords:15 }}</p>

@@ -601,8 +601,16 @@
 
                 <div class="product-grid">
                     <div class="product-image-container">
-                        <img src="{% if product.image %}{{ product.image.url }}{% else %}{% static 'images/product-placeholder.jpg' %}{% endif %}" 
-                             alt="{{ product.name }}" class="product-image">
+                        {% if product.image %}
+                            <img src="{{ product.image.url }}" 
+                                 alt="{{ product.name }}" 
+                                 class="product-image"
+                                 onerror="this.src='{% static 'images/default-product.jpg' %}'">
+                        {% else %}
+                            <img src="{% static 'images/default-product.jpg' %}" 
+                                 alt="{{ product.name }}" 
+                                 class="product-image">
+                        {% endif %}
                     </div>
                     
                     <div class="product-info">

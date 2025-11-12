@@ -758,9 +758,16 @@
                 {% for product in products %}
                 <div class="product-card">
                     {% if product.image %}
-                        <img src="{{ product.image.url }}" class="product-image" alt="{{ product.name }}" loading="lazy">
+                        <img src="{{ product.image.url }}" 
+                             class="product-image" 
+                             alt="{{ product.name }}" 
+                             loading="lazy"
+                             onerror="this.src='{% static 'images/default-product.jpg' %}'">
                     {% else %}
-                        <img src="{% static 'images/placeholder.jpg' %}" class="product-image" alt="Placeholder" loading="lazy">
+                        <img src="{% static 'images/default-product.jpg' %}" 
+                             class="product-image" 
+                             alt="Placeholder" 
+                             loading="lazy">
                     {% endif %}
                     <div class="product-info">
                         <h3 class="product-name">{{ product.name }}</h3>

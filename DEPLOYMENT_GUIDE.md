@@ -1,169 +1,174 @@
-ibn # Montclair Wardrobe - Render Deployment Guide
+# Deploying Image Fix Updates to Production
 
-## Prerequisites
-1. GitHub account
-2. Render account (sign up at https://render.com)
-3. Your project pushed to GitHub
+## Overview
+These updates fix product image display issues and add persistent image storage via Cloudinary.
 
-## Step-by-Step Deployment
+## What Changed
+1. ✅ Fixed duplicate image field in Product model
+2. ✅ Improved image display in all templates with fallbacks
+3. ✅ Added Cloudinary for persistent image storage in production
+4. ✅ Fixed Profile creation signal bug
+5. ✅ Added media context processor
 
-### 1. Push Your Code to GitHub
+## Deployment Steps
+
+### Step 1: Commit and Push Changes to GitHub
 
 ```bash
-# Initialize git (if not already done)
-git init
-
-# Add all files
+# Add all changes
 git add .
 
-# Commit
-git commit -m "Prepare for Render deployment"
+# Commit with descriptive message
+git commit -m "Fix product image display and add Cloudinary support"
 
-# Create a new repository on GitHub, then:
-git remote add origin https://github.com/YOUR_USERNAME/montclair-wardrobe.git
-git branch -M main
-git push -u origin main
-```
-
-### 2. Create PostgreSQL Database on Render
-
-1. Go to https://dashboard.render.com
-2. Click "New +" → "PostgreSQL"
-3. Fill in:
-   - **Name**: `montclair-db`
-   - **Database**: `montclair_wardrobe`
-   - **User**: `montclair_user`
-   - **Region**: Choose closest to your users
-   - **Plan**: Free
-4. Click "Create Database"
-5. **Save the connection details** (you'll need them)
-
-### 3. Create Web Service on Render
-
-1. Click "New +" → "Web Service"
-2. Connect your GitHub repository
-3. Fill in:
-   - **Name**: `montclair-wardrobe`
-   - **Region**: Same as database
-   - **Branch**: `main`
-   - **Runtime**: Python
-   - **Build Command**: `./build.sh`
-   - **Start Command**: `gunicorn montclair_wardrobe.wsgi:application`
-   - **Plan**: Free
-
-### 4. Add Environment Variables
-
-In the "Environment" section, add:
-
-```
-SECRET_KEY=your-secret-key-here-generate-a-new-one
-DEBUG=False
-DATABASE_URL=<your-postgres-connection-string>
-STRIPE_SECRET_KEY=your-stripe-secret-key
-STRIPE_PUBLISHABLE_KEY=your-stripe-publishable-key
-MTN_API_USER=your-mtn-api-user
-MTN_API_KEY=your-mtn-api-key
-MTN_SUBSCRIPTION_KEY=your-mtn-subscription-key
-AIRTEL_CLIENT_ID=your-airtel-client-id
-AIRTEL_CLIENT_SECRET=your-airtel-client-secret
-```
-
-**Generate a new SECRET_KEY:**
-```python
-python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"
-```
-
-### 5. Deploy
-
-1. Click "Create Web Service"
-2. Render will automatically:
-   - Install dependencies
-   - Run migrations
-   - Collect static files
-   - Start your application
-
-### 6. Create Superuser
-
-After deployment, go to the "Shell" tab in your Render dashboard and run:
-
-```bash
-python manage.py createsuperuser
-```
-
-### 7. Access Your Site
-
-Your site will be available at:
-`https://montclair-wardrobe.onrender.com`
-
-Admin panel:
-`https://montclair-wardrobe.onrender.com/admin`
-
-## Important Notes
-
-### Free Tier Limitations
-- App sleeps after 15 minutes of inactivity
-- Takes ~30 seconds to wake up on first request
-- 750 hours/month free (enough for one app)
-- Database expires after 90 days of inactivity
-
-### Media Files (Product Images)
-The free tier doesn't persist uploaded files. For production, you need to:
-
-1. **Use Cloudinary (Recommended - Free tier available)**
-   ```bash
-   pip install django-cloudinary-storage
-   ```
-
-2. **Or AWS S3**
-   ```bash
-   pip install django-storages boto3
-   ```
-
-Add to `requirements.txt` and configure in `settings.py`
-
-### Custom Domain
-1. Go to your web service settings
-2. Click "Custom Domain"
-3. Add your domain
-4. Update DNS records as instructed
-
-## Troubleshooting
-
-### Build Fails
-- Check build logs in Render dashboard
-- Ensure all dependencies are in `requirements.txt`
-- Verify `build.sh` has execute permissions
-
-### Database Connection Issues
-- Verify `DATABASE_URL` environment variable
-- Check database is in same region as web service
-
-### Static Files Not Loading
-- Run `python manage.py collectstatic` manually in Shell
-- Check `STATIC_ROOT` and `STATIC_URL` settings
-
-### App Keeps Sleeping
-- Upgrade to paid plan ($7/month) for always-on service
-- Or use a service like UptimeRobot to ping your site every 5 minutes
-
-## Monitoring
-
-- View logs in Render dashboard
-- Set up email alerts for deployment failures
-- Monitor database usage
-
-## Updating Your App
-
-```bash
-# Make changes locally
-git add .
-git commit -m "Your update message"
+# Push to GitHub
 git push origin main
 ```
 
-Render will automatically redeploy!
+### Step 2: Render Will Auto-Deploy
+- Render will automatically detect the push and start deploying
+- Wait for deployment to complete (usually 2-5 minutes)
+- Check deployment logs for any errors
+
+### Step 3: Run Migration on Render
+After deployment completes, you need to run the migration:
+
+**Option A: Via Render Dashboard**
+1. Go to your Render dashboard
+2. Click on your web service
+3. Go to "Shell" tab
+4. Run: `python manage.py migrate`
+
+**Option B: Via Render CLI** (if you have it installed)
+```bash
+render shell
+python manage.py migrate
+```
+
+### Step 4: Set Up Cloudinary (Recommended)
+
+#### 4.1 Sign Up for Cloudinary
+1. Go to https://cloudinary.com/
+2. Sign up for free account
+3. Verify your email
+4. Go to Dashboard to get credentials
+
+#### 4.2 Add Environment Variables to Render
+1. In Render dashboard, go to your web service
+2. Click "Environment" in left sidebar
+3. Add these environment variables:
+   ```
+   CLOUDINARY_CLOUD_NAME=your_cloud_name_here
+   CLOUDINARY_API_KEY=your_api_key_here
+   CLOUDINARY_API_SECRET=your_api_secret_here
+   ```
+4. Click "Save Changes"
+5. Render will automatically redeploy
+
+#### 4.3 Test Image Upload
+1. Go to your production admin panel
+2. Upload a product image
+3. Verify it displays on the website
+4. Restart your Render service (Manual Deploy > Clear build cache & deploy)
+5. Verify image still displays (it should persist now!)
+
+### Step 5: Re-upload Existing Images (If Needed)
+
+If you had images uploaded before that aren't showing:
+1. Those images were stored on Render's ephemeral filesystem
+2. They're lost after each deployment
+3. You'll need to re-upload them through the admin panel
+4. Once Cloudinary is set up, new uploads will persist
+
+## Verification Checklist
+
+After deployment, verify:
+- [ ] Site loads without errors
+- [ ] Can login to admin panel
+- [ ] Products display on homepage
+- [ ] Categories display correctly
+- [ ] Can upload product images via admin
+- [ ] Uploaded images display on website
+- [ ] Images persist after Render restart (if Cloudinary is set up)
+
+## Rollback Plan (If Something Goes Wrong)
+
+If you encounter issues:
+
+### Option 1: Revert via Git
+```bash
+# Find the commit before changes
+git log --oneline
+
+# Revert to previous commit
+git revert HEAD
+
+# Push to trigger redeployment
+git push origin main
+```
+
+### Option 2: Manual Rollback in Render
+1. Go to Render dashboard
+2. Click on your web service
+3. Go to "Events" tab
+4. Find previous successful deployment
+5. Click "Rollback to this version"
+
+## Troubleshooting
+
+### Images Not Displaying
+**Problem**: Products show but no images
+**Solution**: 
+- Check that Cloudinary credentials are set correctly
+- Verify images were uploaded after Cloudinary setup
+- Check browser console for image loading errors
+
+### Migration Errors
+**Problem**: Migration fails on Render
+**Solution**:
+- Check Render logs for specific error
+- The duplicate image field migration should be safe
+- If issues persist, contact support with error logs
+
+### Site Not Loading
+**Problem**: 500 error or site won't load
+**Solution**:
+- Check Render logs for Python errors
+- Verify all environment variables are set
+- Try manual deploy with "Clear build cache"
+
+## Important Notes
+
+### Local vs Production
+- **Local changes**: Only affected your local database
+- **Production data**: Completely separate and safe
+- **Migrations**: Will update production database schema safely
+
+### Cloudinary Free Tier
+- 25 GB storage
+- 25 GB monthly bandwidth
+- 25,000 transformations/month
+- More than enough for most e-commerce sites
+
+### Without Cloudinary
+- Site will still work fine
+- Images will be stored on Render's filesystem
+- Images will be lost on each deployment/restart
+- Not recommended for production
 
 ## Support
 
-- Render Docs: https://render.com/docs
-- Django Deployment: https://docs.djangoproject.com/en/stable/howto/deployment/
+If you encounter any issues:
+1. Check Render deployment logs
+2. Check application logs in Render dashboard
+3. Verify all environment variables are set
+4. Test locally first to isolate issues
+
+## Summary
+
+✅ **Safe to deploy** - All changes are backward compatible
+✅ **No data loss** - Production data is not affected
+✅ **Improvements only** - Better image handling and persistence
+✅ **Easy rollback** - Can revert if needed
+
+Deploy with confidence! Your production site will work better after these updates.

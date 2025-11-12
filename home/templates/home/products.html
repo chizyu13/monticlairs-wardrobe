@@ -947,9 +947,16 @@ body>
                     <div class="product-card">
                         <div class="product-image-container">
                             {% if product.image %}
-                                <img src="{{ product.image.url }}" alt="{{ product.name }}" class="product-image" loading="lazy">
+                                <img src="{{ product.image.url }}" 
+                                     alt="{{ product.name }}" 
+                                     class="product-image" 
+                                     loading="lazy"
+                                     onerror="this.src='{% static 'images/default-product.jpg' %}'">
                             {% else %}
-                                <img src="{% static 'images/placeholder.jpg' %}" alt="Product placeholder" class="product-image" loading="lazy">
+                                <img src="{% static 'images/default-product.jpg' %}" 
+                                     alt="Product placeholder" 
+                                     class="product-image" 
+                                     loading="lazy">
                             {% endif %}
                             <div class="product-overlay">
                                 <i class="fas fa-eye overlay-icon"></i>

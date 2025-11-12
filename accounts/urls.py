@@ -1,16 +1,18 @@
 from django.urls import path
 from . import views
-from django.contrib.auth.views import LogoutView
 from .views import register_view, login_view  # Import custom views
 from django.contrib.auth import views as auth_views  # Import auth views for password reset
+
+# Note: This file is not currently included in main URLs
+# Authentication is handled directly in main project URLs
+# Keeping this for potential future use
 
 app_name = 'accounts'
 
 urlpatterns = [
     path('register/', register_view, name='register'),
     path('login/', login_view, name='login'),
-    # Updated logout to use a custom POST-only view
-    path('logout/', views.logout_view, name='logout'),  # Changed from LogoutView to custom view
+    path('logout/', views.logout_view, name='logout'),
     
     # Password reset views
     path('password_reset/', auth_views.PasswordResetView.as_view(), name='password_reset'),

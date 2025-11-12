@@ -1,0 +1,203 @@
+{% extends 'custom_admin/base.html' %}
+{% load static %}
+
+{% block title %}Order Details - Admin{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="fas fa-receipt me-2"></i>Order Details</h2>
+    <a href="{% url 'custom_admin:manage_orders' %}" class="btn btn-secondary">
+        <i class="fas fa-arrow-left me-1"></i>Back to Orders
+    </a>
+</div>
+
+<div class="row">
+    <!-- Order Information -->
+    <div class="col-md-8">
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Order #MW{{ order.checkout.id|stringformat:"06d" }}</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Product Details</h6>
+                        <div class="d-flex align-items-center mb-3">
+                            {% if order.product.image %}
+                                <img src="{{ order.product.image.url }}" alt="{{ order.product.name }}" 
+                                     class="me-3 rounded" style="width: 80px; height: 80px; object-fit: cover;">
+                            {% endif %}
+                            <div>
+                                <h6 class="mb-1">{{ order.product.name }}</h6>
+                                <p class="text-muted mb-1">{{ order.product.description|truncatewords:10 }}</p>
+                                <small class="text-muted">Sold by: {{ order.product.seller.username }}</small>
+                            </div>
+                        </div>
+                        <p><strong>Quantity:</strong> {{ order.quantity }}</p>
+                        <p><strong>Unit Price:</strong> ZMW {{ order.product.price }}</p>
+                        <p><strong>Total:</strong> ZMW {{ order.total_price }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Order Status</h6>
+                        <div class="mb-3">
+                            <span class="badge bg-{% if order.status == 'delivered' %}success{% elif order.status == 'shipped' %}info{% elif order.status == 'processing' %}warning{% else %}secondary{% endif %} fs-6">
+                                {{ order.status|title }}
+                            </span>
+                        </div>
+                        <p><strong>Order Date:</strong> {{ order.created_at|date:"M d, Y H:i" }}</p>
+                        <p><strong>Last Updated:</strong> {{ order.updated_at|date:"M d, Y H:i" }}</p>
+                        
+                        <!-- Status Update Form -->
+                        <form method="POST" action="{% url 'custom_admin:update_order_status' order.id %}" class="mt-3">
+                            {% csrf_token %}
+                            <div class="input-group">
+                                <select name="status" class="form-select">
+                                    <option value="pending" {% if order.status == 'pending' %}selected{% endif %}>Pending</option>
+                                    <option value="processing" {% if order.status == 'processing' %}selected{% endif %}>Processing</option>
+                                    <option value="shipped" {% if order.status == 'shipped' %}selected{% endif %}>Shipped</option>
+                                    <option value="delivered" {% if order.status == 'delivered' %}selected{% endif %}>Delivered</option>
+                                    <option value="cancelled" {% if order.status == 'cancelled' %}selected{% endif %}>Cancelled</option>
+                                </select>
+                                <button type="submit" class="btn btn-primary">Update</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Customer & Delivery Information -->
+    <div class="col-md-4">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h6><i class="fas fa-user me-2"></i>Customer Information</h6>
+            </div>
+            <div class="card-body">
+                <div class="d-flex align-items-center mb-3">
+                    {% if order.user.profile.profile_picture %}
+                        <img src="{{ order.user.profile.profile_picture.url }}" alt="{{ order.user.username }}" 
+                             class="me-2 rounded-circle" style="width: 50px; height: 50px; object-fit: cover;">
+                    {% else %}
+                        <i class="fas fa-user-circle me-2 text-muted" style="font-size: 3rem;"></i>
+                    {% endif %}
+                    <div>
+                        <h6 class="mb-0">{{ order.user.get_full_name|default:order.user.username }}</h6>
+                        <small class="text-muted">{{ order.user.email }}</small>
+                    </div>
+                </div>
+                <p><strong>Phone:</strong> {{ order.checkout.phone_number }}</p>
+                <p><strong>Location:</strong> {{ order.checkout.location|title }}</p>
+                <p><strong>GPS:</strong> {{ order.checkout.gps_location }}</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h6><i class="fas fa-credit-card me-2"></i>Payment Information</h6>
+            </div>
+            <div class="card-body">
+                <p><strong>Method:</strong> {{ order.checkout.payment_method|title }}</p>
+                <p><strong>Delivery Fee:</strong> ZMW {{ order.checkout.delivery_fee }}</p>
+                <p><strong>Payment Status:</strong> 
+                    <span class="badge bg-{% if order.checkout.payment_status == 'completed' %}success{% elif order.checkout.payment_status == 'failed' %}danger{% else %}warning{% endif %}">
+                        {{ order.checkout.payment_status|title }}
+                    </span>
+                </p>
+                {% if order.checkout.transaction_id %}
+                    <p><strong>Transaction ID:</strong> {{ order.checkout.transaction_id }}</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Order Timeline -->
+<div class="card">
+    <div class="card-header">
+        <h6><i class="fas fa-history me-2"></i>Order Timeline</h6>
+    </div>
+    <div class="card-body">
+        <div class="timeline">
+            <div class="timeline-item {% if order.status == 'pending' or order.status == 'processing' or order.status == 'shipped' or order.status == 'delivered' %}active{% endif %}">
+                <i class="fas fa-shopping-cart"></i>
+                <div class="timeline-content">
+                    <h6>Order Placed</h6>
+                    <small class="text-muted">{{ order.created_at|date:"M d, Y H:i" }}</small>
+                </div>
+            </div>
+            <div class="timeline-item {% if order.status == 'processing' or order.status == 'shipped' or order.status == 'delivered' %}active{% endif %}">
+                <i class="fas fa-cog"></i>
+                <div class="timeline-content">
+                    <h6>Processing</h6>
+                    <small class="text-muted">{% if order.status != 'pending' %}{{ order.updated_at|date:"M d, Y H:i" }}{% else %}Pending{% endif %}</small>
+                </div>
+            </div>
+            <div class="timeline-item {% if order.status == 'shipped' or order.status == 'delivered' %}active{% endif %}">
+                <i class="fas fa-truck"></i>
+                <div class="timeline-content">
+                    <h6>Shipped</h6>
+                    <small class="text-muted">{% if order.status == 'shipped' or order.status == 'delivered' %}{{ order.updated_at|date:"M d, Y H:i" }}{% else %}Not yet shipped{% endif %}</small>
+                </div>
+            </div>
+            <div class="timeline-item {% if order.status == 'delivered' %}active{% endif %}">
+                <i class="fas fa-check-circle"></i>
+                <div class="timeline-content">
+                    <h6>Delivered</h6>
+                    <small class="text-muted">{% if order.status == 'delivered' %}{{ order.updated_at|date:"M d, Y H:i" }}{% else %}Not yet delivered{% endif %}</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.timeline {
+    position: relative;
+    padding-left: 2rem;
+}
+
+.timeline-item {
+    position: relative;
+    margin-bottom: 2rem;
+    display: flex;
+    align-items-center;
+}
+
+.timeline-item i {
+    position: absolute;
+    left: -2rem;
+    width: 2rem;
+    height: 2rem;
+    background: #6c757d;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+}
+
+.timeline-item.active i {
+    background: #28a745;
+}
+
+.timeline-item:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    left: -1rem;
+    top: 2rem;
+    width: 2px;
+    height: 2rem;
+    background: #dee2e6;
+}
+
+.timeline-item.active:not(:last-child)::after {
+    background: #28a745;
+}
+
+.timeline-content {
+    margin-left: 1rem;
+}
+</style>
+{% endblock %}

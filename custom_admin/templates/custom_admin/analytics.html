@@ -1,0 +1,188 @@
+{% extends 'custom_admin/base.html' %}
+{% load static %}
+
+{% block title %}Analytics Dashboard - Admin{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="fas fa-chart-line me-2"></i>Analytics Dashboard</h2>
+    <small class="text-muted">Last 30 days overview</small>
+</div>
+
+<!-- Key Metrics Cards -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card bg-primary text-white">
+            <div class="card-body text-center">
+                <i class="fas fa-shopping-cart fa-2x mb-2"></i>
+                <h3>{{ total_orders }}</h3>
+                <p class="mb-0">Total Orders</p>
+                <small class="opacity-75">+{{ recent_orders }} this month</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-success text-white">
+            <div class="card-body text-center">
+                <i class="fas fa-money-bill-wave fa-2x mb-2"></i>
+                <h3>ZMW {{ total_revenue|floatformat:0 }}</h3>
+                <p class="mb-0">Total Revenue</p>
+                <small class="opacity-75">+ZMW {{ recent_revenue|floatformat:0 }} this month</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-info text-white">
+            <div class="card-body text-center">
+                <i class="fas fa-users fa-2x mb-2"></i>
+                <h3>{{ total_customers }}</h3>
+                <p class="mb-0">Total Customers</p>
+                <small class="opacity-75">+{{ recent_customers }} this month</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-warning text-dark">
+            <div class="card-body text-center">
+                <i class="fas fa-tshirt fa-2x mb-2"></i>
+                <h3>{{ active_products }}</h3>
+                <p class="mb-0">Active Products</p>
+                <small>{{ pending_products }} pending approval</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Order Status Overview -->
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-clipboard-list me-2"></i>Order Status Overview</h5>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-3">
+                        <div class="border-end">
+                            <h4 class="text-warning">{{ pending_orders }}</h4>
+                            <small class="text-muted">Pending</small>
+                        </div>
+                    </div>
+                    <div class="col-3">
+                        <div class="border-end">
+                            <h4 class="text-info">{{ recent_orders }}</h4>
+                            <small class="text-muted">Processing</small>
+                        </div>
+                    </div>
+                    <div class="col-3">
+                        <div class="border-end">
+                            <h4 class="text-primary">0</h4>
+                            <small class="text-muted">Shipped</small>
+                        </div>
+                    </div>
+                    <div class="col-3">
+                        <h4 class="text-success">{{ completed_orders }}</h4>
+                        <small class="text-muted">Delivered</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-star me-2"></i>Top Selling Products</h5>
+            </div>
+            <div class="card-body">
+                {% if top_products %}
+                    {% for product in top_products %}
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <div class="d-flex align-items-center">
+                                {% if product.image %}
+                                    <img src="{{ product.image.url }}" alt="{{ product.name }}" 
+                                         class="me-2 rounded" style="width: 30px; height: 30px; object-fit: cover;">
+                                {% endif %}
+                                <span class="fw-bold">{{ product.name }}</span>
+                            </div>
+                            <span class="badge bg-success">{{ product.total_sold }} sold</span>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <p class="text-muted">No sales data available yet.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-bolt me-2"></i>Quick Actions</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3 mb-3">
+                        <a href="{% url 'custom_admin:manage_orders' %}" class="btn btn-outline-primary w-100">
+                            <i class="fas fa-shopping-cart d-block mb-2"></i>
+                            Manage Orders
+                        </a>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <a href="{% url 'custom_admin:manage_customers' %}" class="btn btn-outline-info w-100">
+                            <i class="fas fa-users d-block mb-2"></i>
+                            Manage Customers
+                        </a>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <a href="{% url 'custom_admin:manage_products' %}" class="btn btn-outline-success w-100">
+                            <i class="fas fa-tshirt d-block mb-2"></i>
+                            Manage Products
+                        </a>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <a href="{% url 'custom_admin:add_product' %}" class="btn btn-outline-warning w-100">
+                            <i class="fas fa-plus d-block mb-2"></i>
+                            Add Product
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Activity -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-clock me-2"></i>System Status</h5>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-md-4">
+                        <div class="border-end">
+                            <h6 class="text-muted">System Status</h6>
+                            <span class="badge bg-success fs-6">Online</span>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="border-end">
+                            <h6 class="text-muted">Last Order</h6>
+                            <small>{{ recent_orders }} orders today</small>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <h6 class="text-muted">Avg Order Value</h6>
+                        <strong>ZMW {{ recent_revenue|floatformat:0 }}</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

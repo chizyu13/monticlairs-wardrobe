@@ -1,0 +1,608 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Admin Dashboard{% endblock %} - Montclair Wardrobe</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-dark: #0a0a0a;
+            --secondary-dark: #1a1a1a;
+            --accent-dark: #2a2a2a;
+            --gold-accent: #d4af37;
+            --gold-light: #f4e4a6;
+            --text-primary: #ffffff;
+            --text-secondary: #b0b0b0;
+            --text-muted: #808080;
+            --glass-bg: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--primary-dark);
+            color: var(--text-primary);
+            min-height: 100vh;
+            position: relative;
+        }
+        
+        /* Animated Background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(212, 175, 55, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(212, 175, 55, 0.08) 0%, transparent 50%),
+                linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 50%, #0f0f0f 100%);
+            z-index: -2;
+        }
+        
+        .sidebar {
+            min-height: 100vh;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border-right: 1px solid var(--glass-border);
+            box-shadow: 4px 0 20px rgba(0,0,0,0.5);
+        }
+        
+        .sidebar .nav-link {
+            color: var(--text-secondary);
+            padding: 12px 20px;
+            border-radius: 10px;
+            margin: 4px 8px;
+            transition: all 0.3s ease;
+            border: 1px solid transparent;
+            position: relative;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        
+        .sidebar .nav-link:hover {
+            color: var(--text-primary);
+            background: rgba(212, 175, 55, 0.1);
+            border-color: var(--gold-accent);
+            transform: translateX(4px);
+        }
+        
+        .sidebar .nav-link.active {
+            color: var(--primary-dark);
+            background: linear-gradient(135deg, var(--gold-accent), #b8941f);
+            border-color: var(--gold-accent);
+            box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3);
+        }
+        
+        .sidebar .nav-link i {
+            width: 20px;
+            text-align: center;
+        }
+        
+        .main-content {
+            background: transparent;
+            min-height: 100vh;
+        }
+        
+        .card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+            transition: all 0.3s ease;
+            color: var(--text-primary);
+        }
+        
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.6);
+            border-color: var(--gold-accent);
+        }
+        
+        .card-header {
+            background: linear-gradient(135deg, var(--gold-accent), #b8941f) !important;
+            border-bottom: 1px solid var(--glass-border);
+            border-radius: 16px 16px 0 0 !important;
+            color: var(--primary-dark) !important;
+            font-weight: 600;
+        }
+        
+        .navbar-brand {
+            font-family: 'Playfair Display', serif;
+            font-weight: 700;
+            color: var(--gold-accent) !important;
+            text-shadow: 0 2px 10px rgba(212, 175, 55, 0.3);
+        }
+        
+        .bg-primary {
+            background: linear-gradient(135deg, var(--gold-accent), #b8941f) !important;
+        }
+        
+        .bg-success {
+            background: linear-gradient(135deg, #28a745, #1e7e34) !important;
+        }
+        
+        .bg-info {
+            background: linear-gradient(135deg, #17a2b8, #117a8b) !important;
+        }
+        
+        .bg-warning {
+            background: linear-gradient(135deg, #ffc107, #e0a800) !important;
+        }
+        
+        .bg-danger {
+            background: linear-gradient(135deg, #dc3545, #c82333) !important;
+        }
+        
+        .border-bottom {
+            border-color: rgba(255,255,255,0.1) !important;
+        }
+        
+        .alert {
+            background: rgba(45, 55, 72, 0.9);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .btn {
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+        }
+        
+        .admin-title {
+            font-family: 'Playfair Display', serif;
+            background: linear-gradient(135deg, var(--gold-accent), var(--gold-light));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 700;
+            font-size: 1.5rem;
+        }
+        
+        .sidebar-title {
+            font-family: 'Playfair Display', serif;
+            background: linear-gradient(135deg, var(--gold-accent), var(--gold-light));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 600;
+        }
+        
+        /* Scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: var(--secondary-dark);
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, var(--gold-accent), #b8941f);
+            border-radius: 5px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(135deg, var(--gold-light), var(--gold-accent));
+        }
+        
+        /* Buttons */
+        .btn {
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            padding: 8px 20px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--gold-accent), #b8941f);
+            border: none;
+            color: var(--primary-dark);
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(135deg, var(--gold-light), var(--gold-accent));
+            color: var(--primary-dark);
+        }
+        
+        /* Admin Footer Styles */
+        .admin-footer {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid var(--glass-border);
+            border-radius: 20px 20px 0 0;
+            margin-top: 3rem;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .admin-footer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--gold-accent), var(--gold-light), var(--gold-accent));
+            background-size: 200% 100%;
+            animation: shimmer 4s ease-in-out infinite;
+        }
+        
+        @keyframes shimmer {
+            0%, 100% { background-position: 200% 0; }
+            50% { background-position: -200% 0; }
+        }
+        
+        .footer-content {
+            padding: 2.5rem 2rem 1.5rem;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .footer-brand {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        
+        .footer-brand i {
+            font-size: 1.5rem;
+            color: var(--gold-accent);
+            margin-right: 0.5rem;
+        }
+        
+        .brand-text {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.25rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--gold-accent), var(--gold-light));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-right: 0.75rem;
+        }
+        
+        .admin-badge {
+            background: linear-gradient(135deg, var(--gold-accent), #b8941f);
+            color: var(--primary-dark);
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .footer-description {
+            color: rgba(224, 230, 237, 0.7);
+            font-size: 0.9rem;
+            margin-bottom: 0;
+            max-width: 400px;
+        }
+        
+        .footer-stats {
+            display: flex;
+            justify-content: flex-end;
+            gap: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: rgba(224, 230, 237, 0.8);
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+        
+        .stat-item:hover {
+            color: var(--gold-accent);
+            transform: translateY(-2px);
+        }
+        
+        .stat-item i {
+            font-size: 1rem;
+            color: var(--gold-accent);
+        }
+        
+        .footer-links {
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+        
+        .footer-link {
+            color: rgba(224, 230, 237, 0.7);
+            text-decoration: none;
+            font-size: 0.9rem;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.1);
+            transition: all 0.3s ease;
+            background: rgba(45, 55, 72, 0.3);
+        }
+        
+        .footer-link:hover {
+            color: var(--primary-dark);
+            background: linear-gradient(135deg, var(--gold-accent), #b8941f);
+            border-color: var(--gold-accent);
+            transform: translateY(-2px);
+            text-decoration: none;
+        }
+        
+        .footer-divider {
+            border-color: rgba(255,255,255,0.1);
+            margin: 1.5rem 0 1rem;
+        }
+        
+        .copyright {
+            color: rgba(224, 230, 237, 0.6);
+        }
+        
+        .system-info {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 1rem;
+        }
+        
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.85rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            background: rgba(72, 187, 120, 0.1);
+            border: 1px solid rgba(72, 187, 120, 0.3);
+        }
+        
+        .status-indicator.online {
+            color: #48bb78;
+        }
+        
+        .status-indicator i {
+            font-size: 0.5rem;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .version-info {
+            color: rgba(224, 230, 237, 0.5);
+            font-size: 0.8rem;
+            font-family: 'Courier New', monospace;
+            background: rgba(45, 55, 72, 0.5);
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        /* Responsive Footer */
+        @media (max-width: 768px) {
+            .footer-stats {
+                justify-content: center;
+                margin-bottom: 1.5rem;
+            }
+            
+            .footer-links {
+                justify-content: center;
+            }
+            
+            .system-info {
+                justify-content: center;
+                margin-top: 1rem;
+            }
+            
+            .footer-content {
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <nav class="col-md-3 col-lg-2 d-md-block sidebar collapse">
+                <div class="position-sticky pt-3">
+                    <div class="text-center mb-4">
+                        <h4 class="sidebar-title">
+                            <i class="fas fa-tshirt me-2"></i>
+                            Admin Panel
+                        </h4>
+                        <small style="color: var(--text-muted);">Montclair Wardrobe</small>
+                    </div>
+                    
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}" 
+                               href="{% url 'custom_admin:dashboard' %}">
+                                <i class="fas fa-tachometer-alt me-2"></i>
+                                Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if request.resolver_match.url_name == 'analytics_dashboard' %}active{% endif %}" 
+                               href="{% url 'custom_admin:analytics_dashboard' %}">
+                                <i class="fas fa-chart-line me-2"></i>
+                                Analytics
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if 'orders' in request.resolver_match.url_name %}active{% endif %}" 
+                               href="{% url 'custom_admin:manage_orders' %}">
+                                <i class="fas fa-shopping-cart me-2"></i>
+                                Orders
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if 'customers' in request.resolver_match.url_name %}active{% endif %}" 
+                               href="{% url 'custom_admin:manage_customers' %}">
+                                <i class="fas fa-users me-2"></i>
+                                Customers
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if 'products' in request.resolver_match.url_name %}active{% endif %}" 
+                               href="{% url 'custom_admin:manage_products' %}">
+                                <i class="fas fa-tshirt me-2"></i>
+                                Products
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if request.resolver_match.url_name == 'sales_reports' %}active{% endif %}" 
+                               href="{% url 'custom_admin:sales_reports' %}">
+                                <i class="fas fa-chart-bar me-2"></i>
+                                Sales Reports
+                            </a>
+                        </li>
+                        <li class="nav-item mt-3">
+                            <hr class="text-white-50">
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'home:main_page' %}">
+                                <i class="fas fa-home me-2"></i>
+                                Back to Store
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'logout' %}">
+                                <i class="fas fa-sign-out-alt me-2"></i>
+                                Logout
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+
+            <!-- Main content -->
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 main-content">
+                <!-- Top Navigation -->
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                    <div class="navbar-brand admin-title">
+                        <i class="fas fa-tshirt me-2"></i>
+                        Montclair Admin
+                    </div>
+                    <div class="btn-toolbar mb-2 mb-md-0">
+                        <div class="btn-group me-2">
+                            <span style="color: var(--text-secondary);">Welcome, <strong style="color: var(--gold-accent);">{{ user.get_full_name|default:user.username }}</strong></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Messages -->
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+
+                <!-- Page Content -->
+                {% block content %}
+                {% endblock %}
+                
+                <!-- Admin Footer -->
+                <footer class="admin-footer mt-5">
+                    <div class="footer-content">
+                        <div class="row align-items-center">
+                            <div class="col-md-6">
+                                <div class="footer-brand">
+                                    <i class="fas fa-tshirt me-2"></i>
+                                    <span class="brand-text">Montclair Wardrobe</span>
+                                    <span class="admin-badge">Admin Panel</span>
+                                </div>
+                                <p class="footer-description">
+                                    Professional boutique management system for complete business control
+                                </p>
+                            </div>
+                            <div class="col-md-6 text-md-end">
+                                <div class="footer-stats">
+                                    <div class="stat-item">
+                                        <i class="fas fa-shield-alt"></i>
+                                        <span>Secure</span>
+                                    </div>
+                                    <div class="stat-item">
+                                        <i class="fas fa-bolt"></i>
+                                        <span>Fast</span>
+                                    </div>
+                                    <div class="stat-item">
+                                        <i class="fas fa-heart"></i>
+                                        <span>Reliable</span>
+                                    </div>
+                                </div>
+                                <div class="footer-links">
+                                    <a href="{% url 'home:main_page' %}" class="footer-link">
+                                        <i class="fas fa-store me-1"></i>Visit Store
+                                    </a>
+                                    <a href="{% url 'custom_admin:analytics_dashboard' %}" class="footer-link">
+                                        <i class="fas fa-chart-line me-1"></i>Analytics
+                                    </a>
+                                    <a href="{% url 'custom_admin:sales_reports' %}" class="footer-link">
+                                        <i class="fas fa-file-alt me-1"></i>Reports
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        <hr class="footer-divider">
+                        <div class="row align-items-center">
+                            <div class="col-md-6">
+                                <div class="copyright">
+                                    <small>© 2025 Montclair Wardrobe. All rights reserved.</small>
+                                </div>
+                            </div>
+                            <div class="col-md-6 text-md-end">
+                                <div class="system-info">
+                                    <span class="status-indicator online">
+                                        <i class="fas fa-circle"></i>
+                                        System Online
+                                    </span>
+                                    <span class="version-info">v2.1.0</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </footer>
+            </main>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    {% block extra_js %}
+    {% endblock %}
+</body>
+</html>

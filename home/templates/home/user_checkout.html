@@ -1,355 +1,1253 @@
-{% extends 'base.html' %}
 {% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Orders - Montclair Wardrobe</title>
+    <meta name="description" content="View and manage your orders at Montclair Wardrobe. Track your fashion purchases and order history.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            --primary-dark: #0a0a0a;
+            --secondary-dark: #1a1a1a;
+            --accent-dark: #2a2a2a;
+            --gold-accent: #d4af37;
+            --gold-light: #f4e4a6;
+            --text-primary: #ffffff;
+            --text-secondary: #b0b0b0;
+            --text-muted: #808080;
+            --glass-bg: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --shadow-dark: rgba(0, 0, 0, 0.5);
+            --success-color: #28a745;
+            --warning-color: #ffc107;
+            --danger-color: #dc3545;
+            --info-color: #17a2b8;
+        }
 
-{% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/checkouts.css' %}">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
-<style>
-    .filter-container {
-        background: #f8f9fa;
-        padding: 20px;
-        border-radius: 10px;
-        margin-bottom: 20px;
-    }
-    .table-container {
-        max-height: 600px;
-        overflow-y: auto;
-    }
-    .status-filter {
-        min-width: 150px;
-    }
-    .sort-btn {
-        cursor: pointer;
-        color: #007bff;
-    }
-    .sort-btn:hover {
-        color: #0056b3;
-        text-decoration: underline;
-    }
-    .table th, .table td {
-        vertical-align: middle;
-    }
-    .badge {
-        font-size: 0.9em;
-    }
-</style>
-{% endblock %}
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--primary-dark);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
 
-{% block title %}My Checkouts - EHC Marketplace{% endblock %}
+        /* Animated Background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(212, 175, 55, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(212, 175, 55, 0.08) 0%, transparent 50%),
+                linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 50%, #0f0f0f 100%);
+            z-index: -2;
+        }
 
-{% block content %}
-<div class="container my-5">
-    <h2 class="text-center mb-4">My Checkouts</h2>
+        /* Floating particles */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            pointer-events: none;
+        }
 
-    <!-- Filter and Search Section -->
-    <div class="filter-container">
-        <div class="row g-3 align-items-center">
-            <div class="col-md-3">
-                <select id="statusFilter" class="form-select status-filter">
-                    <option value="">All Statuses</option>
-                    <option value="pending">Pending</option>
-                    <option value="delivered">Delivered</option>
-                    <option value="cancelled">Cancelled</option>
-                </select>
-            </div>
-            <div class="col-md-3">
-                <select id="dateFilter" class="form-select">
-                    <option value="">All Dates</option>
-                    <option value="today">Today</option>
-                    <option value="week">This Week</option>
-                    <option value="month">This Month</option>
-                </select>
-            </div>
-            <div class="col-md-4">
-                <input type="text" id="searchInput" class="form-control" placeholder="Search by product name...">
-            </div>
-            <div class="col-md-2">
-                <button class="btn btn-outline-primary w-100" onclick="resetFilters()">Reset</button>
-            </div>
-        </div>
-    </div>
+        .particle {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: var(--gold-accent);
+            border-radius: 50%;
+            opacity: 0.3;
+            animation: float 6s ease-in-out infinite;
+        }
 
-    {% if checkouts %}
-        <div class="table-container">
-            <table class="table table-hover table-bordered align-middle" id="checkoutTable">
-                <thead class="table-dark sticky-top">
-                    <tr>
-                        <th scope="col">#</th>
-                        <th scope="col">
-                            Product
-                            <i class="bi bi-sort-alpha-down sort-btn" onclick="sortTable('product')"></i>
-                        </th>
-                        <th scope="col">
-                            Price (ZMW)
-                            <i class="bi bi-sort-numeric-down sort-btn" onclick="sortTable('price')"></i>
-                        </th>
-                        <th scope="col">Quantity</th>
-                        <th scope="col">Total</th>
-                        <th scope="col">Delivery Method</th>
-                        <th scope="col">Payment Type</th>
-                        <th scope="col">Status</th>
-                        <th scope="col">
-                            Date
-                            <i class="bi bi-sort-down sort-btn" onclick="sortTable('date')"></i>
-                        </th>
-                        <th scope="col">Actions</th>
-                    </tr>
-                </thead>
-                <tbody id="checkoutTableBody">
-                    {% for checkout in checkouts %}
-                    <tr data-status="{{ checkout.status|lower }}" data-date="{{ checkout.created_at|date:'Y-m-d' }}" data-product="{{ checkout.product.name|lower }}">
-                        <td>{{ forloop.counter }}</td>
-                        <td>
-                            <div class="d-flex align-items-center">
-                                {% if checkout.product.image %}
-                                    <img src="{{ checkout.product.image.url }}" alt="{{ checkout.product.name }}" class="me-2" style="width: 50px; height: 50px; object-fit: cover; border-radius: 5px;">
-                                {% else %}
-                                    <img src="{% static 'images/placeholder.png' %}" alt="No image" class="me-2" style="width: 50px; height: 50px; object-fit: cover; border-radius: 5px;">
-                                {% endif %}
-                                {{ checkout.product.name }}
-                            </div>
-                        </td>
-                        <td data-price="{{ checkout.product.price }}">ZMW {{ checkout.product.price|floatformat:2 }}</td>
-                        <td>{{ checkout.quantity }}</td>
-                        <td>ZMW {{ checkout.total_price|floatformat:2 }}</td>
-                        <td>{{ checkout.get_delivery_method_display|default:"N/A" }}</td>
-                        <td>{{ checkout.get_payment_method_display|default:"N/A" }}</td>
-                        <td>
-                            {% if checkout.status == 'pending' %}
-                                <span class="badge bg-warning text-dark">Pending</span>
-                            {% elif checkout.status == 'delivered' %}
-                                <span class="badge bg-success">Delivered</span>
-                            {% elif checkout.status == 'cancelled' %}
-                                <span class="badge bg-danger">Cancelled</span>
-                            {% else %}
-                                <span class="badge bg-secondary">{{ checkout.status|title }}</span>
-                            {% endif %}
-                        </td>
-                        <td data-date="{{ checkout.created_at|date:'c' }}">{{ checkout.created_at|date:"M d, Y H:i" }}</td>
-                        <td>
-                            {% if checkout.status == 'pending' %}
-                                <button class="btn btn-sm btn-danger cancel-order" data-id="{{ checkout.id }}">Cancel</button>
-                            {% else %}
-                                <button class="btn btn-sm btn-secondary" disabled>Cancel</button>
-                            {% endif %}
-                            <a href="{% url 'home:checkout_detail' checkout.id %}" class="btn btn-sm btn-info">View</a>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); opacity: 0.3; }
+            50% { transform: translateY(-20px) rotate(180deg); opacity: 0.8; }
+        }   
+     /* Navbar Styles */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--glass-border);
+            padding: 16px 0;
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
 
-        <!-- Pagination -->
-        {% if checkouts.has_other_pages %}
-        <nav aria-label="Checkout pagination" class="mt-4">
-            <ul class="pagination justify-content-center">
-                {% if checkouts.has_previous %}
-                    <li class="page-item">
-                        <a class="page-link" href="?page={{ checkouts.previous_page_number }}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}">Previous</a>
-                    </li>
-                {% endif %}
-                
-                {% for num in checkouts.paginator.page_range %}
-                    <li class="page-item {% if checkouts.number == num %}active{% endif %}">
-                        <a class="page-link" href="?page={{ num }}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}">{{ num }}</a>
-                    </li>
-                {% endfor %}
-                
-                {% if checkouts.has_next %}
-                    <li class="page-item">
-                        <a class="page-link" href="?page={{ checkouts.next_page_number }}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}">Next</a>
-                    </li>
+        .navbar.scrolled {
+            background: rgba(10, 10, 10, 0.95);
+            backdrop-filter: blur(30px);
+        }
+
+        .navbar-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .navbar-brand {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--gold-accent);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .navbar-brand:hover {
+            color: var(--gold-light);
+        }
+
+        .navbar-nav {
+            display: flex;
+            list-style: none;
+            gap: 32px;
+            align-items: center;
+        }
+
+        .nav-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .nav-link.active,
+        .nav-link:hover {
+            color: var(--text-primary);
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--gold-accent);
+            transition: width 0.3s ease;
+        }
+
+        .nav-link.active::after,
+        .nav-link:hover::after {
+            width: 100%;
+        }
+
+        .navbar-toggle {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--text-primary);
+            font-size: 1.2rem;
+            cursor: pointer;
+        } 
+       .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .main-content {
+            padding: 120px 0 60px;
+            min-height: 100vh;
+        }
+
+        .page-header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .page-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--gold-accent);
+            margin-bottom: 16px;
+            letter-spacing: -0.02em;
+        }
+
+        .page-subtitle {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Filter Section */
+        .filter-section {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 40px;
+            transition: all 0.3s ease;
+        }
+
+        .filter-section:hover {
+            border-color: var(--gold-accent);
+        }
+
+        .filter-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            align-items: center;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .filter-label {
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 0.9rem;
+        }
+
+        .filter-control {
+            background: var(--glass-bg);
+            border: 2px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 12px 16px;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+        }
+
+        .filter-control:focus {
+            outline: none;
+            border-color: var(--gold-accent);
+            box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1);
+        }
+
+        .filter-control option {
+            background: var(--secondary-dark);
+            color: var(--text-primary);
+        }
+
+        .btn-reset {
+            background: linear-gradient(135deg, var(--accent-dark), var(--secondary-dark));
+            border: 2px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 12px 24px;
+            color: var(--text-secondary);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            align-self: end;
+        }
+
+        .btn-reset:hover {
+            background: var(--gold-accent);
+            color: var(--primary-dark);
+            border-color: var(--gold-accent);
+            transform: translateY(-2px);
+        } 
+       /* Orders Section */
+        .orders-section {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .orders-section:hover {
+            border-color: var(--gold-accent);
+        }
+
+        .orders-header {
+            background: rgba(212, 175, 55, 0.1);
+            padding: 20px 30px;
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .orders-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--gold-accent);
+            margin: 0;
+        }
+
+        .orders-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .orders-table th {
+            background: rgba(255, 255, 255, 0.03);
+            padding: 20px;
+            text-align: left;
+            font-weight: 600;
+            color: var(--text-primary);
+            border-bottom: 1px solid var(--glass-border);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .orders-table td {
+            padding: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            vertical-align: middle;
+        }
+
+        .orders-table tr {
+            transition: all 0.3s ease;
+        }
+
+        .orders-table tr:hover {
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .product-info {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .product-image {
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
+            object-fit: cover;
+            border: 2px solid var(--glass-border);
+        }
+
+        .product-details h4 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin: 0 0 4px 0;
+        }
+
+        .product-details p {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin: 0;
+        }
+
+        .price-cell {
+            font-weight: 600;
+            color: var(--gold-accent);
+            font-size: 1rem;
+        }
+
+        .quantity-cell {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .total-cell {
+            font-weight: 700;
+            color: var(--gold-accent);
+            font-size: 1.1rem;
+        }
+
+        /* Status Badges */
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-pending {
+            background: rgba(255, 193, 7, 0.2);
+            color: var(--warning-color);
+            border: 1px solid rgba(255, 193, 7, 0.3);
+        }
+
+        .status-delivered {
+            background: rgba(40, 167, 69, 0.2);
+            color: var(--success-color);
+            border: 1px solid rgba(40, 167, 69, 0.3);
+        }
+
+        .status-cancelled {
+            background: rgba(220, 53, 69, 0.2);
+            color: var(--danger-color);
+            border: 1px solid rgba(220, 53, 69, 0.3);
+        }        
+.date-cell {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .btn-action {
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            border: none;
+        }
+
+        .btn-cancel {
+            background: linear-gradient(135deg, var(--danger-color), #c82333);
+            color: white;
+        }
+
+        .btn-cancel:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+            color: white;
+        }
+
+        .btn-view {
+            background: linear-gradient(135deg, var(--info-color), #138496);
+            color: white;
+        }
+
+        .btn-view:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(23, 162, 184, 0.3);
+            color: white;
+        }
+
+        .btn-disabled {
+            background: var(--accent-dark);
+            color: var(--text-muted);
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        .btn-disabled:hover {
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* Sort Icons */
+        .sort-header {
+            cursor: pointer;
+            user-select: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: color 0.3s ease;
+        }
+
+        .sort-header:hover {
+            color: var(--gold-accent);
+        }
+
+        .sort-icon {
+            font-size: 0.8rem;
+            opacity: 0.6;
+            transition: all 0.3s ease;
+        }
+
+        .sort-header:hover .sort-icon {
+            opacity: 1;
+            color: var(--gold-accent);
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 80px 40px;
+            color: var(--text-secondary);
+        }
+
+        .empty-icon {
+            font-size: 4rem;
+            color: var(--gold-accent);
+            margin-bottom: 24px;
+            opacity: 0.6;
+        }
+
+        .empty-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            color: var(--text-primary);
+            margin-bottom: 16px;
+        }
+
+        .empty-description {
+            font-size: 1.1rem;
+            margin-bottom: 32px;
+            max-width: 400px;
+            margin-left: auto;
+            margin-right: auto;
+        }    
+    .btn-shop {
+            background: linear-gradient(135deg, var(--gold-accent), #b8941f);
+            color: var(--primary-dark);
+            padding: 16px 32px;
+            border-radius: 25px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-shop:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(212, 175, 55, 0.4);
+            color: var(--primary-dark);
+        }
+
+        /* Pagination */
+        .pagination-section {
+            margin-top: 40px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .pagination {
+            display: flex;
+            gap: 8px;
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .page-item {
+            display: flex;
+        }
+
+        .page-link {
+            padding: 12px 16px;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 8px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .page-link:hover {
+            background: var(--gold-accent);
+            color: var(--primary-dark);
+            border-color: var(--gold-accent);
+            transform: translateY(-2px);
+        }
+
+        .page-item.active .page-link {
+            background: var(--gold-accent);
+            color: var(--primary-dark);
+            border-color: var(--gold-accent);
+        }
+
+        /* Table Container */
+        .table-container {
+            max-height: 600px;
+            overflow-y: auto;
+            border-radius: 0 0 20px 20px;
+        }
+
+        .table-container::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .table-container::-webkit-scrollbar-track {
+            background: var(--accent-dark);
+            border-radius: 4px;
+        }
+
+        .table-container::-webkit-scrollbar-thumb {
+            background: var(--gold-accent);
+            border-radius: 4px;
+        }
+
+        .table-container::-webkit-scrollbar-thumb:hover {
+            background: var(--gold-light);
+        } 
+       /* Responsive Design */
+        @media (max-width: 768px) {
+            .navbar-nav {
+                display: none;
+                position: absolute;
+                top: 100%;
+                left: 0;
+                right: 0;
+                background: var(--secondary-dark);
+                border-top: 1px solid var(--accent-dark);
+                flex-direction: column;
+                padding: 20px;
+                gap: 16px;
+            }
+
+            .navbar-nav.active {
+                display: flex;
+            }
+
+            .navbar-toggle {
+                display: block;
+            }
+
+            .main-content {
+                padding: 100px 0 40px;
+            }
+
+            .page-title {
+                font-size: 2rem;
+            }
+
+            .filter-row {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+
+            .filter-section {
+                padding: 20px;
+            }
+
+            .orders-table {
+                font-size: 0.9rem;
+            }
+
+            .orders-table th,
+            .orders-table td {
+                padding: 12px 8px;
+            }
+
+            .product-info {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+
+            .product-image {
+                width: 50px;
+                height: 50px;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+                gap: 4px;
+            }
+
+            .btn-action {
+                font-size: 0.8rem;
+                padding: 6px 12px;
+            }
+
+            .container {
+                padding: 0 15px;
+            }
+
+            .navbar-container {
+                padding: 0 15px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .page-title {
+                font-size: 1.8rem;
+            }
+
+            .orders-section {
+                border-radius: 16px;
+            }
+
+            .filter-section {
+                border-radius: 16px;
+                padding: 16px;
+            }
+
+            .orders-header {
+                padding: 16px 20px;
+            }
+
+            .orders-table th,
+            .orders-table td {
+                padding: 10px 6px;
+                font-size: 0.85rem;
+            }
+
+            .product-details h4 {
+                font-size: 0.9rem;
+            }
+
+            .empty-state {
+                padding: 60px 20px;
+            }
+
+            .empty-icon {
+                font-size: 3rem;
+            }
+
+            .empty-title {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head><bo
+dy>
+    <!-- Navbar -->
+    <nav class="navbar" id="navbar">
+        <div class="navbar-container">
+            <a href="{% url 'home:main_page' %}" class="navbar-brand">
+                <i class="fas fa-gem"></i>
+                Montclair Wardrobe
+            </a>
+            <ul class="navbar-nav" id="navbarNav">
+                <li><a href="{% url 'home:main_page' %}" class="nav-link">Home</a></li>
+                <li><a href="{% url 'home:about' %}" class="nav-link">Boutique</a></li>
+                <li><a href="{% url 'home:about' %}" class="nav-link">About</a></li>
+                <li><a href="{% url 'home:contact' %}" class="nav-link">Contact</a></li>
+                <li><a href="{% url 'home:products' %}" class="nav-link">Shop</a></li>
+                {% if user.is_authenticated %}
+                    <li><a href="{% url 'cart:view_cart' %}" class="nav-link">
+                        <i class="fas fa-shopping-cart"></i>
+                        Cart
+                    </a></li>
+                    <li><a href="#" class="nav-link active">My Orders</a></li>
+                    <li><a href="{% url 'logout' %}" class="nav-link">Logout</a></li>
+                {% else %}
+                    <li><a href="{% url 'login' %}" class="nav-link">Sign In</a></li>
+                    <li><a href="{% url 'register' %}" class="nav-link">Register</a></li>
                 {% endif %}
             </ul>
-        </nav>
-        {% endif %}
-
-    {% else %}
-        <div class="alert alert-info text-center" role="alert">
-            You have no checkouts yet. Start shopping now!
+            <button class="navbar-toggle" id="navbarToggle">
+                <i class="fas fa-bars"></i>
+            </button>
         </div>
-    {% endif %}
+    </nav>
 
-    <div class="mt-4 text-center">
-        <a href="{% url 'home:products' %}" class="btn btn-primary btn-lg">Continue Shopping</a>
+    <!-- Floating Particles -->
+    <div class="particles">
+        <div class="particle" style="left: 10%; animation-delay: 0s;"></div>
+        <div class="particle" style="left: 20%; animation-delay: 1s;"></div>
+        <div class="particle" style="left: 30%; animation-delay: 2s;"></div>
+        <div class="particle" style="left: 40%; animation-delay: 3s;"></div>
+        <div class="particle" style="left: 50%; animation-delay: 4s;"></div>
+        <div class="particle" style="left: 60%; animation-delay: 5s;"></div>
+        <div class="particle" style="left: 70%; animation-delay: 0.5s;"></div>
+        <div class="particle" style="left: 80%; animation-delay: 1.5s;"></div>
+        <div class="particle" style="left: 90%; animation-delay: 2.5s;"></div>
     </div>
-</div>
 
-{% block extra_js %}
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script>
-// Sorting state
-let sortDirection = {
-    'product': true,
-    'price': true,
-    'date': true
-};
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+            <!-- Page Header -->
+            <div class="page-header">
+                <h1 class="page-title">My Orders</h1>
+                <p class="page-subtitle">Track and manage your fashion purchases from Montclair Wardrobe</p>
+            </div>
 
-// Sort table by column
-function sortTable(column) {
-    const tbody = document.getElementById('checkoutTableBody');
-    const rows = Array.from(tbody.getElementsByTagName('tr'));
-    
-    rows.sort((a, b) => {
-        let aValue, bValue;
-        
-        if (column === 'product') {
-            aValue = a.dataset.product;
-            bValue = b.dataset.product;
-        } else if (column === 'price') {
-            aValue = parseFloat(a.querySelector('[data-price]').dataset.price);
-            bValue = parseFloat(b.querySelector('[data-price]').dataset.price);
-        } else if (column === 'date') {
-            aValue = new Date(a.querySelector('[data-date]').dataset.date);
-            bValue = new Date(b.querySelector('[data-date]').dataset.date);
-        }
-        
-        if (sortDirection[column]) {
-            return aValue > bValue ? 1 : -1;
-        } else {
-            return aValue < bValue ? 1 : -1;
-        }
-    });
-    
-    sortDirection[column] = !sortDirection[column];
-    
-    tbody.innerHTML = '';
-    rows.forEach(row => tbody.appendChild(row));
-}
+            <!-- Filter Section -->
+            <div class="filter-section">
+                <div class="filter-row">
+                    <div class="filter-group">
+                        <label class="filter-label">Status</label>
+                        <select id="statusFilter" class="filter-control">
+                            <option value="">All Statuses</option>
+                            <option value="pending">Pending</option>
+                            <option value="delivered">Delivered</option>
+                            <option value="cancelled">Cancelled</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label class="filter-label">Date Range</label>
+                        <select id="dateFilter" class="filter-control">
+                            <option value="">All Dates</option>
+                            <option value="today">Today</option>
+                            <option value="week">This Week</option>
+                            <option value="month">This Month</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label class="filter-label">Search Products</label>
+                        <input type="text" id="searchInput" class="filter-control" placeholder="Search by product name...">
+                    </div>
+                    <div class="filter-group">
+                        <button class="btn-reset" onclick="resetFilters()">
+                            <i class="fas fa-undo"></i>
+                            Reset Filters
+                        </button>
+                    </div>
+                </div>
+            </div> 
+           {% if checkouts %}
+                <!-- Orders Table -->
+                <div class="orders-section">
+                    <div class="orders-header">
+                        <h2 class="orders-title">
+                            <i class="fas fa-shopping-bag"></i>
+                            Order History
+                        </h2>
+                    </div>
+                    <div class="table-container">
+                        <table class="orders-table" id="checkoutTable">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>
+                                        <div class="sort-header" onclick="sortTable('product')">
+                                            Product
+                                            <i class="fas fa-sort sort-icon"></i>
+                                        </div>
+                                    </th>
+                                    <th>
+                                        <div class="sort-header" onclick="sortTable('price')">
+                                            Price (ZMW)
+                                            <i class="fas fa-sort sort-icon"></i>
+                                        </div>
+                                    </th>
+                                    <th>Quantity</th>
+                                    <th>Total</th>
+                                    <th>Delivery</th>
+                                    <th>Payment</th>
+                                    <th>Status</th>
+                                    <th>
+                                        <div class="sort-header" onclick="sortTable('date')">
+                                            Date
+                                            <i class="fas fa-sort sort-icon"></i>
+                                        </div>
+                                    </th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="checkoutTableBody">
+                                {% for checkout in checkouts %}
+                                <tr data-status="{{ checkout.status|lower }}" data-date="{{ checkout.created_at|date:'Y-m-d' }}" data-product="{{ checkout.product.name|lower }}">
+                                    <td>{{ forloop.counter }}</td>
+                                    <td>
+                                        <div class="product-info">
+                                            {% if checkout.product.image %}
+                                                <img src="{{ checkout.product.image.url }}" alt="{{ checkout.product.name }}" class="product-image">
+                                            {% else %}
+                                                <img src="{% static 'images/placeholder.png' %}" alt="No image" class="product-image">
+                                            {% endif %}
+                                            <div class="product-details">
+                                                <h4>{{ checkout.product.name }}</h4>
+                                                <p>{{ checkout.product.category.name|default:"Fashion" }}</p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="price-cell" data-price="{{ checkout.product.price }}">
+                                        ZMW {{ checkout.product.price|floatformat:2 }}
+                                    </td>
+                                    <td class="quantity-cell">{{ checkout.quantity }}</td>
+                                    <td class="total-cell">ZMW {{ checkout.total_price|floatformat:2 }}</td>
+                                    <td>{{ checkout.get_delivery_method_display|default:"Standard" }}</td>
+                                    <td>{{ checkout.get_payment_method_display|default:"Cash" }}</td>
+                                    <td>
+                                        {% if checkout.status == 'pending' %}
+                                            <span class="status-badge status-pending">
+                                                <i class="fas fa-clock"></i>
+                                                Pending
+                                            </span>
+                                        {% elif checkout.status == 'delivered' %}
+                                            <span class="status-badge status-delivered">
+                                                <i class="fas fa-check-circle"></i>
+                                                Delivered
+                                            </span>
+                                        {% elif checkout.status == 'cancelled' %}
+                                            <span class="status-badge status-cancelled">
+                                                <i class="fas fa-times-circle"></i>
+                                                Cancelled
+                                            </span>
+                                        {% else %}
+                                            <span class="status-badge status-pending">{{ checkout.status|title }}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="date-cell" data-date="{{ checkout.created_at|date:'c' }}">
+                                        {{ checkout.created_at|date:"M d, Y" }}<br>
+                                        <small>{{ checkout.created_at|date:"H:i" }}</small>
+                                    </td>
+                                    <td>
+                                        <div class="action-buttons">
+                                            {% if checkout.status == 'pending' %}
+                                                <button class="btn-action btn-cancel cancel-order" data-id="{{ checkout.id }}">
+                                                    <i class="fas fa-times"></i>
+                                                    Cancel
+                                                </button>
+                                            {% else %}
+                                                <button class="btn-action btn-disabled" disabled>
+                                                    <i class="fas fa-times"></i>
+                                                    Cancel
+                                                </button>
+                                            {% endif %}
+                                            <a href="{% url 'home:checkout_detail' checkout.id %}" class="btn-action btn-view">
+                                                <i class="fas fa-eye"></i>
+                                                View
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>   
+             <!-- Pagination -->
+                {% if checkouts.has_other_pages %}
+                <div class="pagination-section">
+                    <ul class="pagination">
+                        {% if checkouts.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ checkouts.previous_page_number }}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}">
+                                    <i class="fas fa-chevron-left"></i>
+                                    Previous
+                                </a>
+                            </li>
+                        {% endif %}
+                        
+                        {% for num in checkouts.paginator.page_range %}
+                            <li class="page-item {% if checkouts.number == num %}active{% endif %}">
+                                <a class="page-link" href="?page={{ num }}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}">{{ num }}</a>
+                            </li>
+                        {% endfor %}
+                        
+                        {% if checkouts.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ checkouts.next_page_number }}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}">
+                                    Next
+                                    <i class="fas fa-chevron-right"></i>
+                                </a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </div>
+                {% endif %}
 
-// Filter table based on inputs
-function filterTable() {
-    const statusFilter = document.getElementById('statusFilter').value;
-    const dateFilter = document.getElementById('dateFilter').value;
-    const searchInput = document.getElementById('searchInput').value.toLowerCase();
-    const rows = document.querySelectorAll('#checkoutTableBody tr');
-    
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    
-    rows.forEach(row => {
-        const status = row.dataset.status;
-        const date = new Date(row.dataset.date);
-        const productName = row.dataset.product;
-        
-        let showRow = true;
-        
-        // Status filter
-        if (statusFilter && status !== statusFilter) {
-            showRow = false;
-        }
-        
-        // Date filter
-        if (dateFilter) {
-            if (dateFilter === 'today' && date.toDateString() !== today.toDateString()) {
-                showRow = false;
-            } else if (dateFilter === 'week') {
-                const weekAgo = new Date(today);
-                weekAgo.setDate(today.getDate() - 7);
-                if (date < weekAgo) {
-                    showRow = false;
+            {% else %}
+                <!-- Empty State -->
+                <div class="orders-section">
+                    <div class="empty-state">
+                        <div class="empty-icon">
+                            <i class="fas fa-shopping-bag"></i>
+                        </div>
+                        <h2 class="empty-title">No Orders Yet</h2>
+                        <p class="empty-description">
+                            You haven't placed any orders yet. Start shopping to see your order history here.
+                        </p>
+                        <a href="{% url 'home:products' %}" class="btn-shop">
+                            <i class="fas fa-shopping-cart"></i>
+                            Start Shopping
+                        </a>
+                    </div>
+                </div>
+            {% endif %}
+
+            <!-- Continue Shopping Button -->
+            <div style="text-align: center; margin-top: 40px;">
+                <a href="{% url 'home:products' %}" class="btn-shop">
+                    <i class="fas fa-arrow-left"></i>
+                    Continue Shopping
+                </a>
+            </div>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Navbar scroll effect
+            const navbar = document.getElementById('navbar');
+            window.addEventListener('scroll', function() {
+                if (window.scrollY > 50) {
+                    navbar.classList.add('scrolled');
+                } else {
+                    navbar.classList.remove('scrolled');
                 }
-            } else if (dateFilter === 'month') {
-                const monthAgo = new Date(today);
-                monthAgo.setMonth(today.getMonth() - 1);
-                if (date < monthAgo) {
-                    showRow = false;
-                }
-            }
-        }
-        
-        // Search filter
-        if (searchInput && !productName.includes(searchInput)) {
-            showRow = false;
-        }
-        
-        row.style.display = showRow ? '' : 'none';
-    });
-}
+            });
 
-// Reset all filters
-function resetFilters() {
-    document.getElementById('statusFilter').value = '';
-    document.getElementById('dateFilter').value = '';
-    document.getElementById('searchInput').value = '';
-    filterTable();
-}
-
-// Debounce function for search input
-function debounce(func, wait) {
-    let timeout;
-    return function executedFunction(...args) {
-        const later = () => {
-            clearTimeout(timeout);
-            func(...args);
-        };
-        clearTimeout(timeout);
-        timeout = setTimeout(later, wait);
-    };
-}
-
-// Event listeners
-document.getElementById('statusFilter').addEventListener('change', filterTable);
-document.getElementById('dateFilter').addEventListener('change', filterTable);
-document.getElementById('searchInput').addEventListener('input', debounce(filterTable, 300));
-
-// Cancel order functionality
-document.querySelectorAll('.cancel-order').forEach(button => {
-    button.addEventListener('click', function() {
-        const checkoutId = this.dataset.id;
-        
-        Swal.fire({
-            title: 'Are you sure?',
-            text: "Do you want to cancel this order?",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#dc3545',
-            cancelButtonColor: '#6c757d',
-            confirmButtonText: 'Yes, cancel it!'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                fetch(`/marketplace/cancel-checkout/${checkoutId}/`, {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
-                        'Content-Type': 'application/json'
-                    }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        Swal.fire(
-                            'Cancelled!',
-                            'Your order has been cancelled.',
-                            'success'
-                        ).then(() => {
-                            location.reload();
-                        });
+            // Mobile navbar toggle
+            const navbarToggle = document.getElementById('navbarToggle');
+            const navbarNav = document.getElementById('navbarNav');
+            
+            if (navbarToggle && navbarNav) {
+                navbarToggle.addEventListener('click', function() {
+                    navbarNav.classList.toggle('active');
+                    const icon = this.querySelector('i');
+                    if (navbarNav.classList.contains('active')) {
+                        icon.classList.remove('fa-bars');
+                        icon.classList.add('fa-times');
                     } else {
-                        Swal.fire(
-                            'Error!',
-                            data.message || 'Unable to cancel order.',
-                            'error'
-                        );
+                        icon.classList.remove('fa-times');
+                        icon.classList.add('fa-bars');
                     }
-                })
-                .catch(error => {
-                    Swal.fire(
-                        'Error!',
-                        'Something went wrong. Please try again.',
-                        'error'
-                    );
                 });
-            }
-        });
-    });
-});
 
-// Initialize table filtering on load
-document.addEventListener('DOMContentLoaded', () => {
-    filterTable();
-});
-</script>
-{% endblock %}
-{% endblock %}
+                // Close mobile menu when clicking outside
+                document.addEventListener('click', function(event) {
+                    if (!navbar.contains(event.target)) {
+                        navbarNav.classList.remove('active');
+                        const icon = navbarToggle.querySelector('i');
+                        icon.classList.remove('fa-times');
+                        icon.classList.add('fa-bars');
+                    }
+                });
+            }         
+   // Animate particles
+            const particles = document.querySelectorAll('.particle');
+            particles.forEach((particle, index) => {
+                particle.style.top = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 6 + 's';
+            });
+
+            // Initialize table filtering
+            filterTable();
+        });
+
+        // Sorting state
+        let sortDirection = {
+            'product': true,
+            'price': true,
+            'date': true
+        };
+
+        // Sort table by column
+        function sortTable(column) {
+            const tbody = document.getElementById('checkoutTableBody');
+            if (!tbody) return;
+            
+            const rows = Array.from(tbody.getElementsByTagName('tr'));
+            
+            rows.sort((a, b) => {
+                let aValue, bValue;
+                
+                if (column === 'product') {
+                    aValue = a.dataset.product;
+                    bValue = b.dataset.product;
+                } else if (column === 'price') {
+                    aValue = parseFloat(a.querySelector('[data-price]').dataset.price);
+                    bValue = parseFloat(b.querySelector('[data-price]').dataset.price);
+                } else if (column === 'date') {
+                    aValue = new Date(a.querySelector('[data-date]').dataset.date);
+                    bValue = new Date(b.querySelector('[data-date]').dataset.date);
+                }
+                
+                if (sortDirection[column]) {
+                    return aValue > bValue ? 1 : -1;
+                } else {
+                    return aValue < bValue ? 1 : -1;
+                }
+            });
+            
+            sortDirection[column] = !sortDirection[column];
+            
+            tbody.innerHTML = '';
+            rows.forEach(row => tbody.appendChild(row));
+        }
+
+        // Filter table based on inputs
+        function filterTable() {
+            const statusFilter = document.getElementById('statusFilter');
+            const dateFilter = document.getElementById('dateFilter');
+            const searchInput = document.getElementById('searchInput');
+            const rows = document.querySelectorAll('#checkoutTableBody tr');
+            
+            if (!statusFilter || !dateFilter || !searchInput || !rows.length) return;
+            
+            const statusValue = statusFilter.value;
+            const dateValue = dateFilter.value;
+            const searchValue = searchInput.value.toLowerCase();
+            
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            
+            rows.forEach(row => {
+                const status = row.dataset.status;
+                const date = new Date(row.dataset.date);
+                const productName = row.dataset.product;
+                
+                let showRow = true;
+                
+                // Status filter
+                if (statusValue && status !== statusValue) {
+                    showRow = false;
+                }
+                
+                // Date filter
+                if (dateValue) {
+                    if (dateValue === 'today' && date.toDateString() !== today.toDateString()) {
+                        showRow = false;
+                    } else if (dateValue === 'week') {
+                        const weekAgo = new Date(today);
+                        weekAgo.setDate(today.getDate() - 7);
+                        if (date < weekAgo) {
+                            showRow = false;
+                        }
+                    } else if (dateValue === 'month') {
+                        const monthAgo = new Date(today);
+                        monthAgo.setMonth(today.getMonth() - 1);
+                        if (date < monthAgo) {
+                            showRow = false;
+                        }
+                    }
+                }
+                
+                // Search filter
+                if (searchValue && !productName.includes(searchValue)) {
+                    showRow = false;
+                }
+                
+                row.style.display = showRow ? '' : 'none';
+            });
+        }    
+    // Reset all filters
+        function resetFilters() {
+            const statusFilter = document.getElementById('statusFilter');
+            const dateFilter = document.getElementById('dateFilter');
+            const searchInput = document.getElementById('searchInput');
+            
+            if (statusFilter) statusFilter.value = '';
+            if (dateFilter) dateFilter.value = '';
+            if (searchInput) searchInput.value = '';
+            
+            filterTable();
+        }
+
+        // Debounce function for search input
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+
+        // Event listeners
+        const statusFilter = document.getElementById('statusFilter');
+        const dateFilter = document.getElementById('dateFilter');
+        const searchInput = document.getElementById('searchInput');
+
+        if (statusFilter) statusFilter.addEventListener('change', filterTable);
+        if (dateFilter) dateFilter.addEventListener('change', filterTable);
+        if (searchInput) searchInput.addEventListener('input', debounce(filterTable, 300));
+
+        // Cancel order functionality
+        document.querySelectorAll('.cancel-order').forEach(button => {
+            button.addEventListener('click', function() {
+                const checkoutId = this.dataset.id;
+                
+                Swal.fire({
+                    title: 'Cancel Order?',
+                    text: "Are you sure you want to cancel this order? This action cannot be undone.",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#dc3545',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: 'Yes, Cancel Order',
+                    cancelButtonText: 'Keep Order',
+                    background: '#1a1a1a',
+                    color: '#ffffff',
+                    customClass: {
+                        popup: 'swal-dark-theme'
+                    }
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Show loading state
+                        this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Cancelling...';
+                        this.disabled = true;
+                        
+                        fetch(`/marketplace/cancel-checkout/${checkoutId}/`, {
+                            method: 'POST',
+                            headers: {
+                                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]')?.value || '',
+                                'Content-Type': 'application/json'
+                            }
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                Swal.fire({
+                                    title: 'Order Cancelled!',
+                                    text: 'Your order has been successfully cancelled.',
+                                    icon: 'success',
+                                    background: '#1a1a1a',
+                                    color: '#ffffff',
+                                    confirmButtonColor: '#d4af37'
+                                }).then(() => {
+                                    location.reload();
+                                });
+                            } else {
+                                Swal.fire({
+                                    title: 'Error!',
+                                    text: data.message || 'Unable to cancel order. Please try again.',
+                                    icon: 'error',
+                                    background: '#1a1a1a',
+                                    color: '#ffffff',
+                                    confirmButtonColor: '#dc3545'
+                                });
+                                // Reset button state
+                                this.innerHTML = '<i class="fas fa-times"></i> Cancel';
+                                this.disabled = false;
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            Swal.fire({
+                                title: 'Error!',
+                                text: 'Something went wrong. Please try again later.',
+                                icon: 'error',
+                                background: '#1a1a1a',
+                                color: '#ffffff',
+                                confirmButtonColor: '#dc3545'
+                            });
+                            // Reset button state
+                            this.innerHTML = '<i class="fas fa-times"></i> Cancel';
+                            this.disabled = false;
+                        });
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

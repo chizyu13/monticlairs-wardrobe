@@ -1,344 +1,1584 @@
-{% extends 'base.html' %}
 {% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sales Report - Montclair Wardrobe</title>
+    <meta name="description" content="Comprehensive sales analytics and reporting dashboard for Montclair Wardrobe boutique.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            --primary-dark: #0a0a0a;
+            --secondary-dark: #1a1a1a;
+            --accent-dark: #2a2a2a;
+            --gold-accent: #d4af37;
+            --gold-light: #f4e4a6;
+            --text-primary: #ffffff;
+            --text-secondary: #b0b0b0;
+            --text-muted: #808080;
+            --glass-bg: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --shadow-dark: rgba(0, 0, 0, 0.5);
+            --success-color: #28a745;
+            --warning-color: #ffc107;
+            --danger-color: #dc3545;
+            --info-color: #17a2b8;
+            --purple-color: #6f42c1;
+        }
 
-{% block extra_css %}
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-<style>
-    .bg-purple {
-        background-color: #6f42c1 !important;
-    }
-    .card {
-        transition: transform 0.2s;
-    }
-    .card:hover {
-        transform: translateY(-5px);
-    }
-    .table th, .table td {
-        vertical-align: middle;
-    }
-    .badge {
-        font-size: 0.9em;
-        padding: 0.5em 1em;
-    }
-    .pagination .btn {
-        margin: 0 5px;
-    }
-</style>
-{% endblock %}
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--primary-dark);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
 
-{% block title %}Sales Report - EHC Marketplace{% endblock %}
+        /* Animated Background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(212, 175, 55, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(212, 175, 55, 0.08) 0%, transparent 50%),
+                linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 50%, #0f0f0f 100%);
+            z-index: -2;
+        }
 
-{% block content %}
-<div class="container-fluid mt-4">
-    <!-- Header Section -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="mb-0">
-            <i class="fas fa-chart-line text-primary me-2"></i>Sales Report
-        </h2>
-        <div>
-            <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#exportModal">
-                <i class="fas fa-download me-1"></i>Export
+        /* Floating particles */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        .particle {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: var(--gold-accent);
+            border-radius: 50%;
+            opacity: 0.3;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); opacity: 0.3; }
+            50% { transform: translateY(-20px) rotate(180deg); opacity: 0.8; }
+        }   
+     /* Navbar Styles */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--glass-border);
+            padding: 16px 0;
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+
+        .navbar.scrolled {
+            background: rgba(10, 10, 10, 0.95);
+            backdrop-filter: blur(30px);
+        }
+
+        .navbar-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .navbar-brand {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--gold-accent);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .navbar-brand:hover {
+            color: var(--gold-light);
+        }
+
+        .navbar-nav {
+            display: flex;
+            list-style: none;
+            gap: 32px;
+            align-items: center;
+        }
+
+        .nav-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .nav-link.active,
+        .nav-link:hover {
+            color: var(--text-primary);
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--gold-accent);
+            transition: width 0.3s ease;
+        }
+
+        .nav-link.active::after,
+        .nav-link:hover::after {
+            width: 100%;
+        }
+
+        .navbar-toggle {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--text-primary);
+            font-size: 1.2rem;
+            cursor: pointer;
+        }        
+.container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .main-content {
+            padding: 120px 0 60px;
+            min-height: 100vh;
+        }
+
+        /* Page Header */
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .page-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--gold-accent);
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            letter-spacing: -0.02em;
+        }
+
+        .page-title i {
+            font-size: 2rem;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn-export {
+            background: linear-gradient(135deg, var(--gold-accent), #b8941f);
+            color: var(--primary-dark);
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-export:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(212, 175, 55, 0.4);
+            color: var(--primary-dark);
+        }
+
+        /* Statistics Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+            margin-bottom: 40px;
+        }
+
+        .stat-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 30px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--gold-accent), var(--gold-light));
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--gold-accent);
+            box-shadow: 0 15px 35px var(--shadow-dark);
+        }
+
+        .stat-card.primary::before {
+            background: linear-gradient(90deg, #007bff, #0056b3);
+        }
+
+        .stat-card.success::before {
+            background: linear-gradient(90deg, var(--success-color), #1e7e34);
+        }
+
+        .stat-card.info::before {
+            background: linear-gradient(90deg, var(--info-color), #117a8b);
+        }
+
+        .stat-card.purple::before {
+            background: linear-gradient(90deg, var(--purple-color), #5a32a3);
+        }
+
+        .stat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 16px;
+        }
+
+        .stat-info h3 {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-value {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            line-height: 1;
+        }
+
+        .stat-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            opacity: 0.8;
+        }
+
+        .stat-card.primary .stat-icon {
+            background: rgba(0, 123, 255, 0.2);
+            color: #007bff;
+        }
+
+        .stat-card.success .stat-icon {
+            background: rgba(40, 167, 69, 0.2);
+            color: var(--success-color);
+        }
+
+        .stat-card.info .stat-icon {
+            background: rgba(23, 162, 184, 0.2);
+            color: var(--info-color);
+        }
+
+        .stat-card.purple .stat-icon {
+            background: rgba(111, 66, 193, 0.2);
+            color: var(--purple-color);
+        }
+
+        .stat-description {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            margin-top: 8px;
+        }  
+      /* Filter Section */
+        .filter-section {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            margin-bottom: 40px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .filter-section:hover {
+            border-color: var(--gold-accent);
+        }
+
+        .filter-header {
+            background: rgba(212, 175, 55, 0.1);
+            padding: 20px 30px;
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .filter-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--gold-accent);
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .filter-body {
+            padding: 30px;
+        }
+
+        .filter-form {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 24px;
+            align-items: end;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .form-label i {
+            color: var(--gold-accent);
+            font-size: 0.8rem;
+        }
+
+        .form-control {
+            background: var(--glass-bg);
+            border: 2px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 12px 16px;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--gold-accent);
+            box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .form-control option {
+            background: var(--secondary-dark);
+            color: var(--text-primary);
+        }
+
+        .filter-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn-apply {
+            background: linear-gradient(135deg, var(--gold-accent), #b8941f);
+            color: var(--primary-dark);
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-apply:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(212, 175, 55, 0.4);
+        }
+
+        .btn-reset {
+            background: var(--glass-bg);
+            border: 2px solid var(--glass-border);
+            color: var(--text-secondary);
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-reset:hover {
+            background: var(--accent-dark);
+            color: var(--text-primary);
+            border-color: var(--accent-dark);
+            transform: translateY(-2px);
+        }     
+   /* Sales Table Section */
+        .table-section {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .table-section:hover {
+            border-color: var(--gold-accent);
+        }
+
+        .table-header {
+            background: rgba(212, 175, 55, 0.1);
+            padding: 20px 30px;
+            border-bottom: 1px solid var(--glass-border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .table-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--gold-accent);
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .table-info {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .table-container {
+            max-height: 700px;
+            overflow-y: auto;
+        }
+
+        .table-container::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .table-container::-webkit-scrollbar-track {
+            background: var(--accent-dark);
+        }
+
+        .table-container::-webkit-scrollbar-thumb {
+            background: var(--gold-accent);
+            border-radius: 4px;
+        }
+
+        .sales-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .sales-table th {
+            background: rgba(255, 255, 255, 0.03);
+            padding: 20px 16px;
+            text-align: left;
+            font-weight: 600;
+            color: var(--text-primary);
+            border-bottom: 1px solid var(--glass-border);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .sales-table th.text-end {
+            text-align: right;
+        }
+
+        .sales-table th.text-center {
+            text-align: center;
+        }
+
+        .sales-table td {
+            padding: 20px 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            vertical-align: middle;
+            font-size: 0.9rem;
+        }
+
+        .sales-table tr {
+            transition: all 0.3s ease;
+        }
+
+        .sales-table tr:hover {
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .product-info {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .product-image {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            object-fit: cover;
+            border: 2px solid var(--glass-border);
+        }
+
+        .product-name {
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .buyer-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .buyer-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--gold-accent), #b8941f);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: var(--primary-dark);
+            font-size: 0.9rem;
+        }
+
+        .buyer-name {
+            color: var(--text-primary);
+            font-weight: 500;
+        }        .
+date-cell {
+            color: var(--text-secondary);
+        }
+
+        .quantity-cell {
+            font-weight: 600;
+            color: var(--text-primary);
+            text-align: right;
+        }
+
+        .total-cell {
+            font-weight: 700;
+            color: var(--gold-accent);
+            font-size: 1rem;
+            text-align: right;
+        }
+
+        /* Status Badges */
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .status-sold {
+            background: rgba(220, 53, 69, 0.2);
+            color: var(--danger-color);
+            border: 1px solid rgba(220, 53, 69, 0.3);
+        }
+
+        .status-pending {
+            background: rgba(255, 193, 7, 0.2);
+            color: var(--warning-color);
+            border: 1px solid rgba(255, 193, 7, 0.3);
+        }
+
+        .status-delivered {
+            background: rgba(40, 167, 69, 0.2);
+            color: var(--success-color);
+            border: 1px solid rgba(40, 167, 69, 0.3);
+        }
+
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            gap: 6px;
+            justify-content: center;
+        }
+
+        .btn-action {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.85rem;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            border: 1px solid;
+        }
+
+        .btn-pdf {
+            background: rgba(40, 167, 69, 0.1);
+            color: var(--success-color);
+            border-color: rgba(40, 167, 69, 0.3);
+        }
+
+        .btn-pdf:hover {
+            background: var(--success-color);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .btn-view {
+            background: rgba(23, 162, 184, 0.1);
+            color: var(--info-color);
+            border-color: rgba(23, 162, 184, 0.3);
+        }
+
+        .btn-view:hover {
+            background: var(--info-color);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .btn-delete {
+            background: rgba(220, 53, 69, 0.1);
+            color: var(--danger-color);
+            border-color: rgba(220, 53, 69, 0.3);
+        }
+
+        .btn-delete:hover {
+            background: var(--danger-color);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 80px 40px;
+            color: var(--text-secondary);
+        }
+
+        .empty-icon {
+            font-size: 4rem;
+            color: var(--gold-accent);
+            margin-bottom: 24px;
+            opacity: 0.6;
+        }
+
+        .empty-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            color: var(--text-primary);
+            margin-bottom: 16px;
+        }
+
+        .empty-description {
+            font-size: 1.1rem;
+            margin-bottom: 32px;
+            max-width: 400px;
+            margin-left: auto;
+            margin-right: auto;
+        }   
+     /* Pagination */
+        .pagination-section {
+            margin-top: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .pagination-info {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .pagination {
+            display: flex;
+            gap: 8px;
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .page-link {
+            padding: 10px 16px;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 8px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .page-link:hover {
+            background: var(--gold-accent);
+            color: var(--primary-dark);
+            border-color: var(--gold-accent);
+            transform: translateY(-2px);
+        }
+
+        .page-link.active {
+            background: var(--gold-accent);
+            color: var(--primary-dark);
+            border-color: var(--gold-accent);
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            z-index: 2000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--secondary-dark);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .modal-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            color: var(--gold-accent);
+            margin: 0;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        .modal-close:hover {
+            color: var(--text-primary);
+        }
+
+        .modal-body {
+            margin-bottom: 32px;
+        }
+
+        .modal-body p {
+            color: var(--text-secondary);
+            margin-bottom: 24px;
+        }
+
+        .export-options {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .btn-export-option {
+            background: var(--glass-bg);
+            border: 2px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 16px 20px;
+            color: var(--text-primary);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .btn-export-option:hover {
+            background: var(--gold-accent);
+            color: var(--primary-dark);
+            border-color: var(--gold-accent);
+            transform: translateY(-2px);
+        }
+
+        .btn-export-option i {
+            font-size: 1.2rem;
+        } 
+       /* Responsive Design */
+        @media (max-width: 768px) {
+            .navbar-nav {
+                display: none;
+                position: absolute;
+                top: 100%;
+                left: 0;
+                right: 0;
+                background: var(--secondary-dark);
+                border-top: 1px solid var(--accent-dark);
+                flex-direction: column;
+                padding: 20px;
+                gap: 16px;
+            }
+
+            .navbar-nav.active {
+                display: flex;
+            }
+
+            .navbar-toggle {
+                display: block;
+            }
+
+            .main-content {
+                padding: 100px 0 40px;
+            }
+
+            .page-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 16px;
+            }
+
+            .page-title {
+                font-size: 2rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+
+            .stat-card {
+                padding: 24px;
+            }
+
+            .filter-form {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+
+            .filter-body {
+                padding: 20px;
+            }
+
+            .filter-actions {
+                flex-direction: column;
+            }
+
+            .table-container {
+                max-height: 500px;
+            }
+
+            .sales-table {
+                font-size: 0.85rem;
+            }
+
+            .sales-table th,
+            .sales-table td {
+                padding: 12px 8px;
+            }
+
+            .product-info {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+
+            .product-image {
+                width: 40px;
+                height: 40px;
+            }
+
+            .buyer-info {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 6px;
+            }
+
+            .buyer-avatar {
+                width: 32px;
+                height: 32px;
+                font-size: 0.8rem;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+                gap: 4px;
+            }
+
+            .btn-action {
+                width: 32px;
+                height: 32px;
+                font-size: 0.8rem;
+            }
+
+            .container {
+                padding: 0 15px;
+            }
+
+            .navbar-container {
+                padding: 0 15px;
+            }
+
+            .modal-content {
+                padding: 30px 20px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .page-title {
+                font-size: 1.8rem;
+            }
+
+            .stat-value {
+                font-size: 1.8rem;
+            }
+
+            .filter-section,
+            .table-section {
+                border-radius: 16px;
+            }
+
+            .filter-header,
+            .table-header {
+                padding: 16px 20px;
+            }
+
+            .filter-body {
+                padding: 16px;
+            }
+
+            .empty-state {
+                padding: 60px 20px;
+            }
+
+            .empty-icon {
+                font-size: 3rem;
+            }
+
+            .empty-title {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head><body>
+
+    <!-- Navbar -->
+    <nav class="navbar" id="navbar">
+        <div class="navbar-container">
+            <a href="{% url 'home:main_page' %}" class="navbar-brand">
+                <i class="fas fa-gem"></i>
+                Montclair Wardrobe
+            </a>
+            <ul class="navbar-nav" id="navbarNav">
+                <li><a href="{% url 'home:main_page' %}" class="nav-link">Home</a></li>
+                <li><a href="{% url 'home:about' %}" class="nav-link">Boutique</a></li>
+                <li><a href="{% url 'home:about' %}" class="nav-link">About</a></li>
+                <li><a href="{% url 'home:contact' %}" class="nav-link">Contact</a></li>
+                <li><a href="{% url 'home:products' %}" class="nav-link">Shop</a></li>
+                {% if user.is_authenticated %}
+                    {% if user.is_staff or user.is_superuser %}
+                        <li><a href="#" class="nav-link active">Sales Report</a></li>
+                    {% endif %}
+                    <li><a href="{% url 'cart:view_cart' %}" class="nav-link">
+                        <i class="fas fa-shopping-cart"></i>
+                        Cart
+                    </a></li>
+                    <li><a href="{% url 'logout' %}" class="nav-link">Logout</a></li>
+                {% else %}
+                    <li><a href="{% url 'login' %}" class="nav-link">Sign In</a></li>
+                    <li><a href="{% url 'register' %}" class="nav-link">Register</a></li>
+                {% endif %}
+            </ul>
+            <button class="navbar-toggle" id="navbarToggle">
+                <i class="fas fa-bars"></i>
             </button>
         </div>
+    </nav>
+
+    <!-- Floating Particles -->
+    <div class="particles">
+        <div class="particle" style="left: 10%; animation-delay: 0s;"></div>
+        <div class="particle" style="left: 20%; animation-delay: 1s;"></div>
+        <div class="particle" style="left: 30%; animation-delay: 2s;"></div>
+        <div class="particle" style="left: 40%; animation-delay: 3s;"></div>
+        <div class="particle" style="left: 50%; animation-delay: 4s;"></div>
+        <div class="particle" style="left: 60%; animation-delay: 5s;"></div>
+        <div class="particle" style="left: 70%; animation-delay: 0.5s;"></div>
+        <div class="particle" style="left: 80%; animation-delay: 1.5s;"></div>
+        <div class="particle" style="left: 90%; animation-delay: 2.5s;"></div>
     </div>
 
-    <!-- Summary Statistics Cards -->
-    <div class="row mb-4 g-4">
-        <div class="col-xl-3 col-md-6">
-            <div class="card bg-primary bg-gradient text-white shadow-sm">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="card-subtitle mb-2">Total Sales</h6>
-                            <h3 class="card-title mb-0">{{ total_sales_count|default:0 }}</h3>
-                        </div>
-                        <i class="fas fa-shopping-cart fa-2x opacity-50"></i>
-                    </div>
-                    <div class="mt-2">
-                        <small class="text-white-50">Filtered transactions</small>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-xl-3 col-md-6">
-            <div class="card bg-success bg-gradient text-white shadow-sm">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="card-subtitle mb-2">Total Revenue</h6>
-                            <h3 class="card-title mb-0">ZMW {{ total_revenue|floatformat:2|default:"0.00" }}</h3>
-                        </div>
-                        <i class="fas fa-dollar-sign fa-2x opacity-50"></i>
-                    </div>
-                    <div class="mt-2">
-                        <small class="text-white-50">Filtered gross revenue</small>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-xl-3 col-md-6">
-            <div class="card bg-info bg-gradient text-white shadow-sm">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="card-subtitle mb-2">Avg. Sale</h6>
-                            <h3 class="card-title mb-0">ZMW {{ average_sale|floatformat:2|default:"0.00" }}</h3>
-                        </div>
-                        <i class="fas fa-calculator fa-2x opacity-50"></i>
-                    </div>
-                    <div class="mt-2">
-                        <small class="text-white-50">Per filtered transaction</small>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-xl-3 col-md-6">
-            <div class="card bg-purple bg-gradient text-white shadow-sm">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="card-subtitle mb-2">This Month</h6>
-                            <h3 class="card-title mb-0">ZMW {{ monthly_revenue|floatformat:2|default:"0.00" }}</h3>
-                        </div>
-                        <i class="fas fa-calendar-alt fa-2x opacity-50"></i>
-                    </div>
-                    <div class="mt-2">
-                        <small class="text-white-50">{{ current_month|default:"Current Month" }} revenue</small>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Filter Section -->
-    <div class="card mb-4 shadow-sm">
-        <div class="card-header bg-light">
-            <h5 class="mb-0">
-                <i class="fas fa-filter me-2"></i>Filters
-            </h5>
-        </div>
-        <div class="card-body">
-            <form method="get" class="row g-3">
-                <div class="col-md-3">
-                    <label for="start_date" class="form-label">From Date</label>
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="far fa-calendar-alt"></i></span>
-                        <input type="date" class="form-control" id="start_date" name="start_date" value="{{ start_date|default_if_none:'' }}">
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <label for="end_date" class="form-label">To Date</label>
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="far fa-calendar-alt"></i></span>
-                        <input type="date" class="form-control" id="end_date" name="end_date" value="{{ end_date|default_if_none:'' }}">
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <label for="product" class="form-label">Product</label>
-                    <select class="form-select" id="product" name="product">
-                        <option value="">All Products</option>
-                        {% for product in products %}
-                        <option value="{{ product.id }}" {% if product_id == product.id|stringformat:"s" %}selected{% endif %}>
-                            {{ product.name }}
-                        </option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div class="col-md-3 d-flex align-items-end">
-                    <button type="submit" class="btn btn-primary me-2">
-                        <i class="fas fa-search me-1"></i>Apply
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+            <!-- Page Header -->
+            <div class="page-header">
+                <h1 class="page-title">
+                    <i class="fas fa-chart-line"></i>
+                    Sales Analytics
+                </h1>
+                <div class="header-actions">
+                    <button class="btn-export" onclick="openExportModal()">
+                        <i class="fas fa-download"></i>
+                        Export Report
                     </button>
-                    <a href="{% url 'home:sales_report' %}" class="btn btn-outline-secondary">
-                        <i class="fas fa-undo me-1"></i>Reset
-                    </a>
                 </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Sales Table -->
-    <div class="card shadow-sm">
-        <div class="card-header bg-light d-flex justify-content-between align-items-center">
-            <h5 class="mb-0">
-                <i class="fas fa-table me-2"></i>Sales Records
-            </h5>
-            <div class="text-muted">
-                Showing {{ sales.start_index|default:0 }} to {{ sales.end_index|default:0 }} of {{ sales.paginator.count|default:0 }} entries
             </div>
-        </div>
-        <div class="card-body p-0">
-            <div class="table-responsive">
-                <table class="table table-hover mb-0">
-                    <thead class="table-light">
-                        <tr>
-                            <th width="5%">#</th>
-                            <th width="25%">Product</th>
-                            <th width="20%">Buyer</th>
-                            <th width="15%">Date</th>
-                            <th width="10%" class="text-end">Qty</th>
-                            <th width="15%" class="text-end">Total</th>
-                            <th width="15%" class="text-center">Status</th>
-                            <th width="15%" class="text-center">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for sale in sales %}
-                        <tr>
-                            <td>{{ forloop.counter0|add:sales.start_index }}</td>
-                            <td>
-                                <div class="d-flex align-items-center">
-                                    {% if sale.product.image %}
-                                    <img src="{{ sale.product.image.url }}" alt="{{ sale.product.name }}" class="rounded me-2" width="40" style="object-fit: cover;">
-                                    {% else %}
-                                    <img src="{% static 'images/placeholder.png' %}" alt="No image" class="rounded me-2" width="40" style="object-fit: cover;">
-                                    {% endif %}
-                                    <span>{{ sale.product.name|truncatechars:30 }}</span>
-                                </div>
-                            </td>
-                            <td>
-                                <div class="d-flex align-items-center">
-                                    <div class="avatar-sm me-2">
-                                        <span class="avatar-title bg-soft-primary rounded-circle text-primary">
-                                            {{ sale.buyer.username|first|upper|default:"?" }}
-                                        </span>
-                                    </div>
-                                    {{ sale.buyer.username|default:"Unknown" }}
-                                </div>
-                            </td>
-                            <td>{{ sale.sale_date|date:"M d, Y"|default:"N/A" }}</td>
-                            <td class="text-end">{{ sale.quantity|default:0 }}</td>
-                            <td class="text-end fw-bold">ZMW {{ sale.total_amount|floatformat:2|default:"0.00" }}</td>
-                            <td class="text-center">
-                                <span class="badge {% if sale.status == 'sold' %}bg-danger{% elif sale.status == 'pending' %}bg-warning{% else %}bg-success{% endif %}">
-                                    {{ sale.status|title|default:"Active" }}
-                                </span>
-                            </td>
-                            <td class="text-center">
-                                <div class="btn-group btn-group-sm" role="group">
-                                    <a href="{% url 'home:generate_receipt' sale.id %}" class="btn btn-outline-success" title="Generate Receipt">
-                                        <i class="fas fa-file-pdf"></i>
-                                    </a>
-                                    <a href="{% url 'home:sale_detail' sale.id %}" class="btn btn-outline-info" title="View Details">
-                                        <i class="fas fa-eye"></i>
-                                    </a>
-                                    <a href="{% url 'home:delete_product' sale.product.id %}" class="btn btn-outline-danger" title="Delete Product" onclick="return confirm('Are you sure you want to delete this product?');">
-                                        <i class="fas fa-trash-alt"></i>
-                                    </a>
-                                </div>
-                            </td>
-                        </tr>
-                        {% empty %}
-                        <tr>
-                            <td colspan="8" class="text-center py-5">
-                                <div class="py-4">
-                                    <i class="fas fa-exclamation-circle fa-3x text-muted"></i>
-                                    <p class="lead text-muted">No sales records available</p>
-                                </div>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
 
-    <!-- Pagination -->
-    {% if sales.has_other_pages %}
-    <div class="pagination mt-4 d-flex justify-content-center align-items-center">
-        <span class="me-3">Page {{ sales.number }} of {{ sales.paginator.num_pages }}</span>
-        <div>
-            {% if sales.has_previous %}
-            <a href="?page=1{% if start_date %}&start_date={{ start_date }}{% endif %}{% if end_date %}&end_date={{ end_date }}{% endif %}{% if product_id %}&product={{ product_id }}{% endif %}" class="btn btn-outline-secondary">
-                <i class="fas fa-angle-double-left"></i>
-            </a>
-            <a href="?page={{ sales.previous_page_number }}{% if start_date %}&start_date={{ start_date }}{% endif %}{% if end_date %}&end_date={{ end_date }}{% endif %}{% if product_id %}&product={{ product_id }}{% endif %}" class="btn btn-outline-secondary">
-                <i class="fas fa-angle-left"></i>
-            </a>
-            {% endif %}
-            {% for num in sales.paginator.page_range %}
-            <a href="?page={{ num }}{% if start_date %}&start_date={{ start_date }}{% endif %}{% if end_date %}&end_date={{ end_date }}{% endif %}{% if product_id %}&product={{ product_id }}{% endif %}" class="btn btn-outline-secondary {% if sales.number == num %}active{% endif %}">
-                {{ num }}
-            </a>
-            {% endfor %}
-            {% if sales.has_next %}
-            <a href="?page={{ sales.next_page_number }}{% if start_date %}&start_date={{ start_date }}{% endif %}{% if end_date %}&end_date={{ end_date }}{% endif %}{% if product_id %}&product={{ product_id }}{% endif %}" class="btn btn-outline-secondary">
-                <i class="fas fa-angle-right"></i>
-            </a>
-            <a href="?page={{ sales.paginator.num_pages }}{% if start_date %}&start_date={{ start_date }}{% endif %}{% if end_date %}&end_date={{ end_date }}{% endif %}{% if product_id %}&product={{ product_id }}{% endif %}" class="btn btn-outline-secondary">
-                <i class="fas fa-angle-double-right"></i>
-            </a>
+            <!-- Statistics Cards -->
+            <div class="stats-grid">
+                <div class="stat-card primary">
+                    <div class="stat-header">
+                        <div class="stat-info">
+                            <h3>Total Sales</h3>
+                            <div class="stat-value">{{ total_sales_count|default:0 }}</div>
+                            <div class="stat-description">Filtered transactions</div>
+                        </div>
+                        <div class="stat-icon">
+                            <i class="fas fa-shopping-cart"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stat-card success">
+                    <div class="stat-header">
+                        <div class="stat-info">
+                            <h3>Total Revenue</h3>
+                            <div class="stat-value">ZMW {{ total_revenue|floatformat:2|default:"0.00" }}</div>
+                            <div class="stat-description">Filtered gross revenue</div>
+                        </div>
+                        <div class="stat-icon">
+                            <i class="fas fa-dollar-sign"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stat-card info">
+                    <div class="stat-header">
+                        <div class="stat-info">
+                            <h3>Average Sale</h3>
+                            <div class="stat-value">ZMW {{ average_sale|floatformat:2|default:"0.00" }}</div>
+                            <div class="stat-description">Per filtered transaction</div>
+                        </div>
+                        <div class="stat-icon">
+                            <i class="fas fa-calculator"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stat-card purple">
+                    <div class="stat-header">
+                        <div class="stat-info">
+                            <h3>This Month</h3>
+                            <div class="stat-value">ZMW {{ monthly_revenue|floatformat:2|default:"0.00" }}</div>
+                            <div class="stat-description">{{ current_month|default:"Current Month" }} revenue</div>
+                        </div>
+                        <div class="stat-icon">
+                            <i class="fas fa-calendar-alt"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>      
+      <!-- Filter Section -->
+            <div class="filter-section">
+                <div class="filter-header">
+                    <h2 class="filter-title">
+                        <i class="fas fa-filter"></i>
+                        Advanced Filters
+                    </h2>
+                </div>
+                <div class="filter-body">
+                    <form method="get" class="filter-form">
+                        <div class="form-group">
+                            <label for="start_date" class="form-label">
+                                <i class="far fa-calendar-alt"></i>
+                                From Date
+                            </label>
+                            <input type="date" class="form-control" id="start_date" name="start_date" value="{{ start_date|default_if_none:'' }}">
+                        </div>
+                        <div class="form-group">
+                            <label for="end_date" class="form-label">
+                                <i class="far fa-calendar-alt"></i>
+                                To Date
+                            </label>
+                            <input type="date" class="form-control" id="end_date" name="end_date" value="{{ end_date|default_if_none:'' }}">
+                        </div>
+                        <div class="form-group">
+                            <label for="product" class="form-label">
+                                <i class="fas fa-box"></i>
+                                Product Filter
+                            </label>
+                            <select class="form-control" id="product" name="product">
+                                <option value="">All Products</option>
+                                {% for product in products %}
+                                <option value="{{ product.id }}" {% if product_id == product.id|stringformat:"s" %}selected{% endif %}>
+                                    {{ product.name }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <div class="filter-actions">
+                                <button type="submit" class="btn-apply">
+                                    <i class="fas fa-search"></i>
+                                    Apply Filters
+                                </button>
+                                <a href="{% url 'home:sales_report' %}" class="btn-reset">
+                                    <i class="fas fa-undo"></i>
+                                    Reset All
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Sales Table -->
+            <div class="table-section">
+                <div class="table-header">
+                    <h2 class="table-title">
+                        <i class="fas fa-table"></i>
+                        Sales Records
+                    </h2>
+                    <div class="table-info">
+                        {% if sales %}
+                            Showing {{ sales.start_index|default:0 }} to {{ sales.end_index|default:0 }} of {{ sales.paginator.count|default:0 }} entries
+                        {% else %}
+                            No records found
+                        {% endif %}
+                    </div>
+                </div>
+
+                {% if sales %}
+                    <div class="table-container">
+                        <table class="sales-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 5%;">#</th>
+                                    <th style="width: 25%;">Product</th>
+                                    <th style="width: 20%;">Buyer</th>
+                                    <th style="width: 15%;">Date</th>
+                                    <th style="width: 10%;" class="text-end">Qty</th>
+                                    <th style="width: 15%;" class="text-end">Total</th>
+                                    <th style="width: 15%;" class="text-center">Status</th>
+                                    <th style="width: 15%;" class="text-center">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for sale in sales %}
+                                <tr>
+                                    <td>{{ forloop.counter0|add:sales.start_index }}</td>
+                                    <td>
+                                        <div class="product-info">
+                                            {% if sale.product.image %}
+                                                <img src="{{ sale.product.image.url }}" alt="{{ sale.product.name }}" class="product-image">
+                                            {% else %}
+                                                <img src="{% static 'images/placeholder.png' %}" alt="No image" class="product-image">
+                                            {% endif %}
+                                            <div class="product-name">{{ sale.product.name|truncatechars:30 }}</div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="buyer-info">
+                                            <div class="buyer-avatar">
+                                                {{ sale.buyer.username|first|upper|default:"?" }}
+                                            </div>
+                                            <div class="buyer-name">{{ sale.buyer.username|default:"Unknown" }}</div>
+                                        </div>
+                                    </td>
+                                    <td class="date-cell">{{ sale.sale_date|date:"M d, Y"|default:"N/A" }}</td>
+                                    <td class="quantity-cell">{{ sale.quantity|default:0 }}</td>
+                                    <td class="total-cell">ZMW {{ sale.total_amount|floatformat:2|default:"0.00" }}</td>
+                                    <td class="text-center">
+                                        {% if sale.status == 'sold' %}
+                                            <span class="status-badge status-sold">
+                                                <i class="fas fa-check-circle"></i>
+                                                Sold
+                                            </span>
+                                        {% elif sale.status == 'pending' %}
+                                            <span class="status-badge status-pending">
+                                                <i class="fas fa-clock"></i>
+                                                Pending
+                                            </span>
+                                        {% else %}
+                                            <span class="status-badge status-delivered">
+                                                <i class="fas fa-truck"></i>
+                                                {{ sale.status|title|default:"Active" }}
+                                            </span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="action-buttons">
+                                            <a href="{% url 'home:generate_receipt' sale.id %}" class="btn-action btn-pdf" title="Generate Receipt">
+                                                <i class="fas fa-file-pdf"></i>
+                                            </a>
+                                            <a href="{% url 'home:sale_detail' sale.id %}" class="btn-action btn-view" title="View Details">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            <a href="{% url 'home:delete_product' sale.product.id %}" class="btn-action btn-delete" title="Delete Product" onclick="return confirmDelete('{{ sale.product.name }}');">
+                                                <i class="fas fa-trash-alt"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="empty-state">
+                        <div class="empty-icon">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <h2 class="empty-title">No Sales Data</h2>
+                        <p class="empty-description">
+                            No sales records match your current filters. Try adjusting your search criteria or check back later.
+                        </p>
+                    </div>
+                {% endif %}
+            </div>       
+     <!-- Pagination -->
+            {% if sales.has_other_pages %}
+            <div class="pagination-section">
+                <div class="pagination-info">
+                    Page {{ sales.number }} of {{ sales.paginator.num_pages }}
+                </div>
+                <div class="pagination">
+                    {% if sales.has_previous %}
+                        <a href="?page=1{% if start_date %}&start_date={{ start_date }}{% endif %}{% if end_date %}&end_date={{ end_date }}{% endif %}{% if product_id %}&product={{ product_id }}{% endif %}" class="page-link">
+                            <i class="fas fa-angle-double-left"></i>
+                            First
+                        </a>
+                        <a href="?page={{ sales.previous_page_number }}{% if start_date %}&start_date={{ start_date }}{% endif %}{% if end_date %}&end_date={{ end_date }}{% endif %}{% if product_id %}&product={{ product_id }}{% endif %}" class="page-link">
+                            <i class="fas fa-angle-left"></i>
+                            Previous
+                        </a>
+                    {% endif %}
+                    
+                    {% for num in sales.paginator.page_range %}
+                        <a href="?page={{ num }}{% if start_date %}&start_date={{ start_date }}{% endif %}{% if end_date %}&end_date={{ end_date }}{% endif %}{% if product_id %}&product={{ product_id }}{% endif %}" class="page-link {% if sales.number == num %}active{% endif %}">
+                            {{ num }}
+                        </a>
+                    {% endfor %}
+                    
+                    {% if sales.has_next %}
+                        <a href="?page={{ sales.next_page_number }}{% if start_date %}&start_date={{ start_date }}{% endif %}{% if end_date %}&end_date={{ end_date }}{% endif %}{% if product_id %}&product={{ product_id }}{% endif %}" class="page-link">
+                            Next
+                            <i class="fas fa-angle-right"></i>
+                        </a>
+                        <a href="?page={{ sales.paginator.num_pages }}{% if start_date %}&start_date={{ start_date }}{% endif %}{% if end_date %}&end_date={{ end_date }}{% endif %}{% if product_id %}&product={{ product_id }}{% endif %}" class="page-link">
+                            Last
+                            <i class="fas fa-angle-double-right"></i>
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
             {% endif %}
         </div>
-    </div>
-    {% endif %}
+    </main>
 
     <!-- Export Modal -->
-    <div class="modal fade" id="exportModal" tabindex="-1" aria-labelledby="exportModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="exportModalLabel">Export Sales Report</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <p>Select the format to export the sales report:</p>
-                    <div class="d-flex flex-column gap-3">
-                        <button class="btn btn-primary" onclick="exportToPDF()">
-                            <i class="fas fa-file-pdf me-2"></i>Export as PDF
-                        </button>
-                        <!-- Placeholder for other export formats if needed -->
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+    <div class="modal-overlay" id="exportModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Export Sales Report</h3>
+                <button class="modal-close" onclick="closeExportModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Select the format to export your sales report:</p>
+                <div class="export-options">
+                    <button class="btn-export-option" onclick="exportToPDF()">
+                        <i class="fas fa-file-pdf"></i>
+                        <div>
+                            <strong>Export as PDF</strong>
+                            <div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 4px;">
+                                Professional formatted report with charts and tables
+                            </div>
+                        </div>
+                    </button>
                 </div>
             </div>
         </div>
     </div>
-</div>
 
-{% block extra_js %}
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script>
-// Export to PDF function
-function exportToPDF() {
-    const startDate = document.getElementById('start_date').value;
-    const endDate = document.getElementById('end_date').value;
-    const product = document.getElementById('product').value;
-    let queryParams = 'format=pdf';
-    if (startDate) queryParams += `&start_date=${startDate}`;
-    if (endDate) queryParams += `&end_date=${endDate}`;
-    if (product) queryParams += `&product=${product}`;
-    window.location.href = `{% url 'home:export_sales' %}?${queryParams}`;
-}
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Navbar scroll effect
+            const navbar = document.getElementById('navbar');
+            window.addEventListener('scroll', function() {
+                if (window.scrollY > 50) {
+                    navbar.classList.add('scrolled');
+                } else {
+                    navbar.classList.remove('scrolled');
+                }
+            });
 
-// Validate date inputs
-document.getElementById('start_date').addEventListener('change', function() {
-    const startDate = this.value;
-    const endDateInput = document.getElementById('end_date');
-    if (startDate && endDateInput.value && new Date(startDate) > new Date(endDateInput.value)) {
-        Swal.fire({
-            icon: 'warning',
-            title: 'Invalid Date Range',
-            text: 'Start date cannot be later than end date.',
+            // Mobile navbar toggle
+            const navbarToggle = document.getElementById('navbarToggle');
+            const navbarNav = document.getElementById('navbarNav');
+            
+            if (navbarToggle && navbarNav) {
+                navbarToggle.addEventListener('click', function() {
+                    navbarNav.classList.toggle('active');
+                    const icon = this.querySelector('i');
+                    if (navbarNav.classList.contains('active')) {
+                        icon.classList.remove('fa-bars');
+                        icon.classList.add('fa-times');
+                    } else {
+                        icon.classList.remove('fa-times');
+                        icon.classList.add('fa-bars');
+                    }
+                });
+
+                // Close mobile menu when clicking outside
+                document.addEventListener('click', function(event) {
+                    if (!navbar.contains(event.target)) {
+                        navbarNav.classList.remove('active');
+                        const icon = navbarToggle.querySelector('i');
+                        icon.classList.remove('fa-times');
+                        icon.classList.add('fa-bars');
+                    }
+                });
+            }
+
+            // Animate particles
+            const particles = document.querySelectorAll('.particle');
+            particles.forEach((particle, index) => {
+                particle.style.top = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 6 + 's';
+            });
+        });        
+// Export Modal Functions
+        function openExportModal() {
+            document.getElementById('exportModal').classList.add('active');
+        }
+
+        function closeExportModal() {
+            document.getElementById('exportModal').classList.remove('active');
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('exportModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeExportModal();
+            }
         });
-        this.value = '';
-    }
-});
 
-document.getElementById('end_date').addEventListener('change', function() {
-    const endDate = this.value;
-    const startDateInput = document.getElementById('start_date');
-    if (endDate && startDateInput.value && new Date(endDate) < new Date(startDateInput.value)) {
-        Swal.fire({
-            icon: 'warning',
-            title: 'Invalid Date Range',
-            text: 'End date cannot be earlier than start date.',
+        // Export to PDF function
+        function exportToPDF() {
+            const startDate = document.getElementById('start_date').value;
+            const endDate = document.getElementById('end_date').value;
+            const product = document.getElementById('product').value;
+            
+            let queryParams = 'format=pdf';
+            if (startDate) queryParams += `&start_date=${startDate}`;
+            if (endDate) queryParams += `&end_date=${endDate}`;
+            if (product) queryParams += `&product=${product}`;
+            
+            // Show loading state
+            const exportBtn = document.querySelector('.btn-export-option');
+            const originalContent = exportBtn.innerHTML;
+            exportBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i><div><strong>Generating PDF...</strong><div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 4px;">Please wait while we prepare your report</div></div>';
+            exportBtn.style.pointerEvents = 'none';
+            
+            // Simulate export process
+            setTimeout(() => {
+                window.location.href = `{% url 'home:export_sales' %}?${queryParams}`;
+                
+                // Reset button after a delay
+                setTimeout(() => {
+                    exportBtn.innerHTML = originalContent;
+                    exportBtn.style.pointerEvents = 'auto';
+                    closeExportModal();
+                }, 2000);
+            }, 1000);
+        }
+
+        // Date validation
+        document.getElementById('start_date').addEventListener('change', function() {
+            const startDate = this.value;
+            const endDateInput = document.getElementById('end_date');
+            
+            if (startDate && endDateInput.value && new Date(startDate) > new Date(endDateInput.value)) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Invalid Date Range',
+                    text: 'Start date cannot be later than end date.',
+                    background: '#1a1a1a',
+                    color: '#ffffff',
+                    confirmButtonColor: '#d4af37',
+                    customClass: {
+                        popup: 'swal-dark-theme'
+                    }
+                });
+                this.value = '';
+            }
         });
-        this.value = '';
-    }
-});
-</script>
-{% endblock %}
-{% endblock %}
+
+        document.getElementById('end_date').addEventListener('change', function() {
+            const endDate = this.value;
+            const startDateInput = document.getElementById('start_date');
+            
+            if (endDate && startDateInput.value && new Date(endDate) < new Date(startDateInput.value)) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Invalid Date Range',
+                    text: 'End date cannot be earlier than start date.',
+                    background: '#1a1a1a',
+                    color: '#ffffff',
+                    confirmButtonColor: '#d4af37',
+                    customClass: {
+                        popup: 'swal-dark-theme'
+                    }
+                });
+                this.value = '';
+            }
+        });
+
+        // Confirm delete function
+        function confirmDelete(productName) {
+            return new Promise((resolve) => {
+                Swal.fire({
+                    title: 'Delete Product?',
+                    text: `Are you sure you want to delete "${productName}"? This action cannot be undone.`,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#dc3545',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: 'Yes, Delete',
+                    cancelButtonText: 'Cancel',
+                    background: '#1a1a1a',
+                    color: '#ffffff',
+                    customClass: {
+                        popup: 'swal-dark-theme'
+                    }
+                }).then((result) => {
+                    resolve(result.isConfirmed);
+                });
+            });
+        }
+
+        // Add loading states to action buttons
+        document.querySelectorAll('.btn-action').forEach(button => {
+            if (button.href && !button.onclick) {
+                button.addEventListener('click', function(e) {
+                    if (this.classList.contains('btn-pdf')) {
+                        this.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                    } else if (this.classList.contains('btn-view')) {
+                        this.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                    }
+                });
+            }
+        });
+
+        // Animate statistics cards on load
+        const statCards = document.querySelectorAll('.stat-card');
+        statCards.forEach((card, index) => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(20px)';
+            card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+            
+            setTimeout(() => {
+                card.style.opacity = '1';
+                card.style.transform = 'translateY(0)';
+            }, index * 150);
+        });
+    </script>
+</body>
+</html>

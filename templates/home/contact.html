@@ -1,0 +1,1157 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Us - Montclair Wardrobe</title>
+    <meta name="description" content="Get in touch with Montclair Wardrobe. Visit our boutique in Lusaka or send us a message for styling advice and inquiries.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            --primary-dark: #0a0a0a;
+            --secondary-dark: #1a1a1a;
+            --accent-dark: #2a2a2a;
+            --gold-accent: #d4af37;
+            --gold-light: #f4e4a6;
+            --text-primary: #ffffff;
+            --text-secondary: #b0b0b0;
+            --text-muted: #808080;
+            --glass-bg: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --shadow-dark: rgba(0, 0, 0, 0.5);
+            --success-color: #28a745;
+            --error-color: #dc3545;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--primary-dark);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Animated Background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(212, 175, 55, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(212, 175, 55, 0.08) 0%, transparent 50%),
+                linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 50%, #0f0f0f 100%);
+            z-index: -2;
+        } 
+       /* Floating particles */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        .particle {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: var(--gold-accent);
+            border-radius: 50%;
+            opacity: 0.3;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); opacity: 0.3; }
+            50% { transform: translateY(-20px) rotate(180deg); opacity: 0.8; }
+        }
+
+        /* Navbar Styles */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--glass-border);
+            padding: 16px 0;
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+
+        .navbar.scrolled {
+            background: rgba(10, 10, 10, 0.95);
+            backdrop-filter: blur(30px);
+        }
+
+        .navbar-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .navbar-brand {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--gold-accent);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }    
+    .navbar-brand:hover {
+            color: var(--gold-light);
+        }
+
+        .navbar-nav {
+            display: flex;
+            list-style: none;
+            gap: 32px;
+            align-items: center;
+        }
+
+        .nav-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .nav-link.active,
+        .nav-link:hover {
+            color: var(--text-primary);
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--gold-accent);
+            transition: width 0.3s ease;
+        }
+
+        .nav-link.active::after,
+        .nav-link:hover::after {
+            width: 100%;
+        }
+
+        .navbar-toggle {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--text-primary);
+            font-size: 1.2rem;
+            cursor: pointer;
+        }
+
+        .contact-hero {
+            position: relative;
+            height: 60vh;
+            background: linear-gradient(
+                135deg,
+                rgba(212, 175, 55, 0.2) 0%,
+                rgba(0, 0, 0, 0.8) 50%,
+                rgba(0, 0, 0, 0.9) 100%
+            ),
+            url('https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80') center/cover;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: var(--text-primary);
+            margin-top: 80px;
+        }       
+ .hero-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.4);
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            max-width: 600px;
+            padding: 0 20px;
+        }
+
+        .contact-hero h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 24px;
+            color: var(--gold-accent);
+            text-shadow: 0 2px 10px rgba(212, 175, 55, 0.3);
+            letter-spacing: -0.02em;
+        }
+
+        .contact-hero p {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .contact-section {
+            padding: 100px 0;
+            position: relative;
+        }
+
+        .row {
+            display: flex;
+            flex-wrap: wrap;
+            margin: -15px;
+        }
+
+        .col-lg-5 {
+            flex: 0 0 41.666667%;
+            max-width: 41.666667%;
+            padding: 15px;
+        }
+
+        .col-lg-7 {
+            flex: 0 0 58.333333%;
+            max-width: 58.333333%;
+            padding: 15px;
+        }       
+ .contact-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 40px;
+            margin-bottom: 30px;
+            transition: all 0.3s ease;
+        }
+
+        .contact-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px var(--shadow-dark);
+            border-color: var(--gold-accent);
+        }
+
+        .contact-info {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 40px;
+            height: 100%;
+            transition: all 0.3s ease;
+        }
+
+        .contact-info:hover {
+            border-color: var(--gold-accent);
+        }
+
+        .contact-info h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2rem;
+            font-weight: 600;
+            margin-bottom: 30px;
+            color: var(--gold-accent);
+            text-align: center;
+        }
+
+        .contact-info ul {
+            padding: 0;
+            margin: 0;
+            list-style: none;
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 24px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.3s ease;
+        }
+
+        .contact-item:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: var(--gold-accent);
+            transform: translateX(5px);
+        }      
+  .contact-icon {
+            background: linear-gradient(135deg, var(--gold-accent), #b8941f);
+            color: var(--primary-dark);
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 20px;
+            font-size: 1.1rem;
+            flex-shrink: 0;
+            box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3);
+        }
+
+        .contact-item div {
+            flex: 1;
+        }
+
+        .contact-item strong {
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 1rem;
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .contact-item a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .contact-item a:hover {
+            color: var(--gold-accent);
+        }
+
+        .contact-item dl {
+            margin: 0;
+            line-height: 1.6;
+        }
+
+        .contact-item dt {
+            font-weight: 500;
+            color: var(--text-secondary);
+            display: inline;
+        }
+
+        .contact-item dd {
+            color: var(--text-secondary);
+            display: inline;
+            margin-left: 8px;
+            margin-bottom: 4px;
+        }
+
+        .form-section h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2rem;
+            font-weight: 600;
+            color: var(--gold-accent);
+            margin-bottom: 20px;
+            text-align: center;
+        }     
+   .form-description {
+            color: var(--text-secondary);
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 1rem;
+        }
+
+        .col-md-6 {
+            flex: 0 0 50%;
+            max-width: 50%;
+            padding: 15px;
+        }
+
+        .col-12 {
+            flex: 0 0 100%;
+            max-width: 100%;
+            padding: 15px;
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+            font-size: 0.95rem;
+            display: block;
+        }
+
+        .form-label i {
+            color: var(--gold-accent);
+            margin-right: 8px;
+        }
+
+        .form-control {
+            border: 2px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 16px 20px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: var(--secondary-dark);
+            backdrop-filter: blur(10px);
+            width: 100%;
+            color: var(--text-primary);
+        }
+
+        .form-control:focus {
+            border-color: var(--gold-accent);
+            box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1);
+            background: rgba(255, 255, 255, 0.08);
+            outline: none;
+        }
+
+        .form-control::placeholder {
+            color: var(--text-muted);
+        }
+
+        .form-control.textarea {
+            min-height: 120px;
+            resize: vertical;
+            font-family: inherit;
+        }
+        
+        .form-control option {
+            background: #1a1a1a;
+            color: #ffffff;
+            padding: 10px;
+        }
+        
+        .form-control option:hover {
+            background: var(--accent-dark);
+        }
+        
+        .form-control option:checked {
+            background: var(--gold-accent);
+            color: var(--primary-dark);
+        }        
+.btn-send {
+            background: linear-gradient(135deg, var(--gold-accent), #b8941f);
+            border: none;
+            border-radius: 25px;
+            padding: 16px 40px;
+            font-weight: 600;
+            font-size: 1rem;
+            color: var(--primary-dark);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 20px;
+        }
+
+        .btn-send:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(212, 175, 55, 0.4);
+        }
+
+        .btn-send:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .success-message {
+            background: linear-gradient(135deg, var(--success-color), #20c997);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            text-align: center;
+            font-weight: 500;
+            box-shadow: 0 8px 25px rgba(40, 167, 69, 0.3);
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .success-message i {
+            font-size: 1.2rem;
+        }
+
+        .alert-danger {
+            background: linear-gradient(135deg, var(--error-color), #c82333);
+            color: white;
+            padding: 16px 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 8px 25px rgba(220, 53, 69, 0.3);
+        }
+
+        .text-danger {
+            color: #ff6b6b !important;
+            font-size: 0.9rem;
+            margin-top: 8px;
+        }     
+   .boutique-hours {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 30px;
+            margin-top: 30px;
+        }
+
+        .boutique-hours h4 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.4rem;
+            color: var(--gold-accent);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .hours-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--glass-border);
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+        }
+
+        .hours-item:last-child {
+            border-bottom: none;
+        }
+
+        .hours-item strong {
+            color: var(--text-primary);
+        }
+
+        .social-links {
+            margin-top: 30px;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .social-link {
+            display: flex;
+            width: 50px;
+            height: 50px;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 50%;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-secondary);
+            transition: all 0.3s ease;
+            text-decoration: none;
+            font-size: 1.1rem;
+        }
+
+        .social-link:hover {
+            background: var(--gold-accent);
+            color: var(--primary-dark);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(212, 175, 55, 0.3);
+        }       
+ /* Footer Styles */
+        .footer {
+            background: var(--secondary-dark);
+            border-top: 1px solid var(--accent-dark);
+            padding: 60px 0 30px;
+            margin-top: 100px;
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+
+        .footer-section h3 {
+            font-family: 'Playfair Display', serif;
+            color: var(--gold-accent);
+            font-size: 1.3rem;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .footer-section p,
+        .footer-section a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            line-height: 1.6;
+            transition: color 0.3s ease;
+        }
+
+        .footer-section a:hover {
+            color: var(--gold-accent);
+        }
+
+        .footer-links {
+            list-style: none;
+        }
+
+        .footer-links li {
+            margin-bottom: 10px;
+        }
+
+        .footer-bottom {
+            border-top: 1px solid var(--accent-dark);
+            padding-top: 30px;
+            text-align: center;
+            color: var(--text-muted);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .navbar-nav {
+                display: none;
+                position: absolute;
+                top: 100%;
+                left: 0;
+                right: 0;
+                background: var(--secondary-dark);
+                border-top: 1px solid var(--accent-dark);
+                flex-direction: column;
+                padding: 20px;
+                gap: 16px;
+            }         
+   .navbar-nav.active {
+                display: flex;
+            }
+
+            .navbar-toggle {
+                display: block;
+            }
+
+            .contact-hero {
+                height: 50vh;
+                margin-top: 70px;
+            }
+
+            .contact-hero h1 {
+                font-size: 2.2rem;
+            }
+
+            .contact-hero p {
+                font-size: 1rem;
+            }
+
+            .contact-section {
+                padding: 60px 0;
+            }
+
+            .col-lg-5, .col-lg-7, .col-md-6 {
+                flex: 0 0 100%;
+                max-width: 100%;
+            }
+
+            .contact-card,
+            .contact-info {
+                padding: 30px 20px;
+                margin-bottom: 20px;
+            }
+
+            .contact-info h3,
+            .form-section h3 {
+                font-size: 1.6rem;
+            }
+
+            .contact-item {
+                padding: 16px;
+                margin-bottom: 16px;
+            }
+
+            .contact-icon {
+                width: 45px;
+                height: 45px;
+                font-size: 1rem;
+                margin-right: 16px;
+            }
+
+            .form-control {
+                padding: 14px 16px;
+                font-size: 0.95rem;
+            }
+
+            .btn-send {
+                padding: 14px 30px;
+                font-size: 0.95rem;
+            }
+
+            .boutique-hours {
+                padding: 25px 20px;
+            }
+
+            .boutique-hours h4 {
+                font-size: 1.2rem;
+            }
+
+            .hours-item {
+                font-size: 0.9rem;
+            }   
+         .social-link {
+                width: 45px;
+                height: 45px;
+                font-size: 1rem;
+            }
+
+            .footer-content {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .contact-hero h1 {
+                font-size: 1.8rem;
+            }
+
+            .navbar-container {
+                padding: 0 15px;
+            }
+
+            .container {
+                padding: 0 15px;
+            }
+
+            .contact-card,
+            .contact-info {
+                padding: 25px 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar" id="navbar">
+        <div class="navbar-container">
+            <a href="{% url 'home:main_page' %}" class="navbar-brand">
+                <i class="fas fa-gem"></i>
+                Montclair Wardrobe
+            </a>
+            <ul class="navbar-nav" id="navbarNav">
+                <li><a href="{% url 'home:main_page' %}" class="nav-link">Home</a></li>
+                <li><a href="{% url 'home:about' %}" class="nav-link">Boutique</a></li>
+                <li><a href="{% url 'home:about' %}" class="nav-link">About</a></li>
+                <li><a href="{% url 'home:contact' %}" class="nav-link active">Contact</a></li>
+                <li><a href="{% url 'home:products' %}" class="nav-link">Shop</a></li>
+                {% if user.is_authenticated %}
+                    <li><a href="{% url 'cart:view_cart' %}" class="nav-link">
+                        <i class="fas fa-shopping-cart"></i>
+                        Cart
+                    </a></li>
+                    <li><a href="{% url 'logout' %}" class="nav-link">Logout</a></li>
+                {% else %}
+                    <li><a href="{% url 'login' %}" class="nav-link">Sign In</a></li>
+                    <li><a href="{% url 'register' %}" class="nav-link">Register</a></li>
+                {% endif %}
+            </ul>
+            <button class="navbar-toggle" id="navbarToggle">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+    </nav>  
+  <!-- Floating Particles -->
+    <div class="particles">
+        <div class="particle" style="left: 10%; animation-delay: 0s;"></div>
+        <div class="particle" style="left: 20%; animation-delay: 1s;"></div>
+        <div class="particle" style="left: 30%; animation-delay: 2s;"></div>
+        <div class="particle" style="left: 40%; animation-delay: 3s;"></div>
+        <div class="particle" style="left: 50%; animation-delay: 4s;"></div>
+        <div class="particle" style="left: 60%; animation-delay: 5s;"></div>
+        <div class="particle" style="left: 70%; animation-delay: 0.5s;"></div>
+        <div class="particle" style="left: 80%; animation-delay: 1.5s;"></div>
+        <div class="particle" style="left: 90%; animation-delay: 2.5s;"></div>
+    </div>
+
+    <!-- Hero Section -->
+    <section class="contact-hero">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+            <h1>Get in Touch</h1>
+            <p>Have a question or need styling advice? Send us a message, and we'll respond promptly.</p>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section class="contact-section">
+        <div class="container">
+            <div class="row">
+                <!-- Contact Information -->
+                <div class="col-lg-5">
+                    <div class="contact-info">
+                        <h3>Visit Our Boutique</h3>
+                        <ul>
+                            <li class="contact-item">
+                                <div class="contact-icon">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                </div>
+                                <div>
+                                    <strong>Address</strong><br>
+                                    Lilayi Area 56<br>
+                                    Lusaka, Zambia
+                                </div>
+                            </li>
+                            <li class="contact-item">
+                                <div class="contact-icon">
+                                    <i class="fas fa-phone"></i>
+                                </div>
+                                <div>
+                                    <strong>Phone</strong><br>
+                                    <a href="tel:+260771172699">+260 77-117-2699</a>
+                                </div>
+                            </li>
+                            <li class="contact-item">
+                                <div class="contact-icon">
+                                    <i class="fas fa-envelope"></i>
+                                </div>
+                                <div>
+                                    <strong>Email</strong><br>
+                                    <a href="mailto:contact@montclairwardrobe.com">contact@montclairwardrobe.com</a>
+                                </div>
+                            </li>   
+                         <li class="contact-item">
+                                <div class="contact-icon">
+                                    <i class="fas fa-clock"></i>
+                                </div>
+                                <div>
+                                    <strong>Business Hours</strong><br>
+                                    <dl>
+                                        <dt>Mon - Sat:</dt>
+                                        <dd>9:00 AM - 8:00 PM</dd><br>
+                                        <dt>Sunday:</dt>
+                                        <dd>11:00 AM - 6:00 PM</dd>
+                                    </dl>
+                                </div>
+                            </li>
+                        </ul>
+                        <div class="social-links">
+                            <a href="https://facebook.com/montclairwardrobe" class="social-link">
+                                <i class="fab fa-facebook-f"></i>
+                            </a>
+                            <a href="https://instagram.com/montclairwardrobe" class="social-link">
+                                <i class="fab fa-instagram"></i>
+                            </a>
+                            <a href="https://twitter.com/montclairwardrobe" class="social-link">
+                                <i class="fab fa-twitter"></i>
+                            </a>
+                            <a href="https://pinterest.com/montclairwardrobe" class="social-link">
+                                <i class="fab fa-pinterest"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Contact Form -->
+                <div class="col-lg-7">
+                    <div class="contact-card">
+                        <div class="form-section">
+                            <h3>Send us a Message</h3>
+                            <p class="form-description">Questions about our collections or need styling advice? We're here to help!</p>
+
+                            {% if success %}
+                                <div class="success-message">
+                                    <i class="fas fa-check-circle"></i>
+                                    Thank you for your message! We'll get back to you within 24 hours.
+                                </div>
+                            {% endif %}
+
+                            <form method="post" id="contactForm">
+                                {% csrf_token %}
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label class="form-label" for="id_name">
+                                                <i class="fas fa-user"></i>Full Name
+                                            </label>
+                                            <input type="text" name="name" class="form-control" id="id_name" 
+                                                   placeholder="Enter your full name" required 
+                                                   value="{{ form.name.value|default:'' }}">
+                                            {% if form.name.errors %}
+                                                <div class="text-danger">{{ form.name.errors.0 }}</div>
+                                            {% endif %}
+                                        </div>
+                                    </div>         
+                           <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label class="form-label" for="id_email">
+                                                <i class="fas fa-envelope"></i>Email Address
+                                            </label>
+                                            <input type="email" name="email" class="form-control" id="id_email" 
+                                                   placeholder="your.email@example.com" required
+                                                   value="{{ form.email.value|default:'' }}">
+                                            {% if form.email.errors %}
+                                                <div class="text-danger">{{ form.email.errors.0 }}</div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    <div class="col-12">
+                                        <div class="form-group">
+                                            <label class="form-label" for="id_subject">
+                                                <i class="fas fa-tag"></i>Subject
+                                            </label>
+                                            <select name="subject" class="form-control" id="id_subject" required>
+                                                <option value="" {% if not form.subject.value %}selected{% endif %}>Select a topic...</option>
+                                                <option value="General Inquiry" {% if form.subject.value == "General Inquiry" %}selected{% endif %}>General Inquiry</option>
+                                                <option value="Product Question" {% if form.subject.value == "Product Question" %}selected{% endif %}>Product Question</option>
+                                                <option value="Styling Consultation" {% if form.subject.value == "Styling Consultation" %}selected{% endif %}>Styling Consultation</option>
+                                                <option value="Order Support" {% if form.subject.value == "Order Support" %}selected{% endif %}>Order Support</option>
+                                                <option value="Returns & Exchanges" {% if form.subject.value == "Returns & Exchanges" %}selected{% endif %}>Returns & Exchanges</option>
+                                                <option value="Partnership Inquiry" {% if form.subject.value == "Partnership Inquiry" %}selected{% endif %}>Partnership Inquiry</option>
+                                                <option value="Other" {% if form.subject.value == "Other" %}selected{% endif %}>Other</option>
+                                            </select>
+                                            {% if form.subject.errors %}
+                                                <div class="text-danger">{{ form.subject.errors.0 }}</div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    <div class="col-12">
+                                        <div class="form-group">
+                                            <label class="form-label" for="id_message">
+                                                <i class="fas fa-comment"></i>Message
+                                            </label>
+                                            <textarea name="message" class="form-control textarea" id="id_message" 
+                                                      placeholder="Tell us how we can help you..." required>{{ form.message.value|default:'' }}</textarea>
+                                            {% if form.message.errors %}
+                                                <div class="text-danger">{{ form.message.errors.0 }}</div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                                <button type="submit" class="btn-send">
+                                    <i class="fas fa-paper-plane"></i>Send Message
+                                </button>
+                            </form>
+                        </div>
+                    </div>   
+                 <!-- Additional Information -->
+                    <div class="boutique-hours">
+                        <h4><i class="fas fa-info-circle"></i>Quick Information</h4>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="hours-item">
+                                    <span><strong>Response Time:</strong></span>
+                                    <span>Within 24 hours</span>
+                                </div>
+                                <div class="hours-item">
+                                    <span><strong>Personal Styling:</strong></span>
+                                    <span>By appointment</span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="hours-item">
+                                    <span><strong>Free Consultation:</strong></span>
+                                    <span>Available</span>
+                                </div>
+                                <div class="hours-item">
+                                    <span><strong>Virtual Styling:</strong></span>
+                                    <span>Available</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>Montclair Wardrobe</h3>
+                    <p>Curating exceptional fashion experiences with premium collections and personalized styling services.</p>
+                    <div class="social-links">
+                        <a href="#" class="social-link">
+                            <i class="fab fa-facebook-f"></i>
+                        </a>
+                        <a href="#" class="social-link">
+                            <i class="fab fa-instagram"></i>
+                        </a>
+                        <a href="#" class="social-link">
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                        <a href="#" class="social-link">
+                            <i class="fab fa-pinterest"></i>
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>Quick Links</h3>
+                    <ul class="footer-links">
+                        <li><a href="{% url 'home:main_page' %}">Home</a></li>
+                        <li><a href="{% url 'home:products' %}">Collections</a></li>
+                        <li><a href="{% url 'home:about' %}">About Us</a></li>
+                        <li><a href="{% url 'home:contact' %}">Contact</a></li>
+                    </ul>
+                </div>     
+           <div class="footer-section">
+                    <h3>Customer Care</h3>
+                    <ul class="footer-links">
+                        <li><a href="#">Size Guide</a></li>
+                        <li><a href="#">Delivery Info</a></li>
+                        <li><a href="#">Returns</a></li>
+                        <li><a href="#">FAQ</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>Contact Info</h3>
+                    <p><i class="fas fa-map-marker-alt" style="margin-right: 8px; color: var(--gold-accent);"></i>Lilayi Area 56, Lusaka, Zambia</p>
+                    <p><i class="fas fa-phone" style="margin-right: 8px; color: var(--gold-accent);"></i>+260 77-117-2699</p>
+                    <p><i class="fas fa-envelope" style="margin-right: 8px; color: var(--gold-accent);"></i>contact@montclairwardrobe.com</p>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2025 Montclair Wardrobe. All rights reserved. | Privacy Policy | Terms of Service</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Navbar scroll effect
+            const navbar = document.getElementById('navbar');
+            window.addEventListener('scroll', function() {
+                if (window.scrollY > 50) {
+                    navbar.classList.add('scrolled');
+                } else {
+                    navbar.classList.remove('scrolled');
+                }
+            });
+
+            // Mobile navbar toggle
+            const navbarToggle = document.getElementById('navbarToggle');
+            const navbarNav = document.getElementById('navbarNav');
+            
+            navbarToggle.addEventListener('click', function() {
+                navbarNav.classList.toggle('active');
+                const icon = this.querySelector('i');
+                if (navbarNav.classList.contains('active')) {
+                    icon.classList.remove('fa-bars');
+                    icon.classList.add('fa-times');
+                } else {
+                    icon.classList.remove('fa-times');
+                    icon.classList.add('fa-bars');
+                }
+            });
+
+            // Close mobile menu when clicking outside
+            document.addEventListener('click', function(event) {
+                if (!navbar.contains(event.target)) {
+                    navbarNav.classList.remove('active');
+                    const icon = navbarToggle.querySelector('i');
+                    icon.classList.remove('fa-times');
+                    icon.classList.add('fa-bars');
+                }
+            });  
+          // Animate particles
+            const particles = document.querySelectorAll('.particle');
+            particles.forEach((particle, index) => {
+                particle.style.top = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 6 + 's';
+            });
+
+            // Form validation and submission
+            const form = document.getElementById('contactForm');
+            const submitBtn = form.querySelector('.btn-send');
+            
+            form.addEventListener('submit', function(e) {
+                const name = form.querySelector('#id_name').value.trim();
+                const email = form.querySelector('#id_email').value.trim();
+                const subject = form.querySelector('#id_subject').value;
+                const message = form.querySelector('#id_message').value.trim();
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+                let hasError = false;
+                let errorMessage = '';
+
+                if (!name) {
+                    errorMessage = 'Please enter your full name.';
+                    hasError = true;
+                } else if (!email || !emailRegex.test(email)) {
+                    errorMessage = 'Please enter a valid email address.';
+                    hasError = true;
+                } else if (!subject) {
+                    errorMessage = 'Please select a subject.';
+                    hasError = true;
+                } else if (!message) {
+                    errorMessage = 'Please enter your message.';
+                    hasError = true;
+                }
+
+                if (hasError) {
+                    e.preventDefault();
+                    const alert = document.createElement('div');
+                    alert.className = 'alert-danger';
+                    alert.innerHTML = `<i class="fas fa-exclamation-triangle"></i>${errorMessage}`;
+                    form.prepend(alert);
+                    submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i>Send Message';
+                    submitBtn.disabled = false;
+                    setTimeout(() => alert.remove(), 5000);
+                    return;
+                }
+
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>Sending...';
+                submitBtn.disabled = true;
+            });
+
+            // Form animations
+            const formGroups = document.querySelectorAll('.form-group');
+            formGroups.forEach((group, index) => {
+                group.style.opacity = '0';
+                group.style.transform = 'translateY(10px)';
+                group.style.transition = 'all 0.4s ease';
+                setTimeout(() => {
+                    group.style.opacity = '1';
+                    group.style.transform = 'translateY(0)';
+                }, index * 100);
+            });
+
+            // Contact info animation
+            const contactItems = document.querySelectorAll('.contact-item');
+            contactItems.forEach((item, index) => {
+                item.style.opacity = '0';
+                item.style.transform = 'translateX(-10px)';
+                item.style.transition = 'all 0.4s ease';
+                setTimeout(() => {
+                    item.style.opacity = '1';
+                    item.style.transform = 'translateX(0)';
+                }, (index + 3) * 100);
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,9 +1,16 @@
+"""
+Accounts Admin Configuration
+
+Note: The Profile model has been moved to home.models.Profile to avoid duplication.
+If you need to manage profiles in the admin, they are registered in home/admin.py
+
+All models are now managed in their respective apps:
+- Profile: home/admin.py
+- Product: home/admin.py
+- Cart: cart/admin.py (if needed)
+"""
+
 from django.contrib import admin
-from .models import Product
 
-class ProductAdmin(admin.ModelAdmin):
-    list_display = ('name', 'price', 'seller', 'category', 'status', 'created_at', 'updated_at')
-    search_fields = ('name', 'category', 'seller__username')
-    list_filter = ('status', 'category')
-
-admin.site.register(Product, ProductAdmin)
+# No models to register here
+# Profile is registered in home/admin.py

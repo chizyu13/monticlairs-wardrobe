@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth import get_user_model
 from django.contrib.auth.admin import UserAdmin as DefaultUserAdmin
-from .models import Product, Category, Checkout, Profile, Order, Sale
+from .models import Product, Category, Checkout, Profile, Order, Sale, StockHistory, StockReservation, Store
 
 # Unregister the default UserAdmin
 User = get_user_model()
@@ -45,7 +45,7 @@ class ProductAdmin(admin.ModelAdmin):
 # Register Category model
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
-    list_display = ['name', 'created_by', 'created_at', 'updated_at', 'product_count']
+    list_display = ['name', 'icon', 'created_by', 'created_at', 'updated_at', 'product_count']
     search_fields = ['name', 'description', 'created_by__username']
     list_filter = ['created_at', 'updated_at', 'created_by']
     ordering = ['name']
@@ -53,6 +53,7 @@ class CategoryAdmin(admin.ModelAdmin):
     date_hierarchy = 'created_at'
     list_per_page = 20
     autocomplete_fields = ['created_by']
+    fields = ['name', 'description', 'image', 'icon', 'created_by', 'created_at', 'updated_at']
 
     def product_count(self, obj):
         return obj.products.count()
@@ -147,3 +148,110 @@ class CustomUserAdmin(DefaultUserAdmin):
 
 # Register the custom User admin
 admin.site.register(User, CustomUserAdmin)
+
+# Register StockHistory model
+@admin.register(StockHistory)
+class StockHistoryAdmin(admin.ModelAdmin):
+    list_display = ['id', 'product', 'change_type', 'quantity_change', 'stock_before', 
+                    'stock_after', 'changed_by', 'created_at']
+    search_fields = ['product__name', 'reason', 'changed_by__username']
+    list_filter = ['change_type', 'created_at', 'changed_by']
+    ordering = ['-created_at']
+    readonly_fields = ['product', 'change_type', 'quantity_change', 'stock_before', 
+                      'stock_after', 'reason', 'changed_by', 'order', 'reservation', 'created_at']
+    date_hierarchy = 'created_at'
+    list_per_page = 50
+    autocomplete_fields = ['product', 'changed_by', 'order', 'reservation']
+    
+    def has_add_permission(self, request):
+        # Prevent manual creation of stock history records
+        return False
+    
+    def has_delete_permission(self, request, obj=None):
+        # Prevent deletion of stock history records
+        return False
+    
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related(
+            'product', 'changed_by', 'order', 'reservation'
+        )
+
+# Register StockReservation model
+@admin.register(StockReservation)
+class StockReservationAdmin(admin.ModelAdmin):
+    list_display = ['id', 'user', 'product', 'quantity', 'status', 'expires_at', 
+                    'is_expired_display', 'created_at']
+    search_fields = ['user__username', 'product__name']
+    list_filter = ['status', 'created_at', 'expires_at']
+    ordering = ['-created_at']
+    readonly_fields = ['created_at', 'updated_at', 'is_expired_display']
+    date_hierarchy = 'created_at'
+    list_per_page = 50
+    autocomplete_fields = ['user', 'product']
+    actions = ['mark_as_expired', 'mark_as_cancelled']
+    
+    def is_expired_display(self, obj):
+        return obj.is_expired()
+    is_expired_display.short_description = 'Is Expired'
+    is_expired_display.boolean = True
+    
+    def mark_as_expired(self, request, queryset):
+        count = 0
+        for reservation in queryset:
+            if reservation.status == 'active':
+                reservation.mark_as_expired()
+                count += 1
+        self.message_user(request, f"{count} reservation(s) marked as expired.")
+    mark_as_expired.short_description = "Mark selected reservations as expired"
+    
+    def mark_as_cancelled(self, request, queryset):
+        count = 0
+        for reservation in queryset:
+            if reservation.status == 'active':
+                reservation.mark_as_cancelled()
+                count += 1
+        self.message_user(request, f"{count} reservation(s) marked as cancelled.")
+    mark_as_cancelled.short_description = "Mark selected reservations as cancelled"
+    
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related('user', 'product')
+
+
+# Register Store model
+@admin.register(Store)
+class StoreAdmin(admin.ModelAdmin):
+    list_display = ['name', 'city', 'phone_number', 'is_active', 'is_pickup_point', 'manager', 'created_at']
+    search_fields = ['name', 'address', 'city', 'phone_number']
+    list_filter = ['is_active', 'is_pickup_point', 'city', 'created_at']
+    ordering = ['city', 'name']
+    readonly_fields = ['created_at', 'updated_at']
+    date_hierarchy = 'created_at'
+    list_per_page = 20
+    autocomplete_fields = ['manager']
+    list_editable = ['is_active', 'is_pickup_point']
+    
+    fieldsets = (
+        ('Basic Information', {
+            'fields': ('name', 'address', 'city', 'manager')
+        }),
+        ('Contact Details', {
+            'fields': ('phone_number', 'whatsapp_number', 'email')
+        }),
+        ('Location Coordinates', {
+            'fields': ('latitude', 'longitude'),
+            'description': 'Enter GPS coordinates for map display'
+        }),
+        ('Operating Hours', {
+            'fields': ('opening_hours',)
+        }),
+        ('Settings', {
+            'fields': ('is_active', 'is_pickup_point')
+        }),
+        ('Timestamps', {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ('collapse',)
+        }),
+    )
+    
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related('manager')

@@ -1,5 +1,5 @@
 from django import forms
-from .models import Product, Checkout, Category
+from .models import Product, Checkout, Category, Review
 
 # Product Form
 from django import forms
@@ -83,3 +83,96 @@ class ProfileForm(forms.ModelForm):
             raise forms.ValidationError("Please use a valid email address.")
         return email
 
+# app/forms.py
+
+from django import forms
+
+class ContactForm(forms.Form):
+    name = forms.CharField(
+        max_length=100,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Enter your full name'
+        })
+    )
+    email = forms.EmailField(
+        widget=forms.EmailInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'your.email@example.com'
+        })
+    )
+    subject = forms.CharField(
+        max_length=150,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'What can we help you with?'
+        })
+    )
+    message = forms.CharField(
+        widget=forms.Textarea(attrs={
+            'class': 'form-control textarea',
+            'rows': 5,
+            'placeholder': 'Tell us how we can help you...'
+        })
+    )
+
+
+
+# Review Form
+class ReviewForm(forms.ModelForm):
+    """Form for submitting product reviews."""
+    
+    class Meta:
+        model = Review
+        fields = ['rating', 'title', 'comment']
+        widgets = {
+            'rating': forms.RadioSelect(
+                choices=Review.RATING_CHOICES,
+                attrs={'class': 'rating-input'}
+            ),
+            'title': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Summarize your experience',
+                'maxlength': '200'
+            }),
+            'comment': forms.Textarea(attrs={
+                'class': 'form-control',
+                'placeholder': 'Share your thoughts about this product...',
+                'rows': 5,
+                'minlength': '10',
+                'maxlength': '500'
+            }),
+        }
+        labels = {
+            'rating': 'Your Rating',
+            'title': 'Review Title',
+            'comment': 'Your Review',
+        }
+        help_texts = {
+            'rating': 'Select a rating from 1 (Poor) to 5 (Excellent)',
+            'title': 'Give your review a short title',
+            'comment': 'Write at least 10 characters (maximum 500)',
+        }
+    
+    def clean_rating(self):
+        """Validate rating is between 1 and 5."""
+        rating = self.cleaned_data.get('rating')
+        if rating < 1 or rating > 5:
+            raise forms.ValidationError('Rating must be between 1 and 5.')
+        return rating
+    
+    def clean_comment(self):
+        """Validate comment length."""
+        comment = self.cleaned_data.get('comment')
+        if len(comment) < 10:
+            raise forms.ValidationError('Review must be at least 10 characters long.')
+        if len(comment) > 500:
+            raise forms.ValidationError('Review must not exceed 500 characters.')
+        return comment
+    
+    def clean_title(self):
+        """Validate title length."""
+        title = self.cleaned_data.get('title')
+        if len(title) < 3:
+            raise forms.ValidationError('Title must be at least 3 characters long.')
+        return title

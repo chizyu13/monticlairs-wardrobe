@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Process Payment</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 2rem;
+            background-color: #f9f9f9;
+        }
+        .container {
+            max-width: 500px;
+            margin: auto;
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #1a73e8;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #155ec5;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Payment Processing</h2>
+        <p>Please confirm your payment details below and click the button to proceed.</p>
+
+        <!-- Example form (you can replace with Stripe checkout or similar) -->
+        <form method="post">
+            {% csrf_token %}
+            <label>Amount:</label><br>
+            <input type="text" name="amount" value="{{ amount }}" readonly><br><br>
+
+            <label>Payment Method:</label><br>
+            <select name="method">
+                <option value="credit_card">Credit Card</option>
+                <option value="paypal">PayPal</option>
+            </select><br><br>
+
+            <button type="submit">Pay Now</button>
+        </form>
+    </div>
+</body>
+</html>

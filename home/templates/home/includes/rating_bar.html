@@ -1,0 +1,56 @@
+<div class="rating-bar-container">
+    <span class="star-label">{{ star_value }} <i class="fas fa-star"></i></span>
+    <div class="rating-bar">
+        <div class="rating-bar-fill" style="width: {{ percentage }}%;"></div>
+    </div>
+    <span class="rating-count">{{ count }}</span>
+    <span class="rating-percentage">{{ percentage|floatformat:0 }}%</span>
+</div>
+
+<style>
+.rating-bar-container {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 8px;
+}
+
+.star-label {
+    min-width: 50px;
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.star-label i {
+    color: #d4af37;
+    font-size: 0.85rem;
+}
+
+.rating-bar {
+    flex: 1;
+    height: 8px;
+    background: var(--accent-dark);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.rating-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #d4af37, #b8941f);
+    transition: width 0.3s ease;
+}
+
+.rating-count {
+    min-width: 40px;
+    text-align: right;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.rating-percentage {
+    min-width: 45px;
+    text-align: right;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+}
+</style>

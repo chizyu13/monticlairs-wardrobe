@@ -5,8 +5,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="EHC Marketplace - Buy and sell products within the EHC community">
-    <title>{% block title %}EHC Marketplace{% endblock %}</title>
+    <meta name="description" content="Montclair Wardrobe - Premium boutique fashion and wardrobe essentials">
+    <meta name="keywords" content="Montclair Wardrobe, fashion, boutique, clothing, premium fashion">
+    <meta property="og:title" content="Montclair Wardrobe - Curated Fashion">
+    <meta property="og:description" content="Discover curated fashion and boutique essentials at Montclair Wardrobe.">
+    <meta property="og:image" content="{% static 'images/hero-bg.jpg' %}">
+    <meta property="og:url" content="{{ request.build_absolute_uri }}">
+    <title>{% block title %}Montclair Wardrobe{% endblock %}</title>
 
     <!-- Favicon -->
     <link rel="icon" href="{% static 'images/favicon.ico' %}" type="image/x-icon">
@@ -14,288 +19,648 @@
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 
+    <!-- Google Fonts -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <!-- Custom CSS -->
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
 
-    <!-- Leaflet CSS (optional, retained as per your setup) -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-
     <style>
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #d4af37;
+            --text-dark: #2c3e50;
+            --text-light: #6c757d;
+            --bg-light: #f8f9fa;
+            --white: #ffffff;
+            /* Modern Design Variables */
+            --primary-dark: #0a0a0a;
+            --secondary-dark: #1a1a1a;
+            --accent-dark: #2a2a2a;
+            --gold-accent: #d4af37;
+            --gold-light: #f4e4a6;
+            --text-primary: #ffffff;
+            --text-secondary: #b0b0b0;
+            --text-muted: #808080;
+            --glass-bg: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --success-color: #28a745;
+            --warning-color: #ffc107;
+            --danger-color: #dc3545;
+        }
+
         body {
+            font-family: 'Inter', sans-serif;
+            background: #0a0a0a;
+            color: #ffffff;
+            min-height: 100vh;
             transition: background-color 0.3s, color 0.3s;
         }
-        body.dark-mode {
-            background-color: #121212;
-            color: #e4e4e4;
+
+        /* Animated Background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background:
+                radial-gradient(circle at 20% 80%, rgba(212, 175, 55, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(212, 175, 55, 0.08) 0%, transparent 50%),
+                linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 50%, #0f0f0f 100%);
+            z-index: -2;
         }
+
+        body.dark-mode {
+            background-color: #0a0a0a;
+            color: #ffffff;
+        }
+
+        /* Modern Navbar Styles */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.05) !important;
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 8px 0 !important;
+            z-index: 1000;
+            transition: all 0.3s ease;
+            min-height: auto !important;
+        }
+
+        .navbar.scrolled {
+            background: rgba(10, 10, 10, 0.95) !important;
+            backdrop-filter: blur(30px);
+        }
+
+        .navbar-container,
+        .navbar>.container {
+            padding-top: 0 !important;
+            padding-bottom: 0 !important;
+        }
+
+        .navbar-brand {
+            font-family: 'Playfair Display', serif;
+            font-weight: 700;
+            font-size: 1.3rem;
+            color: #d4af37 !important;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: color 0.3s ease;
+            padding: 0 !important;
+            margin: 0 !important;
+        }
+
+        .navbar-brand i {
+            font-size: 1.1rem;
+        }
+
+        .navbar-brand:hover {
+            color: #f4e4a6 !important;
+        }
+
+        .navbar-nav {
+            align-items: center;
+            gap: 8px;
+        }
+
+        .navbar-nav .nav-link {
+            color: #b0b0b0 !important;
+            font-weight: 500;
+            font-size: 0.85rem;
+            padding: 6px 12px !important;
+            margin: 0;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .navbar-nav .nav-link:hover {
+            color: #ffffff !important;
+        }
+
+        .navbar-nav .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: 2px;
+            left: 12px;
+            right: 12px;
+            width: calc(100% - 24px);
+            height: 2px;
+            background: #d4af37;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .navbar-nav .nav-link:hover::after {
+            opacity: 1;
+        }
+
+        .navbar-toggler {
+            padding: 4px 8px;
+            font-size: 1rem;
+            border: none;
+        }
+
+        .navbar-toggler:focus {
+            box-shadow: none;
+        }
+
+        /* Cart Badge */
+        .position-relative .badge {
+            font-size: 0.65rem;
+            padding: 2px 5px;
+            top: -4px !important;
+        }
+
+        /* Dropdown Menu Styles */
+        .dropdown-menu {
+            background: rgba(26, 26, 26, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 6px;
+            margin-top: 4px;
+            min-width: 180px;
+        }
+
+        .dropdown-item {
+            color: #b0b0b0;
+            padding: 8px 12px;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+            font-size: 0.85rem;
+        }
+
+        .dropdown-item i {
+            width: 16px;
+            font-size: 0.85rem;
+        }
+
+        .dropdown-item:hover {
+            background: rgba(212, 175, 55, 0.1);
+            color: #d4af37;
+        }
+
+        .dropdown-divider {
+            border-color: rgba(255, 255, 255, 0.1);
+            margin: 4px 0;
+        }
+
+        .dropdown-toggle::after {
+            font-size: 0.7rem;
+        }
+
+        .dropdown-toggle img {
+            width: 24px !important;
+            height: 24px !important;
+        }
+
         body.dark-mode .navbar,
         body.dark-mode .footer {
-            background-color: #1f1f1f !important;
+            background-color: rgba(10, 10, 10, 0.95) !important;
         }
-        body.dark-mode .navbar.bg-primary {
-            background-color: #1a3c6d !important; /* Darker blue for navbar */
-        }
+
         body.dark-mode .navbar .nav-link,
         body.dark-mode .navbar .navbar-brand,
         body.dark-mode .navbar .dropdown-toggle {
-            color: #e9ecef !important; /* Lighter text for navbar */
+            color: #b0b0b0 !important;
         }
+
+        body.dark-mode .navbar .navbar-brand {
+            color: #d4af37 !important;
+        }
+
         body.dark-mode .dropdown-menu {
-            background-color: #2c2c2c;
+            background-color: rgba(26, 26, 26, 0.95);
             color: #e4e4e4;
         }
+
         body.dark-mode .dropdown-item {
-            color: #e4e4e4;
+            color: #b0b0b0;
         }
+
         body.dark-mode .dropdown-item:hover {
-            background-color: #3a3a3a;
+            background-color: rgba(212, 175, 55, 0.1);
+            color: #d4af37;
         }
+
         body.dark-mode .alert {
             background-color: #333;
             border-color: #444;
             color: #eee;
         }
+
         body.dark-mode .card {
             background-color: #2c2c2c;
             color: #e4e4e4;
         }
-        body.dark-mode .card-header.bg-primary {
-            background-color: #1a3c6d !important; /* Matches custom_admin_dashboard */
-        }
-        body.dark-mode .card-header h2,
-        body.dark-mode .card-header .text-white {
-            color: #e9ecef !important; /* Ensures "Custom Admin Dashboard" is readable */
-        }
-        body.dark-mode .card-body .lead,
-        body.dark-mode .card-body p {
-            color: #e4e4e4 !important; /* Welcome text and user info */
-        }
-        body.dark-mode .list-group-item {
-            background-color: #2c2c2c;
-            color: #e4e4e4;
-        }
-        body.dark-mode .list-group-item.active {
-            background-color: #007bff !important;
-            color: #ffffff !important;
-        }
+
         body.dark-mode .form-control,
         body.dark-mode .modal-content,
         body.dark-mode .table {
             background-color: #2c2c2c;
             color: #e4e4e4;
         }
+
         body.dark-mode .table-bordered {
             border-color: #444;
         }
+
         body.dark-mode .btn-outline-light {
             border-color: #ddd;
             color: #e4e4e4;
         }
+
         body.dark-mode .btn-outline-light:hover {
             background-color: #3a3a3a;
         }
-        .dark-toggle {
-            cursor: pointer;
-        }
-        .product .out-of-stock {
-            color: #dc3545; /* Bootstrap danger color */
-            font-weight: bold;
-        }
-    </style>
 
-    {% block extra_css %}{% endblock %}
+        .navbar-nav .nav-item {
+            display: flex;
+            align-items: center;
+        }
+
+        .product-card {
+            max-width: 350px;
+            margin: 0 auto;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .product-card img {
+            height: 200px;
+            object-fit: cover;
+            width: 100%;
+        }
+
+        .product-card .card-body {
+            padding: 1rem;
+        }
+
+        .product-card h5 {
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .product-card p {
+            font-size: 0.85rem;
+            color: var(--text-light);
+            margin-bottom: 0.5rem;
+        }
+
+        .product-card .out-of-stock {
+            color: #dc3545;
+            font-weight: bold;
+            font-size: 0.85rem;
+        }
+
+        .product-card .btn {
+            font-size: 0.85rem;
+            padding: 0.5rem 1rem;
+        }
+
+        .footer {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 2rem 0;
+            color: #b0b0b0;
+        }
+
+        .footer h5 {
+            font-size: 1rem;
+            margin-bottom: 0.75rem;
+            color: #d4af37;
+        }
+
+        .footer p,
+        .footer ul li {
+            font-size: 0.85rem;
+        }
+
+        .footer a {
+            color: #b0b0b0;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .footer a:hover {
+            color: #d4af37;
+        }
+
+        .clock-container {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            margin-right: 1rem;
+        }
+
+        #clock-date,
+        #clock-time {
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--white);
+        }
+
+        body.dark-mode #clock-date,
+        body.dark-mode #clock-time {
+            color: #e4e4e4;
+        }
+
+        @media (max-width: 768px) {
+            .navbar-brand {
+                font-size: 1.4rem;
+            }
+
+            .navbar-nav .nav-link {
+                font-size: 0.85rem;
+            }
+
+            .product-card {
+                max-width: 300px;
+            }
+
+            .product-card img {
+                height: 150px;
+            }
+
+            .footer {
+                padding: 1.5rem 0;
+            }
+
+            .footer h5 {
+                font-size: 0.9rem;
+            }
+
+            .footer p,
+            .footer ul li {
+                font-size: 0.8rem;
+            }
+        }
+
+        {% block extra_css %}{% endblock %}
+    </style>
 </head>
 
-<body class="transition">
-
+<body class="{% if request.session.theme == 'dark' %}dark-mode{% endif %}">
     <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top shadow-sm">
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top shadow-sm">
         <div class="container">
-            <a class="navbar-brand fw-bold" href="{% url 'home' %}">
-                <i class="fas fa-store me-2"></i>EHC Marketplace
+            <a class="navbar-brand fw-bold" href="{% url 'home:main_page' %}">
+                <i class="fas fa-tshirt me-2"></i>Montclair Wardrobe
             </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" 
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
                 aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
-
             <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'home' %}"><i class="fas fa-home me-1"></i> Home</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'products' %}"><i class="fas fa-shopping-bag me-1"></i> Shop</a>
-                    </li>
-                </ul>
-
                 <ul class="navbar-nav ms-auto align-items-center">
-                    <!-- Dark mode toggle -->
-                    <li class="nav-item me-2">
-                        <i id="darkModeToggle" class="fas fa-moon text-white dark-toggle" title="Toggle dark mode"></i>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'home:main_page' %}"><i class="fas fa-home me-1"></i> Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'home:products' %}"><i class="fas fa-shopping-bag me-1"></i>
+                            Boutique</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'home:about' %}"><i class="fas fa-info-circle me-1"></i>
+                            About</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'home:contact' %}"><i class="fas fa-envelope me-1"></i>
+                            Contact</a>
                     </li>
 
                     {% if user.is_authenticated %}
-                        <!-- User Dropdown -->
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                {% if user.profile.profile_picture %}
-                                    <img src="{{ user.profile.profile_picture.url }}" alt="Profile" class="rounded-circle me-2" width="30" height="30">
-                                {% else %}
-                                    <i class="fas fa-user-circle me-2"></i>
-                                {% endif %}
-                                {{ user.username }}
-                            </a>
-                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
-                                <li><a class="dropdown-item" href="{% url 'home:profile' %}"><i class="fas fa-user me-2"></i> Profile</a></li>
-                                <li><a class="dropdown-item" href="{% url 'home:sales_report' %}"><i class="fas fa-chart-line me-2"></i> Sales Report</a></li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li>
-                                    <form action="{% url 'logout' %}" method="POST" style="display: inline;">
-                                        {% csrf_token %}
-                                        <button type="submit" class="btn btn-danger">Logout</button>
-                                    </form>
-                                </li>
-                            </ul>
-                        </li>
-
-                        <!-- Cart -->
-                        <li class="nav-item">
-                            <a class="nav-link position-relative" href="{% url 'cart:view_cart' %}">
-                                <i class="fas fa-shopping-cart"></i>
-                                {% if cart_item_count > 0 %}
-                                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                                        {{ cart_item_count }}
-                                    </span>
-                                {% endif %}
-                            </a>
-                        </li>
-
-                        <!-- Sell Item and Delete Buttons -->
-                        <li class="nav-item ms-2 d-flex gap-2">
-                            <a class="btn btn-success btn-sm rounded-pill" href="{% url 'home:post_product' %}">
-                                <i class="fas fa-plus me-1"></i> Sell Item
-                            </a>
-                            <a class="btn btn-danger btn-sm rounded-pill" href="{% url 'home:manage_products' %}">
-                                <i class="fas fa-trash-alt me-1"></i> Manage
-                            </a>
-                        </li>
+                    <!-- Cart -->
+                    <li class="nav-item">
+                        <a class="nav-link position-relative" href="{% url 'cart:view_cart' %}">
+                            <i class="fas fa-shopping-cart"></i>
+                            {% if cart_item_count > 0 %}
+                            <span
+                                class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                {{ cart_item_count }}
+                            </span>
+                            {% endif %}
+                        </a>
+                    </li>
+                    <!-- User Dropdown -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="userDropdown"
+                            role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            {% if user.profile.profile_picture %}
+                            <img src="{{ user.profile.profile_picture.url }}" alt="Profile picture"
+                                class="rounded-circle me-2" width="28" height="28" loading="lazy">
+                            {% else %}
+                            <i class="fas fa-user-circle me-2"></i>
+                            {% endif %}
+                            <span>{{ user.username }}</span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                            <li><a class="dropdown-item" href="{% url 'home:profile' %}"><i
+                                        class="fas fa-user me-2"></i> My Profile</a></li>
+                            <li><a class="dropdown-item" href="{% url 'home:user_checkouts' %}"><i
+                                        class="fas fa-shopping-bag me-2"></i> My Orders</a></li>
+                            {% if user.is_staff %}
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li><a class="dropdown-item" href="{% url 'custom_admin:dashboard' %}"><i
+                                        class="fas fa-cogs me-2"></i> Admin Dashboard</a></li>
+                            {% endif %}
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#logoutModal">
+                                    <i class="fas fa-sign-out-alt me-2"></i> Logout
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
                     {% else %}
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'login' %}"><i class="fas fa-sign-in-alt me-1"></i> Login</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="btn btn-outline-light btn-sm ms-2" href="{% url 'register' %}"><i class="fas fa-user-plus me-1"></i> Register</a>
-                        </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'login' %}"><i class="fas fa-sign-in-alt me-1"></i> Login</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="btn btn-outline-light btn-sm ms-2" href="{% url 'register' %}"><i
+                                class="fas fa-user-plus me-1"></i> Register</a>
+                    </li>
                     {% endif %}
                 </ul>
             </div>
         </div>
     </nav>
 
-    <!-- Main Content -->
-    <main class="container mt-5 pt-3">
-        {% if messages %}
-            <div class="mt-3">
-                {% for message in messages %}
-                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-                        {{ message }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                    </div>
-                {% endfor %}
-            </div>
-        {% endif %}
-        
-        {% block content %}
-            {% if products %}
-                <div class="row">
-                    {% for product in products %}
-                        <div class="product col-md-4 mb-4">
-                            <img src="{{ product.image.url|default:'/static/images/default-product.jpg' }}" alt="{{ product.name }}" class="img-fluid">
-                            <h5>{{ product.name }}</h5>
-                            <p>{{ product.description|truncatewords:20 }}</p>
-                            <p><strong>ZMW{{ product.price }}</strong></p>
-                            <p>Seller: {{ product.seller.username }}</p>
-                            <p>Stock: {% if product.is_in_stock %}{{ product.stock }}{% else %}<span class="out-of-stock">Out of Stock</span>{% endif %}</p>
-                            <p>Status: {{ product.status|title }}</p>
-                            <div class="d-flex gap-2">
-                                {% if user.is_authenticated and product.is_in_stock %}
-                                    <a href="{% url 'cart:add_to_cart' product.id %}" class="btn btn-primary btn-sm">
-                                        <i class="fas fa-cart-plus me-1"></i> Add to Cart
-                                    </a>
-                                {% endif %}
-                                {% if user == product.seller %}
-                                    <a href="{% url 'home:delete_product' product.id %}" class="btn btn-danger btn-sm">
-                                        <i class="fas fa-trash-alt me-1"></i> Delete
-                                    </a>
-                                {% endif %}
-                            </div>
-                        </div>
-                    {% endfor %}
+    <!-- Logout Modal -->
+    {% if user.is_authenticated %}
+    <div class="modal fade" id="logoutModal" tabindex="-1" aria-labelledby="logoutModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="logoutModalLabel">Confirm Logout</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-            {% else %}
-                <p>No products available.</p>
-                {% if user.is_authenticated %}
-                    <a href="{% url 'home:post_product' %}" class="btn btn-success btn-sm">Sell an Item</a>
-                {% endif %}
-            {% endif %}
+                <div class="modal-body">
+                    Are you sure you want to log out?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <form action="{% url 'logout' %}" method="POST">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger btn-sm">Logout</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Main Content -->
+    <main class="container" style="margin-top: 80px; padding-bottom: 60px;">
+        {% if messages %}
+        <div class="mt-3">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        {% block content %}
+        {% if products %}
+        <div class="row g-3">
+            {% for product in products %}
+            <div class="col-md-4 col-sm-6">
+                <div class="card product-card">
+                    <img src="{{ product.image.url|default:'/static/images/default-product.jpg' }}"
+                        alt="{{ product.name }}" class="card-img-top" loading="lazy">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ product.name }}</h5>
+                        <p class="card-text">{{ product.description|truncatewords:15 }}</p>
+                        <p class="fw-bold text-primary">ZMW {{ product.price }}</p>
+                        <p class="text-muted small">
+                            {% if product.is_in_stock %}
+                            {{ product.stock }} in stock
+                            {% else %}
+                            <span class="out-of-stock">Out of Stock</span>
+                            {% endif %}
+                        </p>
+                        {% if user.is_authenticated and product.is_in_stock %}
+                        <a href="{% url 'cart:add_to_cart' product.id %}" class="btn btn-primary btn-sm">
+                            <i class="fas fa-cart-plus me-1"></i> Add to Cart
+                        </a>
+                        {% elif not user.is_authenticated %}
+                        <a href="{% url 'login' %}" class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-sign-in-alt me-1"></i> Login to Purchase
+                        </a>
+                        {% else %}
+                        <button class="btn btn-secondary btn-sm" disabled>Out of Stock</button>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p class="text-center">No products available at the moment. Please check back soon for new arrivals!</p>
+        {% endif %}
         {% endblock %}
     </main>
 
     <!-- Footer -->
-    <footer class="bg-dark text-white py-4 mt-5 footer">
+    <footer class="footer text-white">
         <div class="container">
             <div class="row">
                 <div class="col-md-4 mb-3">
-                    <h5>About EHC Marketplace</h5>
-                    <p>A platform for the EHC community to buy and sell products safely within campus.</p>
+                    <h5>About Montclair Wardrobe</h5>
+                    <p>Your premier destination for curated fashion and boutique wardrobe essentials.</p>
                 </div>
                 <div class="col-md-4 mb-3">
                     <h5>Quick Links</h5>
                     <ul class="list-unstyled">
-                        <li><a href="{% url 'home' %}" class="text-white">Home</a></li>
-                        <li><a href="{% url 'products' %}" class="text-white">Shop</a></li>
-                        {% if user.is_authenticated %}
-                            <li><a href="{% url 'home:post_product' %}" class="text-white">Sell an Item</a></li>
-                        {% endif %}
+                        <li><a href="{% url 'home:main_page' %}" class="text-white">Home</a></li>
+                        <li><a href="{% url 'home:products' %}" class="text-white">Boutique</a></li>
+                        <li><a href="{% url 'home:about' %}" class="text-white">About Us</a></li>
+                        <li><a href="{% url 'home:contact' %}" class="text-white">Contact Us</a></li>
                     </ul>
                 </div>
                 <div class="col-md-4 mb-3">
                     <h5>Contact</h5>
                     <ul class="list-unstyled">
-                        <li><i class="fas fa-envelope me-2"></i> contact@ehcmarketplace.com</li>
-                        <li><i class="fas fa-phone me-2"></i> +260 123 456 789</li>
+                        <li><i class="fas fa-envelope me-2"></i> <a
+                                href="mailto:contact@montclairwardrobe.com">contact@montclairwardrobe.com</a></li>
+                        <li><i class="fas fa-phone me-2"></i> <a href="tel:+260771172699">+260 77-117-2699</a></li>
                     </ul>
                 </div>
             </div>
-            <hr class="my-4 bg-light">
+            <hr class="my-3 bg-light">
             <div class="text-center">
-                <p class="mb-0">© {% now "Y" %} EHC Marketplace. All rights reserved.</p>
+                <p class="mb-0">© {% now "Y" %} Montclair Wardrobe. All rights reserved.</p>
             </div>
         </div>
     </footer>
 
     <!-- JavaScript -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script src="{% static 'js/main.js' %}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" defer></script>
+    <script src="{% static 'js/main.js' %}" defer></script>
 
-    <!-- Dark mode JS -->
+    <!-- Navbar scroll effect JS -->
     <script>
-        // Apply saved theme on page load
-        if (localStorage.getItem('theme') === 'dark') {
-            document.body.classList.add('dark-mode');
-        }
-        // Toggle dark mode
-        document.getElementById('darkModeToggle').addEventListener('click', function () {
-            document.body.classList.toggle('dark-mode');
-            localStorage.setItem('theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light');
+        document.addEventListener('DOMContentLoaded', function () {
+            // Navbar scroll effect
+            window.addEventListener('scroll', function () {
+                const navbar = document.querySelector('.navbar');
+                if (window.scrollY > 50) {
+                    navbar.classList.add('scrolled');
+                } else {
+                    navbar.classList.remove('scrolled');
+                }
+            });
+        });
+    </script>
+
+    <!-- Clock JS -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const dateElement = document.getElementById('clock-date');
+            const timeElement = document.getElementById('clock-time');
+            if (dateElement && timeElement) {
+                function updateClock() {
+                    try {
+                        const now = new Date();
+                        dateElement.textContent = now.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
+                        timeElement.textContent = now.toLocaleTimeString('en-US', { hour12: true, hour: 'numeric', minute: '2-digit', second: '2-digit' });
+                    } catch (error) {
+                        console.error('Error updating clock:', error);
+                    }
+                }
+                updateClock();
+                setInterval(updateClock, 1000);
+            }
         });
     </script>
 
     {% block extra_js %}{% endblock %}
 </body>
+
 </html>

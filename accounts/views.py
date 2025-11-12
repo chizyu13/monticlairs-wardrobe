@@ -13,64 +13,79 @@ from django.http import HttpResponseForbidden
 from django.views.decorators.http import require_POST
 import requests
 from django.conf import settings
-from .forms import SignUpForm
-from .models import Product
+from .forms import SignUpForm, UserRegisterForm, ProfileForm
+from home.models import Product, Profile  # Import from home app
 
-# Register View
+
+# Register View for boutique customers
 def register_view(request):
     if request.method == 'POST':
-        form = SignUpForm(request.POST)
-        if form.is_valid():
-            user = form.save()
+        user_form = SignUpForm(request.POST)
+        profile_form = ProfileForm(request.POST, request.FILES)
+        if user_form.is_valid() and profile_form.is_valid():
+            user = user_form.save()
+            
+            # Profile is automatically created by signal, just update it
+            # Use a small delay to ensure signal has completed
+            try:
+                profile = user.profile
+            except Profile.DoesNotExist:
+                # Fallback: create profile if signal didn't work
+                profile = Profile.objects.create(user=user)
+            
+            # Update profile with form data
+            profile.bio = profile_form.cleaned_data.get('bio', '')
+            if profile_form.cleaned_data.get('profile_picture'):
+                profile.profile_picture = profile_form.cleaned_data.get('profile_picture')
+            profile.save()
+            
             login(request, user)
-            messages.success(request, "Registration successful! You are now logged in.")
-            return redirect('home')
+            messages.success(request, "Welcome to Montclair Wardrobe! Your account has been created successfully.")
+            return redirect('home:main_page')
+        else:
+            messages.error(request, "Please correct the errors below.")
     else:
-        form = SignUpForm()
-    return render(request, 'accounts/register.html', {'form': form})
+        user_form = SignUpForm()
+        profile_form = ProfileForm()
+    return render(request, 'accounts/register.html', {'user_form': user_form, 'profile_form': profile_form})
 
-# Login View
+
+# Login View for boutique customers
 def login_view(request):
-    form = AuthenticationForm()
-    
     if request.method == 'POST':
         form = AuthenticationForm(data=request.POST)
-        
-
         if form.is_valid():
             username = form.cleaned_data.get('username')
             password = form.cleaned_data.get('password')
             user = authenticate(request, username=username, password=password)
-            
             if user is not None:
                 login(request, user)
-                messages.success(request, "Login successful!")
-                return redirect('home')  # Adjust 'home' with the correct URL name if needed
-            else:
-                messages.error(request, "Invalid username or password.")
-        else:
-            # If form is not valid, show specific form errors
-            messages.error(request, "Invalid username or password.")
-            print(f"Form errors: {form.errors}")
+                messages.success(request, "Welcome back to Montclair Wardrobe!")
+                
+                # Check if user is staff/admin
+                if user.is_staff or user.is_superuser:
+                    return redirect('custom_admin:dashboard')
+                else:
+                    # Regular customers go to home page
+                    return redirect('home:main_page')
+        
+        # Only add one error message if authentication fails
+        messages.error(request, "Invalid username or password.")
+    else:
+        form = AuthenticationForm()
     
-    return render(request, 'registration/login.html', {
-        'form': form,
-    })
+    return render(request, 'registration/login.html', {'form': form})
 
 # Logout View (New, using POST)
 @require_POST
 def logout_view(request):
     logout(request)
     messages.success(request, "You have been logged out successfully.")
-    return redirect('home')
+    return redirect('home:main_page')
 
-# User Dashboard View
-def user_dashboard(request):
-    if not request.user.is_authenticated:
-        return redirect('accounts:login')
-    user = request.user
-    products = Product.objects.filter(seller=user)
-    return render(request, 'accounts/user_dashboard.html', {'products': products})
+
+# Note: Dashboard functionality is handled by custom_admin app
+# Regular customers use the main boutique interface
 
 # Password Reset Request View
 def password_reset_request(request):
@@ -92,7 +107,7 @@ def password_reset_request(request):
                     )
                     send_mail(subject, message, 'no-reply@example.com', [email], fail_silently=False)
                 messages.success(request, "A password reset link has been sent to your email.")
-                return redirect('accounts:password_reset_done')
+                return redirect('password_reset_done')
             else:
                 messages.error(request, "No user found with that email address.")
         else:

@@ -3,128 +3,789 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Checkout Details - EHC Marketplace</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Details - Montclair Wardrobe</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            --primary-dark: #0a0a0a;
+            --secondary-dark: #1a1a1a;
+            --accent-dark: #2a2a2a;
+            --gold-accent: #d4af37;
+            --gold-light: #f4e4a6;
+            --text-primary: #ffffff;
+            --text-secondary: #b0b0b0;
+            --text-muted: #808080;
+            --glass-bg: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --shadow-dark: rgba(0, 0, 0, 0.5);
+            --success-color: #28a745;
+            --warning-color: #ffc107;
+            --info-color: #17a2b8;
+        }
+        
         body {
-            padding-top: 80px;
+            font-family: 'Inter', sans-serif;
+            background: var(--primary-dark);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
         }
-        .card {
-            border-radius: 1rem;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+
+        /* Animated Background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(212, 175, 55, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(212, 175, 55, 0.08) 0%, transparent 50%),
+                linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 50%, #0f0f0f 100%);
+            z-index: -2;
         }
-        .form-section {
+
+        /* Floating particles */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        .particle {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: var(--gold-accent);
+            border-radius: 50%;
+            opacity: 0.3;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); opacity: 0.3; }
+            50% { transform: translateY(-20px) rotate(180deg); opacity: 0.8; }
+        }
+
+        /* Navbar Styles */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--glass-border);
+            padding: 16px 0;
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+
+        .navbar.scrolled {
+            background: rgba(10, 10, 10, 0.95);
+            backdrop-filter: blur(30px);
+        }
+
+        .navbar-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .navbar-brand {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--gold-accent);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .navbar-brand:hover {
+            color: var(--gold-light);
+        }
+
+        .navbar-nav {
+            display: flex;
+            list-style: none;
+            gap: 32px;
+            align-items: center;
+        }
+
+        .nav-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .nav-link:hover {
+            color: var(--text-primary);
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--gold-accent);
+            transition: width 0.3s ease;
+        }
+
+        .nav-link:hover::after {
+            width: 100%;
+        }
+
+        .navbar-toggle {
             display: none;
+            background: none;
+            border: none;
+            color: var(--text-primary);
+            font-size: 1.2rem;
+            cursor: pointer;
+        }
+
+        /* Main Content */
+        .main-content {
+            padding-top: 100px;
+            min-height: 100vh;
+            padding-bottom: 40px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .detail-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            box-shadow: 
+                0 25px 50px var(--shadow-dark),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            padding: 50px;
+            position: relative;
+        }
+
+        .detail-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--gold-accent), transparent);
+            opacity: 0.5;
+        }
+
+        .detail-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .detail-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--gold-accent);
+            margin-bottom: 16px;
+            letter-spacing: -0.02em;
+        }
+
+        .detail-subtitle {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+
+        .order-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 30px;
+        }
+
+        .status-processing {
+            background: rgba(255, 193, 7, 0.2);
+            color: var(--warning-color);
+            border: 1px solid rgba(255, 193, 7, 0.3);
+        }
+
+        .status-completed {
+            background: rgba(40, 167, 69, 0.2);
+            color: var(--success-color);
+            border: 1px solid rgba(40, 167, 69, 0.3);
+        }
+
+        .status-shipped {
+            background: rgba(23, 162, 184, 0.2);
+            color: var(--info-color);
+            border: 1px solid rgba(23, 162, 184, 0.3);
+        }
+
+        /* Order Information Grid */
+        .order-info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .info-section {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 24px;
+            backdrop-filter: blur(10px);
+        }
+
+        .info-section h3 {
+            font-family: 'Playfair Display', serif;
+            color: var(--gold-accent);
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 1.2rem;
+        }
+
+        .info-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid var(--accent-dark);
+        }
+
+        .info-item:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .info-value {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        /* Order Items */
+        .order-items {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+
+        .order-items h3 {
+            font-family: 'Playfair Display', serif;
+            color: var(--gold-accent);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .item-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 0;
+            border-bottom: 1px solid var(--accent-dark);
+        }
+
+        .item-row:last-child {
+            border-bottom: none;
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: var(--gold-accent);
+        }
+
+        .item-info {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .item-name {
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        .item-details {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        .item-price {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 30px;
+        }
+
+        .btn {
+            padding: 14px 28px;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            border: none;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--gold-accent), var(--gold-light));
+            color: var(--primary-dark);
+            box-shadow: 0 8px 25px rgba(212, 175, 55, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 35px rgba(212, 175, 55, 0.4);
+        }
+
+        .btn-secondary {
+            background: var(--glass-bg);
+            color: var(--text-primary);
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(10px);
+        }
+
+        .btn-secondary:hover {
+            background: var(--glass-border);
+            transform: translateY(-2px);
+        }
+
+        /* Timeline */
+        .order-timeline {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+
+        .timeline-header {
+            font-family: 'Playfair Display', serif;
+            color: var(--gold-accent);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .timeline {
+            position: relative;
+            padding-left: 30px;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 15px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: var(--accent-dark);
+        }
+
+        .timeline-item {
+            position: relative;
+            margin-bottom: 20px;
+            padding-left: 20px;
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -8px;
+            top: 6px;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: var(--accent-dark);
+            border: 3px solid var(--primary-dark);
+        }
+
+        .timeline-item.active::before {
+            background: var(--gold-accent);
+        }
+
+        .timeline-item.completed::before {
+            background: var(--success-color);
+        }
+
+        .timeline-content {
+            color: var(--text-secondary);
+        }
+
+        .timeline-content.active {
+            color: var(--text-primary);
+        }
+
+        .timeline-date {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .navbar-nav {
+                display: none;
+            }
+
+            .navbar-toggle {
+                display: block;
+            }
+
+            .main-content {
+                padding-top: 90px;
+            }
+
+            .detail-card {
+                padding: 40px 30px;
+                margin: 20px;
+            }
+
+            .detail-title {
+                font-size: 2rem;
+            }
+
+            .order-info-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .btn {
+                width: 100%;
+                max-width: 300px;
+                justify-content: center;
+            }
+
+            .item-row {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 0 15px;
+            }
+
+            .detail-card {
+                padding: 30px 20px;
+                margin: 10px;
+            }
+
+            .detail-title {
+                font-size: 1.8rem;
+            }
+
+            .info-section {
+                padding: 20px;
+            }
         }
     </style>
 </head>
 <body>
-
-<!-- Navbar -->
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
-    <div class="container">
-        <a class="navbar-brand" href="{% url 'home' %}">EHC Marketplace</a>
+    <!-- Floating Particles -->
+    <div class="particles">
+        <div class="particle" style="left: 10%; top: 20%; animation-delay: 0s;"></div>
+        <div class="particle" style="left: 20%; top: 80%; animation-delay: 1s;"></div>
+        <div class="particle" style="left: 60%; top: 30%; animation-delay: 2s;"></div>
+        <div class="particle" style="left: 80%; top: 70%; animation-delay: 3s;"></div>
+        <div class="particle" style="left: 90%; top: 10%; animation-delay: 4s;"></div>
     </div>
-</nav>
 
-<!-- Checkout Form -->
-<div class="container">
-    <div class="row justify-content-center">
-        <div class="col-lg-8">
-            <div class="card p-4">
-                <h2 class="mb-4">Checkout Details</h2>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="{% url 'home:main_page' %}" class="navbar-brand">
+                <i class="fas fa-gem"></i>
+                Montclair Wardrobe
+            </a>
+            <ul class="navbar-nav">
+                <li><a href="{% url 'home:main_page' %}" class="nav-link">Home</a></li>
+                <li><a href="{% url 'home:products' %}" class="nav-link">Products</a></li>
+                <li><a href="{% url 'home:about' %}" class="nav-link">About</a></li>
+                {% if user.is_authenticated %}
+                    <li><a href="{% url 'logout' %}" class="nav-link">Logout</a></li>
+                {% else %}
+                    <li><a href="{% url 'login' %}" class="nav-link">Login</a></li>
+                {% endif %}
+            </ul>
+            <button class="navbar-toggle">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+    </nav>
 
-                <form method="post" action="{% url 'home:checkout_process' %}">
-                    {% csrf_token %}
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+            <div class="detail-card">
+                <div class="detail-header">
+                    <h1 class="detail-title">Order Details</h1>
+                    <p class="detail-subtitle">Order #{{ order.id|stringformat:"05d" }}</p>
+                    
+                    {% if order.status == 'processing' %}
+                        <div class="order-status status-processing">
+                            <i class="fas fa-clock"></i>
+                            Processing
+                        </div>
+                    {% elif order.status == 'Delivered' %}
+                        <div class="order-status status-shipped">
+                            <i class="fas fa-truck"></i>
+                            Delivered
+                        </div>
+                    {% elif order.status == 'completed' %}
+                        <div class="order-status status-completed">
+                            <i class="fas fa-check-circle"></i>
+                            Completed
+                        </div>
+                    {% endif %}
+                </div>
 
-                    <!-- Delivery Location -->
-                    <div class="mb-3">
-                        <label class="form-label">Where are you located?</label>
-                        <select id="location-type" name="location_type" class="form-select" required>
-                            <option value="" disabled selected>Select your location</option>
-                            <option value="inside">Inside Campus</option>
-                            <option value="outside">Outside Campus</option>
-                        </select>
+                <!-- Order Information Grid -->
+                <div class="order-info-grid">
+                    <div class="info-section">
+                        <h3>
+                            <i class="fas fa-info-circle"></i>
+                            Order Information
+                        </h3>
+                        <div class="info-item">
+                            <span class="info-label">Order Date</span>
+                            <span class="info-value">{{ order.created_at|date:"F d, Y" }}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Order Time</span>
+                            <span class="info-value">{{ order.created_at|time:"g:i A" }}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Payment Method</span>
+                            <span class="info-value">{{ order.payment_method|default:"Credit Card"|title }}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Status</span>
+                            <span class="info-value">{{ order.status|title }}</span>
+                        </div>
                     </div>
 
-                    <!-- Inside Campus Section -->
-                    <div id="inside-section" class="form-section">
-                        <div class="mb-3">
-                            <label class="form-label">Room Number</label>
-                            <input type="text" name="room_number" class="form-control">
+                    <div class="info-section">
+                        <h3>
+                            <i class="fas fa-map-marker-alt"></i>
+                            Delivery Information
+                        </h3>
+                        {% if order.delivery_address %}
+                        <div class="info-item">
+                            <span class="info-label">Address</span>
+                            <span class="info-value">{{ order.shipping_address }}</span>
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label">Phone Number</label>
-                            <input type="tel" name="phone_inside" class="form-control">
+                        {% endif %}
+                        {% if order.phone_number %}
+                        <div class="info-item">
+                            <span class="info-label">Phone</span>
+                            <span class="info-value">{{ order.phone_number }}</span>
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label">GPS Location</label>
-                            <input type="text" name="gps_inside" class="form-control" placeholder="Paste location coordinates">
+                        {% endif %}
+                        {% if order.gps_location %}
+                        <div class="info-item">
+                            <span class="info-label">GPS Location</span>
+                            <span class="info-value">{{ order.gps_location|truncatechars:30 }}</span>
+                        </div>
+                        {% endif %}
+                        <div class="info-item">
+                            <span class="info-label">Delivery Type</span>
+                            <span class="info-value">{{ order.location_type|default:"Standard"|title }}</span>
                         </div>
                     </div>
+                </div>
 
-                    <!-- Outside Campus Section -->
-                    <div id="outside-section" class="form-section">
-                        <div class="mb-3">
-                            <label class="form-label">Phone Number</label>
-                            <input type="tel" name="phone_outside" class="form-control">
+                <!-- Order Timeline -->
+                <div class="order-timeline">
+                    <h3 class="timeline-header">
+                        <i class="fas fa-history"></i>
+                        Order Timeline
+                    </h3>
+                    <div class="timeline">
+                        <div class="timeline-item completed">
+                            <div class="timeline-content active">
+                                <strong>Order Placed</strong>
+                                <div class="timeline-date">{{ order.created_at|date:"F d, Y g:i A" }}</div>
+                            </div>
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label">GPS Location</label>
-                            <input type="text" name="gps_outside" class="form-control" placeholder="Paste location coordinates">
+                        <div class="timeline-item {% if order.status != 'pending' %}completed{% endif %}">
+                            <div class="timeline-content {% if order.status != 'pending' %}active{% endif %}">
+                                <strong>Payment Confirmed</strong>
+                                {% if order.status != 'pending' %}
+                                <div class="timeline-date">{{ order.updated_at|date:"F d, Y g:i A" }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="timeline-item {% if order.status == 'processing' or order.status == 'shipped' or order.status == 'completed' %}active{% endif %}">
+                            <div class="timeline-content {% if order.status == 'processing' or order.status == 'shipped' or order.status == 'completed' %}active{% endif %}">
+                                <strong>Order Processing</strong>
+                                {% if order.status == 'processing' or order.status == 'Delivered' or order.status == 'completed' %}
+                                <div class="timeline-date">In progress</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="timeline-item {% if order.status == 'shipped' or order.status == 'completed' %}active{% endif %}">
+                            <div class="timeline-content {% if order.status == 'shipped' or order.status == 'completed' %}active{% endif %}">
+                                <strong>Order Shipped</strong>
+                                {% if order.status == 'Delivered' or order.status == 'completed' %}
+                                <div class="timeline-date">On the way</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="timeline-item {% if order.status == 'completed' %}completed{% endif %}">
+                            <div class="timeline-content {% if order.status == 'completed' %}active{% endif %}">
+                                <strong>Order Delivered</strong>
+                                {% if order.status == 'completed' %}
+                                <div class="timeline-date">Completed</div>
+                                {% endif %}
+                            </div>
                         </div>
                     </div>
+                </div>
 
-                    <!-- Payment Method -->
-                    <div class="mb-3">
-                        <label class="form-label">Select Payment Method</label>
-                        <select id="payment-method" name="payment_method" class="form-select" required>
-                            <option value="" disabled selected>Select a method</option>
-                            <option value="cash">Cash</option>
-                            <option value="delivery">Payment on Delivery</option>
-                        </select>
+                <!-- Order Items -->
+                <div class="order-items">
+                    <h3>
+                        <i class="fas fa-shopping-bag"></i>
+                        Order Items
+                    </h3>
+                    {% for item in order.items.all %}
+                    <div class="item-row">
+                        <div class="item-info">
+                            <div class="item-name">{{ item.product.name }}</div>
+                            <div class="item-details">Quantity: {{ item.quantity }} | Size: {{ item.size|default:"N/A" }}</div>
+                        </div>
+                        <div class="item-price">${{ item.price }}</div>
                     </div>
-
-                    <!-- Delivery Fee (visible only for Payment on Delivery) -->
-                    <div id="delivery-fee-section" class="form-section">
-                        <p class="text-danger fw-bold">Note: Delivery fee will apply.</p>
+                    {% empty %}
+                    <div class="item-row">
+                        <div class="item-info">
+                            <div class="item-name">No items found</div>
+                        </div>
+                        <div class="item-price">K0.00</div>
                     </div>
+                    {% endfor %}
+                    <div class="item-row">
+                        <div class="item-info">
+                            <div class="item-name"><strong>Total</strong></div>
+                        </div>
+                        <div class="item-price">K{{ order.total_amount }}</div>
+                    </div>
+                </div>
 
-                    <button type="submit" class="btn btn-primary w-100">Confirm Order</button>
-                </form>
+                <!-- Action Buttons -->
+                <div class="action-buttons">
+                    {% if order.checkout.payment_status == 'completed' %}
+                    <a href="{% url 'home:download_receipt' order.checkout.id %}" class="btn btn-primary">
+                        <i class="fas fa-download"></i>
+                        Download Receipt
+                    </a>
+                    <a href="{% url 'home:view_receipt' order.checkout.id %}" class="btn btn-secondary" target="_blank">
+                        <i class="fas fa-file-pdf"></i>
+                        View Receipt
+                    </a>
+                    {% endif %}
+                    <a href="{% url 'home:main_page' %}" class="btn btn-secondary">
+                        <i class="fas fa-shopping-bag"></i>
+                        Continue Shopping
+                    </a>
+                    <a href="{% url 'home:user_checkouts' %}" class="btn btn-secondary">
+                        <i class="fas fa-list"></i>
+                        My Orders
+                    </a>
+                </div>
             </div>
         </div>
-    </div>
-</div>
+    </main>
 
-<!-- Scripts -->
-<script>
-    const locationSelect = document.getElementById("location-type");
-    const insideSection = document.getElementById("inside-section");
-    const outsideSection = document.getElementById("outside-section");
+    <script>
+        // Add scrolled class to navbar on scroll
+        window.addEventListener('scroll', function() {
+            const navbar = document.querySelector('.navbar');
+            if (window.scrollY > 50) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+        });
 
-    locationSelect.addEventListener("change", function () {
-        if (this.value === "inside") {
-            insideSection.style.display = "block";
-            outsideSection.style.display = "none";
-        } else if (this.value === "outside") {
-            insideSection.style.display = "none";
-            outsideSection.style.display = "block";
-        } else {
-            insideSection.style.display = "none";
-            outsideSection.style.display = "none";
+        // Add more floating particles dynamically
+        function createParticle() {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            particle.style.left = Math.random() * 100 + '%';
+            particle.style.top = Math.random() * 100 + '%';
+            particle.style.animationDelay = Math.random() * 6 + 's';
+            document.querySelector('.particles').appendChild(particle);
         }
-    });
 
-    const paymentMethod = document.getElementById("payment-method");
-    const deliveryFeeSection = document.getElementById("delivery-fee-section");
-
-    paymentMethod.addEventListener("change", function () {
-        deliveryFeeSection.style.display = this.value === "delivery" ? "block" : "none";
-    });
-</script>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+        // Create additional particles
+        for (let i = 0; i < 8; i++) {
+            setTimeout(createParticle, i * 300);
+        }
+    </script>
 </body>
 </html>

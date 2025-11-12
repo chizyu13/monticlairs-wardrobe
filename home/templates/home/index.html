@@ -1,0 +1,262 @@
+﻿{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Home - Montclair Wardrobe{% endblock %}
+
+{% block content %}
+<style>
+    .hero-section {
+        background: linear-gradient(135deg, rgba(212, 175, 55, 0.1) 0%, rgba(26, 26, 26, 0.8) 100%);
+        padding: 100px 20px 80px;
+        text-align: center;
+        margin-bottom: 60px;
+        border-radius: 20px;
+    }
+    .hero-title {
+        font-family: 'Playfair Display', serif;
+        font-size: 3.5rem;
+        color: var(--gold-accent);
+        margin-bottom: 20px;
+    }
+    .hero-subtitle {
+        font-size: 1.3rem;
+        color: var(--text-secondary);
+        margin-bottom: 30px;
+    }
+    .section-title {
+        font-family: 'Playfair Display', serif;
+        font-size: 2.5rem;
+        color: var(--gold-accent);
+        text-align: center;
+        margin-bottom: 50px;
+    }
+    .categories-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 30px;
+        margin-bottom: 60px;
+    }
+    .category-card {
+        background: var(--glass-bg);
+        border: 1px solid var(--glass-border);
+        border-radius: 20px;
+        overflow: hidden;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        position: relative;
+    }
+    .category-card:hover {
+        transform: translateY(-10px);
+        border-color: var(--gold-accent);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+    }
+    .category-image-container {
+        position: relative;
+        height: 200px;
+        overflow: hidden;
+    }
+    .category-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.3s ease;
+    }
+    .category-card:hover .category-image {
+        transform: scale(1.1);
+    }
+    .category-icon-fallback {
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, var(--gold-accent), #b8941f);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #000;
+        font-size: 4rem;
+    }
+    .category-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(135deg, rgba(212, 175, 55, 0.8), rgba(184, 148, 31, 0.8));
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .category-card:hover .category-overlay {
+        opacity: 1;
+    }
+    .category-overlay-icon {
+        color: #000;
+        font-size: 3rem;
+    }
+    .category-info {
+        padding: 20px;
+        text-align: center;
+        background: rgba(0, 0, 0, 0.6);
+    }
+    .category-name {
+        font-size: 1.3rem;
+        color: var(--text-primary);
+        font-weight: 600;
+        margin: 0;
+    }
+    .product-card {
+        background: linear-gradient(135deg, rgba(0, 0, 0, 0.9), rgba(26, 26, 26, 0.9));
+        border: 2px solid var(--gold-accent);
+        border-radius: 15px;
+        overflow: hidden;
+        transition: all 0.3s ease;
+    }
+    .product-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 15px 40px rgba(212, 175, 55, 0.4);
+        border-color: var(--gold-light);
+    }
+    .product-card .card-img-top {
+        border-bottom: 2px solid var(--gold-accent);
+    }
+    .product-card .card-body {
+        background: rgba(0, 0, 0, 0.8);
+    }
+    .product-card .card-title {
+        color: var(--gold-accent);
+        font-weight: 600;
+    }
+    .product-card .btn-primary {
+        background: linear-gradient(135deg, var(--gold-accent), #b8941f);
+        border: none;
+        color: #000;
+        font-weight: 600;
+    }
+    .product-card .btn-primary:hover {
+        background: linear-gradient(135deg, var(--gold-light), var(--gold-accent));
+        color: #000;
+    }
+    @media (min-width: 1200px) {
+        .products-grid-5 > div {
+            flex: 0 0 20%;
+            max-width: 20%;
+        }
+    }
+    .products-grid-5 {
+        display: flex;
+        flex-wrap: wrap;
+    }
+    .products-grid-5 > div {
+        display: flex;
+    }
+    .product-card {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+    }
+    .product-card .card-img-top {
+        height: 200px;
+        object-fit: cover;
+    }
+    .product-card .card-body {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+    .product-card .card-body > *:last-child {
+        margin-top: auto;
+    }
+    .category-card {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+    }
+    .categories-grid {
+        display: grid;
+        align-items: stretch;
+    }
+</style>
+
+<!-- Hero Section -->
+<div class="hero-section">
+    <h1 class="hero-title">Montclair Wardrobe</h1>
+    <p class="hero-subtitle">Discover curated fashion and boutique essentials crafted for the discerning individual</p>
+    <a href="{% url 'home:products' %}" class="btn btn-lg" style="background: linear-gradient(135deg, var(--gold-accent), #b8941f); color: #000; padding: 15px 40px; border-radius: 50px; text-decoration: none; font-weight: 600;">
+        <i class="fas fa-shopping-bag me-2"></i>Explore Collections
+    </a>
+</div>
+
+<!-- Categories Section -->
+{% if categories %}
+<div class="mb-5">
+    <h2 class="section-title">Shop by Categories</h2>
+    <div class="categories-grid">
+        {% for category in categories %}
+        <a href="{% url 'home:category_products' category.slug %}" class="category-card">
+            <div class="category-image-container">
+                {% if category.image %}
+                <img src="{{ category.image }}" class="category-image" alt="{{ category.name }}" loading="lazy" 
+                     onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                <div class="category-icon-fallback" style="display: none;">
+                    <i class="{{ category.icon }}"></i>
+                </div>
+                {% else %}
+                <div class="category-icon-fallback">
+                    <i class="{{ category.icon }}"></i>
+                </div>
+                {% endif %}
+                <div class="category-overlay">
+                    <i class="{{ category.icon }} category-overlay-icon"></i>
+                </div>
+            </div>
+            <div class="category-info">
+                <h3 class="category-name">{{ category.name }}</h3>
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+<!-- Products Section -->
+<h2 class="section-title">Featured Products</h2>
+{% if products %}
+<div class="row g-3 products-grid-5">
+    {% for product in products %}
+    <div class="col-lg-3 col-md-4 col-sm-6">
+        <div class="card product-card">
+            <img src="{{ product.image.url|default:'/static/images/default-product.jpg' }}"
+                alt="{{ product.name }}" class="card-img-top" loading="lazy">
+            <div class="card-body">
+                <h5 class="card-title">{{ product.name }}</h5>
+                <p class="card-text">{{ product.description|truncatewords:15 }}</p>
+                <p class="fw-bold" style="color: var(--gold-accent);">ZMW {{ product.price }}</p>
+                <p class="text-muted small">
+                    {% if product.is_in_stock %}
+                    {{ product.stock }} in stock
+                    {% else %}
+                    <span class="out-of-stock">Out of Stock</span>
+                    {% endif %}
+                </p>
+                {% if user.is_authenticated and product.is_in_stock %}
+                <a href="{% url 'cart:add_to_cart' product.id %}" class="btn btn-primary btn-sm">
+                    <i class="fas fa-cart-plus me-1"></i> Add to Cart
+                </a>
+                {% elif not user.is_authenticated %}
+                <a href="{% url 'login' %}" class="btn btn-outline-primary btn-sm">
+                    <i class="fas fa-sign-in-alt me-1"></i> Login to Purchase
+                </a>
+                {% else %}
+                <button class="btn btn-secondary btn-sm" disabled>Out of Stock</button>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<p class="text-center">No products available at the moment. Please check back soon for new arrivals!</p>
+{% endif %}
+{% endblock %}

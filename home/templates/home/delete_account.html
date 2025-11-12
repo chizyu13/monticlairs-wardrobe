@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}Delete Account - EHC Marketplace{% endblock %}
+{% block title %}Delete Account - Monticlair's Wardrobe{% endblock %}
 
 {% block content %}
 <div class="container my-5">
@@ -23,7 +23,7 @@
                     </ul>
                     <p>Please enter your password to confirm the deletion of your account.</p>
 
-                    <form method="POST" action="{% url 'delete_account' %}">
+                    <form method="POST" action="{% url 'home:delete_account' %}">
                         {% csrf_token %}
                         <div class="mb-3">
                             <label for="password" class="form-label">Password</label>

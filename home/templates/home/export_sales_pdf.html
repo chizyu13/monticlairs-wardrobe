@@ -1,226 +1,848 @@
-{% extends 'base.html' %}
 {% load static %}
-
-{% block extra_css %}
-<style>
-    body {
-        font-family: Arial, sans-serif;
-        font-size: 12pt;
-        color: #333;
-    }
-    .container {
-        max-width: 1000px;
-        margin: 20px auto;
-        padding: 20px;
-    }
-    .header {
-        text-align: center;
-        margin-bottom: 30px;
-    }
-    .header img {
-        max-width: 150px;
-        margin-bottom: 10px;
-    }
-    .filters {
-        margin-bottom: 20px;
-        padding: 10px;
-        border: 1px solid #ddd;
-        border-radius: 5px;
-    }
-    .filters p {
-        margin: 5px 0;
-    }
-    .summary {
-        margin-bottom: 20px;
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 10px;
-    }
-    .summary-box {
-        padding: 15px;
-        border: 1px solid #ddd;
-        border-radius: 5px;
-        text-align: center;
-        background-color: #f9f9f9;
-    }
-    .summary-box h5 {
-        margin: 0 0 5px;
-        font-size: 14pt;
-        color: #007bff;
-    }
-    .summary-box p {
-        margin: 0;
-        font-size: 12pt;
-        font-weight: bold;
-    }
-    table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-bottom: 20px;
-    }
-    th, td {
-        border: 1px solid #ddd;
-        padding: 10px;
-        text-align: left;
-    }
-    th {
-        background-color: #007bff;
-        color: white;
-        font-weight: bold;
-    }
-    tr:nth-child(even) {
-        background-color: #f2f2f2;
-    }
-    .text-end {
-        text-align: right;
-    }
-    .text-center {
-        text-align: center;
-    }
-    .badge {
-        padding: 5px 10px;
-        border-radius: 12px;
-        font-size: 10pt;
-        color: white;
-        display: inline-block;
-    }
-    .badge-success { background-color: #28a745; }
-    .badge-danger { background-color: #dc3545; }
-    .badge-warning { background-color: #ffc107; }
-    .footer {
-        margin-top: 30px;
-        text-align: center;
-        font-size: 10pt;
-        color: #777;
-    }
-    @media print {
-        .no-print {
-            display: none;
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sales Report - Montclair Wardrobe</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
+
+        :root {
+            --primary-color: #0a0a0a;
+            --secondary-color: #1a1a1a;
+            --gold-accent: #d4af37;
+            --gold-light: #f4e4a6;
+            --text-primary: #2c2c2c;
+            --text-secondary: #666666;
+            --text-muted: #999999;
+            --border-color: #e0e0e0;
+            --bg-light: #f8f9fa;
+            --success-color: #28a745;
+            --warning-color: #ffc107;
+            --danger-color: #dc3545;
+            --info-color: #17a2b8;
+        }
+
         body {
-            margin: 0;
+            font-family: 'Inter', sans-serif;
+            font-size: 11pt;
+            line-height: 1.4;
+            color: var(--text-primary);
+            background: white;
         }
+
         .container {
-            margin: 0;
-            padding: 10px;
+            max-width: 210mm;
+            margin: 0 auto;
+            padding: 20mm;
+            background: white;
         }
-    }
-</style>
-{% endblock %}
 
-{% block title %}Sales Report Preview - EHC Marketplace{% endblock %}
+        /* Header Section */
+        .report-header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-bottom: 30px;
+            border-bottom: 3px solid var(--gold-accent);
+            position: relative;
+        }
 
-{% block content %}
-<div class="container">
-    <!-- Header -->
-    <div class="header">
-        {% if logo %}
-        <img src="{{ logo.url }}" alt="EHC Marketplace Logo">
-        {% else %}
-        <img src="{% static 'images/logo.png' %}" alt="EHC Marketplace Logo">
-        {% endif %}
-        <h1>EHC Marketplace Sales Report</h1>
-        <p>Generated on: {{ generated_date|date:"F d, Y H:i" }}</p>
-    </div>
+        .company-logo {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 20px;
+            background: linear-gradient(135deg, var(--gold-accent), #b8941f);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 2rem;
+        }
 
-    <!-- Filters Applied -->
-    <div class="filters">
-        <h4>Filters Applied</h4>
-        <p><strong>Date Range:</strong> 
-            {% if start_date %}
-                {{ start_date|date:"F d, Y" }} to 
-                {% if end_date %}
-                    {{ end_date|date:"F d, Y" }}
-                {% else %}
-                    Present
-                {% endif %}
+        .company-name {
+            font-family: 'Playfair Display', serif;
+            font-size: 28pt;
+            font-weight: 700;
+            color: var(--gold-accent);
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+        }
+
+        .company-tagline {
+            font-size: 12pt;
+            color: var(--text-secondary);
+            margin-bottom: 20px;
+            font-style: italic;
+        }
+
+        .report-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 20pt;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+
+        .report-date {
+            font-size: 10pt;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        /* Filter Information */
+        .filter-section {
+            background: var(--bg-light);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+
+        .filter-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 14pt;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .filter-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .filter-item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .filter-label {
+            font-weight: 600;
+            font-size: 9pt;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .filter-value {
+            font-size: 11pt;
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        /* Summary Statistics */
+        .summary-section {
+            margin-bottom: 30px;
+        }
+
+        .summary-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 16pt;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .summary-card {
+            background: white;
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .summary-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--gold-accent);
+        }
+
+        .summary-card.primary::before {
+            background: #007bff;
+        }
+
+        .summary-card.success::before {
+            background: var(--success-color);
+        }
+
+        .summary-card.info::before {
+            background: var(--info-color);
+        }
+
+        .summary-card.warning::before {
+            background: var(--warning-color);
+        }
+
+        .summary-label {
+            font-size: 9pt;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        .summary-value {
+            font-size: 18pt;
+            font-weight: 700;
+            color: var(--text-primary);
+            line-height: 1;
+        }
+
+        .summary-description {
+            font-size: 8pt;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }        /*
+ Sales Table */
+        .table-section {
+            margin-bottom: 30px;
+        }
+
+        .table-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 16pt;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .sales-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            font-size: 9pt;
+        }
+
+        .sales-table th {
+            background: linear-gradient(135deg, var(--gold-accent), #b8941f);
+            color: white;
+            padding: 12px 8px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 8pt;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border: 1px solid #b8941f;
+        }
+
+        .sales-table th.text-center {
+            text-align: center;
+        }
+
+        .sales-table th.text-end {
+            text-align: right;
+        }
+
+        .sales-table td {
+            padding: 10px 8px;
+            border: 1px solid var(--border-color);
+            vertical-align: middle;
+        }
+
+        .sales-table tbody tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+
+        .sales-table tbody tr:hover {
+            background: #f0f0f0;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .text-end {
+            text-align: right;
+        }
+
+        .text-start {
+            text-align: left;
+        }
+
+        /* Status Badges */
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 7pt;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: white;
+            display: inline-block;
+        }
+
+        .status-sold {
+            background: var(--danger-color);
+        }
+
+        .status-pending {
+            background: var(--warning-color);
+            color: var(--text-primary);
+        }
+
+        .status-delivered {
+            background: var(--success-color);
+        }
+
+        .status-active {
+            background: var(--info-color);
+        }
+
+        /* Product Info */
+        .product-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .product-image {
+            width: 30px;
+            height: 30px;
+            border-radius: 4px;
+            object-fit: cover;
+            border: 1px solid var(--border-color);
+        }
+
+        .product-name {
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        /* Buyer Info */
+        .buyer-info {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .buyer-avatar {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: var(--gold-accent);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 8pt;
+            font-weight: 600;
+        }
+
+        /* Table Footer */
+        .sales-table tfoot td {
+            background: #f8f9fa;
+            font-weight: 600;
+            border-top: 2px solid var(--gold-accent);
+            padding: 12px 8px;
+        }
+
+        .total-row {
+            font-size: 10pt;
+            color: var(--text-primary);
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-secondary);
+        }
+
+        .empty-icon {
+            font-size: 3rem;
+            color: var(--gold-accent);
+            margin-bottom: 16px;
+            opacity: 0.6;
+        }
+
+        .empty-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 14pt;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+
+        .empty-description {
+            font-size: 10pt;
+        }
+
+        /* Footer */
+        .report-footer {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 2px solid var(--border-color);
+            text-align: center;
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .footer-section {
+            text-align: center;
+        }
+
+        .footer-title {
+            font-weight: 600;
+            font-size: 9pt;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .footer-text {
+            font-size: 8pt;
+            color: var(--text-secondary);
+            line-height: 1.4;
+        }
+
+        .copyright {
+            font-size: 8pt;
+            color: var(--text-muted);
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        /* Print Button */
+        .print-section {
+            text-align: center;
+            margin-top: 30px;
+            padding: 20px;
+            background: var(--bg-light);
+            border-radius: 8px;
+        }
+
+        .btn-print {
+            background: linear-gradient(135deg, var(--gold-accent), #b8941f);
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 10pt;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-print:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3);
+        }
+
+        /* Print Styles */
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+
+            body {
+                margin: 0;
+                padding: 0;
+                font-size: 10pt;
+            }
+
+            .container {
+                margin: 0;
+                padding: 15mm;
+                max-width: none;
+            }
+
+            .report-header {
+                margin-bottom: 30px;
+                padding-bottom: 20px;
+            }
+
+            .company-name {
+                font-size: 24pt;
+            }
+
+            .report-title {
+                font-size: 18pt;
+            }
+
+            .summary-grid {
+                grid-template-columns: repeat(4, 1fr);
+                gap: 15px;
+            }
+
+            .summary-card {
+                padding: 15px;
+            }
+
+            .summary-value {
+                font-size: 16pt;
+            }
+
+            .sales-table {
+                font-size: 8pt;
+            }
+
+            .sales-table th,
+            .sales-table td {
+                padding: 8px 6px;
+            }
+
+            .filter-section {
+                padding: 15px;
+                margin-bottom: 20px;
+            }
+
+            .report-footer {
+                margin-top: 30px;
+                padding-top: 15px;
+            }
+
+            /* Page break handling */
+            .summary-section,
+            .filter-section {
+                page-break-inside: avoid;
+            }
+
+            .sales-table thead {
+                display: table-header-group;
+            }
+
+            .sales-table tbody tr {
+                page-break-inside: avoid;
+            }
+        }
+
+        /* Screen-only styles */
+        @media screen {
+            body {
+                background: #f5f5f5;
+                padding: 20px 0;
+            }
+
+            .container {
+                box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+                border-radius: 8px;
+            }
+        }
+    </style>
+</head><
+body>
+    <div class="container">
+        <!-- Report Header -->
+        <div class="report-header">
+            <div class="company-logo">
+                <i class="fas fa-gem"></i>
+            </div>
+            <h1 class="company-name">Montclair Wardrobe</h1>
+            <p class="company-tagline">Premium Fashion & Boutique Excellence</p>
+            <h2 class="report-title">Sales Analytics Report</h2>
+            <p class="report-date">Generated on {{ generated_date|date:"F d, Y \a\t H:i" }}</p>
+        </div>
+
+        <!-- Filter Information -->
+        <div class="filter-section">
+            <h3 class="filter-title">
+                📊 Report Parameters
+            </h3>
+            <div class="filter-grid">
+                <div class="filter-item">
+                    <div class="filter-label">Date Range</div>
+                    <div class="filter-value">
+                        {% if start_date %}
+                            {{ start_date|date:"M d, Y" }} to 
+                            {% if end_date %}
+                                {{ end_date|date:"M d, Y" }}
+                            {% else %}
+                                Present
+                            {% endif %}
+                        {% else %}
+                            All Time
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="filter-item">
+                    <div class="filter-label">Product Filter</div>
+                    <div class="filter-value">
+                        {% if product_name %}
+                            {{ product_name }}
+                        {% else %}
+                            All Products
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="filter-item">
+                    <div class="filter-label">Report Type</div>
+                    <div class="filter-value">Comprehensive Sales Analysis</div>
+                </div>
+                <div class="filter-item">
+                    <div class="filter-label">Generated By</div>
+                    <div class="filter-value">{{ request.user.get_full_name|default:request.user.username|default:"System Administrator" }}</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Summary Statistics -->
+        <div class="summary-section">
+            <h3 class="summary-title">Executive Summary</h3>
+            <div class="summary-grid">
+                <div class="summary-card primary">
+                    <div class="summary-label">Total Sales</div>
+                    <div class="summary-value">{{ total_sales_count|default:0 }}</div>
+                    <div class="summary-description">Transactions processed</div>
+                </div>
+                <div class="summary-card success">
+                    <div class="summary-label">Total Revenue</div>
+                    <div class="summary-value">ZMW {{ total_revenue|floatformat:2|default:"0.00" }}</div>
+                    <div class="summary-description">Gross sales revenue</div>
+                </div>
+                <div class="summary-card info">
+                    <div class="summary-label">Average Sale</div>
+                    <div class="summary-value">ZMW {{ average_sale|floatformat:2|default:"0.00" }}</div>
+                    <div class="summary-description">Per transaction</div>
+                </div>
+                <div class="summary-card warning">
+                    <div class="summary-label">Monthly Revenue</div>
+                    <div class="summary-value">ZMW {{ monthly_revenue|floatformat:2|default:"0.00" }}</div>
+                    <div class="summary-description">{{ current_month|default:"Current month" }}</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sales Data Table -->
+        <div class="table-section">
+            <h3 class="table-title">
+                📋 Detailed Sales Records
+            </h3>
+            
+            {% if sales %}
+                <table class="sales-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 5%;">#</th>
+                            <th style="width: 25%;">Product</th>
+                            <th style="width: 15%;">Buyer</th>
+                            <th style="width: 12%;">Date</th>
+                            <th style="width: 8%;" class="text-center">Qty</th>
+                            <th style="width: 12%;" class="text-end">Unit Price</th>
+                            <th style="width: 13%;" class="text-end">Total Amount</th>
+                            <th style="width: 10%;" class="text-center">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for sale in sales %}
+                        <tr>
+                            <td class="text-center">{{ forloop.counter }}</td>
+                            <td>
+                                <div class="product-info">
+                                    {% if sale.product.image %}
+                                        <img src="{{ sale.product.image.url }}" alt="{{ sale.product.name }}" class="product-image">
+                                    {% endif %}
+                                    <div class="product-name">{{ sale.product.name|truncatechars:35 }}</div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="buyer-info">
+                                    <div class="buyer-avatar">
+                                        {{ sale.buyer.username|first|upper|default:"?" }}
+                                    </div>
+                                    <span>{{ sale.buyer.username|default:"Unknown" }}</span>
+                                </div>
+                            </td>
+                            <td>{{ sale.sale_date|date:"M d, Y"|default:"N/A" }}</td>
+                            <td class="text-center">{{ sale.quantity|default:0 }}</td>
+                            <td class="text-end">ZMW {{ sale.unit_price|floatformat:2|default:"0.00" }}</td>
+                            <td class="text-end"><strong>ZMW {{ sale.total_amount|floatformat:2|default:"0.00" }}</strong></td>
+                            <td class="text-center">
+                                {% if sale.status == 'sold' %}
+                                    <span class="status-badge status-sold">Sold</span>
+                                {% elif sale.status == 'pending' %}
+                                    <span class="status-badge status-pending">Pending</span>
+                                {% elif sale.status == 'delivered' %}
+                                    <span class="status-badge status-delivered">Delivered</span>
+                                {% else %}
+                                    <span class="status-badge status-active">{{ sale.status|title|default:"Active" }}</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                    <tfoot>
+                        <tr class="total-row">
+                            <td colspan="6" class="text-end"><strong>TOTAL REVENUE:</strong></td>
+                            <td class="text-end"><strong>ZMW {{ total_revenue|floatformat:2|default:"0.00" }}</strong></td>
+                            <td></td>
+                        </tr>
+                        <tr class="total-row">
+                            <td colspan="6" class="text-end"><strong>TOTAL TRANSACTIONS:</strong></td>
+                            <td class="text-end"><strong>{{ total_sales_count|default:0 }}</strong></td>
+                            <td></td>
+                        </tr>
+                    </tfoot>
+                </table>
             {% else %}
-                All Time
+                <div class="empty-state">
+                    <div class="empty-icon">📊</div>
+                    <h4 class="empty-title">No Sales Data Available</h4>
+                    <p class="empty-description">
+                        No sales records match the specified criteria for this reporting period.
+                    </p>
+                </div>
             {% endif %}
-        </p>
-        <p><strong>Product:</strong> 
-            {% if product_name %}
-                {{ product_name }}
-            {% else %}
-                All Products
-            {% endif %}
-        </p>
+        </div>        <!-
+- Report Footer -->
+        <div class="report-footer">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <div class="footer-title">Business Information</div>
+                    <div class="footer-text">
+                        Montclair Wardrobe<br>
+                        Lilayi Area 56<br>
+                        Lusaka, Zambia<br>
+                        +260 77-117-2699
+                    </div>
+                </div>
+                <div class="footer-section">
+                    <div class="footer-title">Report Details</div>
+                    <div class="footer-text">
+                        Report ID: MW-{{ generated_date|date:"YmdHis" }}<br>
+                        Generated: {{ generated_date|date:"F d, Y H:i" }}<br>
+                        Period: {% if start_date %}{{ start_date|date:"M d, Y" }} - {% if end_date %}{{ end_date|date:"M d, Y" }}{% else %}Present{% endif %}{% else %}All Time{% endif %}<br>
+                        Status: Final
+                    </div>
+                </div>
+                <div class="footer-section">
+                    <div class="footer-title">Contact Information</div>
+                    <div class="footer-text">
+                        Email: contact@montclairwardrobe.com<br>
+                        Website: www.montclairwardrobe.com<br>
+                        Support: +260 77-117-2699<br>
+                        Hours: Mon-Sat 9AM-8PM
+                    </div>
+                </div>
+            </div>
+            
+            <div class="copyright">
+                <p>
+                    <strong>Montclair Wardrobe</strong> &copy; {{ generated_date|date:"Y" }}. All rights reserved. 
+                    This report contains confidential business information and is intended solely for authorized personnel.
+                </p>
+                <p style="margin-top: 8px;">
+                    <em>Premium Fashion • Boutique Excellence • Personalized Service</em>
+                </p>
+            </div>
+        </div>
+
+        <!-- Print Button (Hidden in Print) -->
+        <div class="print-section no-print">
+            <button onclick="window.print()" class="btn-print">
+                🖨️ Print Report / Save as PDF
+            </button>
+            <p style="margin-top: 10px; font-size: 9pt; color: var(--text-secondary);">
+                Use your browser's print function to save this report as a PDF or send it to a printer.
+            </p>
+        </div>
     </div>
 
-    <!-- Summary Statistics -->
-    <div class="summary">
-        <div class="summary-box">
-            <h5>Total Sales</h5>
-            <p>{{ total_sales_count|default:0 }}</p>
-        </div>
-        <div class="summary-box">
-            <h5>Total Revenue</h5>
-            <p>ZMW {{ total_revenue|floatformat:2|default:"0.00" }}</p>
-        </div>
-        <div class="summary-box">
-            <h5>Average Sale</h5>
-            <p>ZMW {{ average_sale|floatformat:2|default:"0.00" }}</p>
-        </div>
-        <div class="summary-box">
-            <h5>This Month</h5>
-            <p>ZMW {{ monthly_revenue|floatformat:2|default:"0.00" }}</p>
-        </div>
-    </div>
+    <script>
+        // Auto-focus print button for accessibility
+        document.addEventListener('DOMContentLoaded', function() {
+            const printBtn = document.querySelector('.btn-print');
+            if (printBtn) {
+                printBtn.focus();
+            }
 
-    <!-- Sales Table -->
-    <table>
-        <thead>
-            <tr>
-                <th>#</th>
-                <th>Product</th>
-                <th>Buyer</th>
-                <th>Date</th>
-                <th class="text-end">Qty</th>
-                <th class="text-end">Unit Price</th>
-                <th class="text-end">Total</th>
-                <th class="text-center">Status</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for sale in sales %}
-            <tr>
-                <td>{{ forloop.counter }}</td>
-                <td>{{ sale.product.name|truncatechars:50 }}</td>
-                <td>{{ sale.buyer.username|default:"Unknown" }}</td>
-                <td>{{ sale.sale_date|date:"M d, Y"|default:"N/A" }}</td>
-                <td class="text-end">{{ sale.quantity|default:0 }}</td>
-                <td class="text-end">ZMW {{ sale.unit_price|floatformat:2|default:"0.00" }}</td>
-                <td class="text-end">ZMW {{ sale.total_amount|floatformat:2|default:"0.00" }}</td>
-                <td class="text-center">
-                    <span class="badge {% if sale.status == 'sold' %}badge-danger{% elif sale.status == 'pending' %}badge-warning{% else %}badge-success{% endif %}">
-                        {{ sale.status|title|default:"Active" }}
-                    </span>
-                </td>
-            </tr>
-            {% empty %}
-            <tr>
-                <td colspan="8" class="text-center">No sales records available</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-        <tfoot>
-            <tr>
-                <td colspan="6" class="text-end"><strong>Total Revenue:</strong></td>
-                <td class="text-end"><strong>ZMW {{ total_revenue|floatformat:2|default:"0.00" }}</strong></td>
-                <td></td>
-            </tr>
-        </tfoot>
-    </table>
+            // Add keyboard shortcut for printing
+            document.addEventListener('keydown', function(e) {
+                if ((e.ctrlKey || e.metaKey) && e.key === 'p') {
+                    e.preventDefault();
+                    window.print();
+                }
+            });
 
-    <!-- Footer -->
-    <div class="footer">
-        <p>EHC Marketplace &copy; {{ generated_date|date:"Y" }}. All rights reserved.</p>
-        <p>Generated by: {{ request.user.username|default:"System" }}</p>
-    </div>
+            // Add loading state to print button
+            const printButton = document.querySelector('.btn-print');
+            if (printButton) {
+                printButton.addEventListener('click', function() {
+                    this.innerHTML = '🖨️ Preparing Print...';
+                    this.disabled = true;
+                    
+                    setTimeout(() => {
+                        this.innerHTML = '🖨️ Print Report / Save as PDF';
+                        this.disabled = false;
+                    }, 2000);
+                });
+            }
 
-    <!-- Print Button (Hidden in Print) -->
-    <div class="text-center no-print">
-        <button onclick="window.print()" class="btn btn-primary">Print / Save as PDF</button>
-    </div>
-</div>
-{% endblock %}
+            // Handle print events
+            window.addEventListener('beforeprint', function() {
+                document.title = 'Montclair Wardrobe - Sales Report - ' + new Date().toLocaleDateString();
+            });
+
+            window.addEventListener('afterprint', function() {
+                document.title = 'Sales Report - Montclair Wardrobe';
+            });
+        });
+
+        // Add print styles dynamically for better browser compatibility
+        function addPrintStyles() {
+            const style = document.createElement('style');
+            style.textContent = `
+                @media print {
+                    @page {
+                        margin: 15mm;
+                        size: A4;
+                    }
+                    
+                    body {
+                        -webkit-print-color-adjust: exact;
+                        color-adjust: exact;
+                    }
+                    
+                    .summary-card::before,
+                    .sales-table th {
+                        -webkit-print-color-adjust: exact;
+                        color-adjust: exact;
+                    }
+                }
+            `;
+            document.head.appendChild(style);
+        }
+
+        // Initialize print styles
+        addPrintStyles();
+    </script>
+</body>
+</html>

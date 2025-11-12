@@ -1,0 +1,302 @@
+{% extends 'base.html' %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --glass-bg: rgba(255, 255, 255, 0.05);
+        --glass-border: rgba(255, 255, 255, 0.1);
+        --gold-accent: #d4af37;
+        --gold-light: #f0d98d;
+        --text-primary: #ffffff;
+        --text-secondary: #b0b0b0;
+        --accent-dark: rgba(255, 255, 255, 0.15);
+    }
+
+    body.dark-mode {
+        --glass-bg: rgba(255, 255, 255, 0.05);
+        --glass-border: rgba(255, 255, 255, 0.1);
+    }
+
+    .main-content {
+        padding-top: 100px;
+        min-height: 100vh;
+    }
+
+    .checkout-header {
+        text-align: center;
+        margin-bottom: 50px;
+    }
+
+    .checkout-title {
+        font-family: 'Playfair Display', serif;
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: var(--gold-accent);
+        margin-bottom: 16px;
+        letter-spacing: -0.02em;
+    }
+
+    .checkout-subtitle {
+        color: var(--text-secondary);
+        font-size: 1.1rem;
+        margin-bottom: 30px;
+    }
+
+    .total-price {
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        border: 1px solid var(--glass-border);
+        border-radius: 16px;
+        padding: 20px;
+        text-align: center;
+        margin-bottom: 30px;
+    }
+
+    .total-price-label {
+        color: var(--text-secondary);
+        font-size: 1rem;
+        margin-bottom: 8px;
+    }
+
+    .total-price-amount {
+        font-family: 'Playfair Display', serif;
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--gold-accent);
+    }
+
+    .info-alert {
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        border: 1px solid var(--glass-border);
+        border-radius: 12px;
+        padding: 16px;
+        margin-bottom: 30px;
+        color: var(--text-secondary);
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+    }
+
+    .info-alert i {
+        color: var(--gold-accent);
+        margin-top: 2px;
+    }
+
+    .checkout-form {
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        border: 1px solid var(--glass-border);
+        border-radius: 20px;
+        padding: 40px;
+        margin-bottom: 40px;
+    }
+
+    .form-group {
+        margin-bottom: 24px;
+    }
+
+    .form-label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 500;
+        color: var(--text-primary);
+        font-size: 0.9rem;
+        letter-spacing: 0.02em;
+    }
+
+    #card-element {
+        padding: 14px 16px;
+        border: 1px solid var(--accent-dark);
+        border-radius: 10px;
+        background: var(--glass-bg);
+        backdrop-filter: blur(10px);
+        transition: all 0.3s ease;
+    }
+
+    #card-element:focus {
+        border-color: var(--gold-accent);
+        box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1);
+    }
+
+    #card-errors {
+        color: #ff6b6b;
+        font-size: 0.9rem;
+        margin-top: 12px;
+        padding: 12px;
+        border-radius: 8px;
+        background: rgba(255, 107, 107, 0.1);
+        border: 1px solid rgba(255, 107, 107, 0.2);
+        display: none;
+    }
+
+    #card-errors:not(:empty) {
+        display: block;
+    }
+
+    .btn-payment {
+        width: 100%;
+        padding: 16px;
+        background: linear-gradient(135deg, var(--gold-accent), var(--gold-light));
+        color: #000;
+        border: none;
+        border-radius: 12px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin-top: 20px;
+    }
+
+    .btn-payment:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(212, 175, 55, 0.3);
+    }
+
+    .btn-payment:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    .btn-cancel {
+        width: 100%;
+        padding: 14px;
+        background: transparent;
+        color: var(--text-secondary);
+        border: 1px solid var(--accent-dark);
+        border-radius: 12px;
+        font-size: 1rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-block;
+        text-align: center;
+        margin-top: 12px;
+    }
+
+    .btn-cancel:hover {
+        border-color: var(--gold-accent);
+        color: var(--gold-accent);
+    }
+
+    @media (max-width: 768px) {
+        .checkout-title {
+            font-size: 2rem;
+        }
+
+        .checkout-form {
+            padding: 24px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="main-content">
+    <div class="container">
+        <div class="checkout-header">
+            <h1 class="checkout-title">Complete Your Payment</h1>
+            <p class="checkout-subtitle">Secure payment powered by Stripe</p>
+        </div>
+
+        <div class="total-price">
+            <div class="total-price-label">Total Amount</div>
+            <div class="total-price-amount">ZMW {{ total_price|default:"50.00" }}</div>
+        </div>
+
+        <div class="info-alert">
+            <i class="fas fa-lock"></i>
+            <div>Your payment information is secure and encrypted. We never store your card details.</div>
+        </div>
+
+        <div class="checkout-form">
+            <form method="POST" id="payment-form">
+                {% csrf_token %}
+
+                <div class="form-group">
+                    <label class="form-label" for="card-element">
+                        <i class="fas fa-credit-card me-2"></i>Card Information
+                    </label>
+                    <div id="card-element"></div>
+                    <div id="card-errors" role="alert"></div>
+                </div>
+
+                <button class="btn-payment" id="submit" type="submit">
+                    <i class="fas fa-lock me-2"></i>Pay ZMW {{ total_price|default:"50.00" }}
+                </button>
+            </form>
+
+            <a href="{% url 'home:main_page' %}" class="btn-cancel">
+                <i class="fas fa-arrow-left me-2"></i>Cancel Payment
+            </a>
+        </div>
+    </div>
+</div>
+
+<script src="https://js.stripe.com/v3/"></script>
+
+<script type="text/javascript">
+    var stripe = Stripe('{{ stripe_publishable_key }}');
+    var elements = stripe.elements({
+        fonts: [{
+            cssSrc: 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap',
+        }],
+    });
+
+    var style = {
+        base: {
+            color: '#ffffff',
+            fontFamily: 'Inter, system-ui, sans-serif',
+            fontSmoothing: 'antialiased',
+            fontSize: '16px',
+            '::placeholder': {
+                color: '#b0b0b0',
+            },
+        },
+        invalid: {
+            color: '#ff6b6b',
+            iconColor: '#ff6b6b',
+        },
+    };
+
+    var card = elements.create('card', { style: style });
+    card.mount('#card-element');
+
+    card.on('change', function (event) {
+        var displayError = document.getElementById('card-errors');
+        if (event.error) {
+            displayError.textContent = event.error.message;
+        } else {
+            displayError.textContent = '';
+        }
+    });
+
+    var form = document.getElementById('payment-form');
+    var submitButton = document.getElementById('submit');
+
+    form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+
+        submitButton.disabled = true;
+        submitButton.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processing...';
+
+        const { token, error } = await stripe.createToken(card);
+
+        if (error) {
+            document.getElementById('card-errors').textContent = error.message;
+            submitButton.disabled = false;
+            submitButton.innerHTML = '<i class="fas fa-lock me-2"></i>Pay ZMW {{ total_price|default:"50.00" }}';
+        } else {
+            const hiddenInput = document.createElement('input');
+            hiddenInput.setAttribute('type', 'hidden');
+            hiddenInput.setAttribute('name', 'payment_method_id');
+            hiddenInput.setAttribute('value', token.id);
+            form.appendChild(hiddenInput);
+
+            form.submit();
+        }
+    });
+</script>
+{% endblock %}

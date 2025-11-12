@@ -1,0 +1,452 @@
+{% extends 'custom_admin/base.html' %}
+{% load static %}
+
+{% block title %}Payment Details - Admin{% endblock %}
+
+{% block content %}
+<style>
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+    }
+    
+    .page-title {
+        font-family: 'Playfair Display', serif;
+        color: var(--gold-accent);
+        font-size: 1.8rem;
+        font-weight: 700;
+        margin: 0;
+    }
+    
+    .detail-card {
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        border: 1px solid var(--glass-border);
+        border-radius: 16px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+    }
+    
+    .card-title {
+        font-family: 'Playfair Display', serif;
+        color: var(--gold-accent);
+        font-size: 1.3rem;
+        font-weight: 700;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .info-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 1rem 0;
+        border-bottom: 1px solid var(--glass-border);
+    }
+    
+    .info-row:last-child {
+        border-bottom: none;
+    }
+    
+    .info-label {
+        color: var(--text-secondary);
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .info-value {
+        color: var(--text-primary);
+        font-weight: 600;
+    }
+    
+    .status-badge {
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .status-pending {
+        background: rgba(255, 193, 7, 0.2);
+        color: #ffc107;
+        border: 1px solid rgba(255, 193, 7, 0.4);
+    }
+    
+    .status-processing {
+        background: rgba(0, 123, 255, 0.2);
+        color: #007bff;
+        border: 1px solid rgba(0, 123, 255, 0.4);
+    }
+    
+    .status-completed {
+        background: rgba(40, 167, 69, 0.2);
+        color: #28a745;
+        border: 1px solid rgba(40, 167, 69, 0.4);
+    }
+    
+    .status-failed {
+        background: rgba(220, 53, 69, 0.2);
+        color: #dc3545;
+        border: 1px solid rgba(220, 53, 69, 0.4);
+    }
+    
+    .amount-display {
+        font-family: 'Playfair Display', serif;
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--gold-accent);
+    }
+    
+    .action-buttons {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+    }
+    
+    .btn-action {
+        padding: 0.75rem 1.5rem;
+        border-radius: 10px;
+        font-weight: 600;
+        border: none;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        flex: 1;
+        justify-content: center;
+    }
+    
+    .btn-action:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+    }
+    
+    .btn-approve {
+        background: linear-gradient(135deg, #28a745, #1e7e34);
+        color: white;
+    }
+    
+    .btn-reject {
+        background: linear-gradient(135deg, #dc3545, #c82333);
+        color: white;
+    }
+    
+    .btn-processing {
+        background: linear-gradient(135deg, #007bff, #0056b3);
+        color: white;
+    }
+    
+    .btn-back {
+        background: transparent;
+        border: 2px solid var(--gold-accent);
+        color: var(--gold-accent);
+        padding: 0.75rem 1.5rem;
+        border-radius: 10px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .btn-back:hover {
+        background: var(--gold-accent);
+        color: var(--primary-dark);
+        transform: translateY(-2px);
+    }
+    
+    .order-item {
+        background: rgba(26, 32, 44, 0.4);
+        border: 1px solid var(--glass-border);
+        border-radius: 12px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+    
+    .order-image {
+        width: 60px;
+        height: 60px;
+        border-radius: 8px;
+        object-fit: cover;
+        border: 2px solid var(--glass-border);
+    }
+    
+    .order-details {
+        flex: 1;
+    }
+    
+    .order-name {
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 0.25rem;
+    }
+    
+    .order-meta {
+        font-size: 0.85rem;
+        color: var(--text-muted);
+    }
+    
+    .order-price {
+        font-family: 'Playfair Display', serif;
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: var(--gold-accent);
+    }
+    
+    .alert-custom {
+        background: rgba(220, 53, 69, 0.1);
+        border: 1px solid rgba(220, 53, 69, 0.3);
+        border-radius: 12px;
+        padding: 1rem;
+        color: #dc3545;
+        margin-top: 1rem;
+    }
+    
+    .reject-form {
+        margin-top: 1rem;
+        padding: 1rem;
+        background: rgba(26, 32, 44, 0.4);
+        border-radius: 12px;
+        border: 1px solid var(--glass-border);
+    }
+    
+    .form-control {
+        background: rgba(26, 32, 44, 0.6);
+        border: 1px solid var(--glass-border);
+        color: var(--text-primary);
+        border-radius: 8px;
+        padding: 0.6rem 1rem;
+    }
+    
+    .form-control:focus {
+        background: rgba(26, 32, 44, 0.8);
+        border-color: var(--gold-accent);
+        box-shadow: 0 0 0 0.2rem rgba(212, 175, 55, 0.25);
+        color: var(--text-primary);
+    }
+</style>
+
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="page-header">
+        <div>
+            <h2 class="page-title">
+                <i class="fas fa-receipt me-2"></i>Payment Details
+            </h2>
+            <p style="color: var(--text-secondary); margin: 0.5rem 0 0 0;">Reference: #{{ payment.reference }}</p>
+        </div>
+        <a href="{% url 'custom_admin:manage_payments' %}" class="btn-back">
+            <i class="fas fa-arrow-left"></i>Back to Payments
+        </a>
+    </div>
+
+    <div class="row">
+        <!-- Payment Information -->
+        <div class="col-md-6">
+            <div class="detail-card">
+                <h3 class="card-title">
+                    <i class="fas fa-info-circle"></i>Payment Information
+                </h3>
+                
+                <div class="info-row">
+                    <span class="info-label"><i class="fas fa-hashtag"></i>Reference</span>
+                    <span class="info-value">#{{ payment.reference }}</span>
+                </div>
+                
+                <div class="info-row">
+                    <span class="info-label"><i class="fas fa-money-bill-wave"></i>Amount</span>
+                    <span class="amount-display">ZMW {{ payment.amount|floatformat:2 }}</span>
+                </div>
+                
+                <div class="info-row">
+                    <span class="info-label"><i class="fas fa-credit-card"></i>Payment Method</span>
+                    <span class="info-value">{{ payment.get_method_display }}</span>
+                </div>
+                
+                <div class="info-row">
+                    <span class="info-label"><i class="fas fa-info-circle"></i>Status</span>
+                    <span class="status-badge status-{{ payment.status }}">
+                        {% if payment.status == 'pending' %}
+                            <i class="fas fa-clock"></i>
+                        {% elif payment.status == 'processing' %}
+                            <i class="fas fa-spinner"></i>
+                        {% elif payment.status == 'completed' %}
+                            <i class="fas fa-check-circle"></i>
+                        {% elif payment.status == 'failed' %}
+                            <i class="fas fa-times-circle"></i>
+                        {% endif %}
+                        {{ payment.get_status_display }}
+                    </span>
+                </div>
+                
+                <div class="info-row">
+                    <span class="info-label"><i class="fas fa-calendar"></i>Created</span>
+                    <span class="info-value">{{ payment.created_at|date:"M d, Y H:i" }}</span>
+                </div>
+                
+                <div class="info-row">
+                    <span class="info-label"><i class="fas fa-sync"></i>Last Updated</span>
+                    <span class="info-value">{{ payment.updated_at|date:"M d, Y H:i" }}</span>
+                </div>
+                
+                {% if payment.completed_at %}
+                <div class="info-row">
+                    <span class="info-label"><i class="fas fa-check"></i>Completed</span>
+                    <span class="info-value">{{ payment.completed_at|date:"M d, Y H:i" }}</span>
+                </div>
+                {% endif %}
+                
+                {% if payment.retry_count > 0 %}
+                <div class="info-row">
+                    <span class="info-label"><i class="fas fa-redo"></i>Retry Count</span>
+                    <span class="info-value">{{ payment.retry_count }}</span>
+                </div>
+                {% endif %}
+                
+                {% if payment.error_message %}
+                <div class="alert-custom">
+                    <strong><i class="fas fa-exclamation-triangle me-2"></i>Error Message:</strong>
+                    <p class="mb-0 mt-2">{{ payment.error_message }}</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Customer Information -->
+        <div class="col-md-6">
+            <div class="detail-card">
+                <h3 class="card-title">
+                    <i class="fas fa-user"></i>Customer Information
+                </h3>
+                
+                <div class="info-row">
+                    <span class="info-label"><i class="fas fa-user"></i>Name</span>
+                    <span class="info-value">{{ payment.user.get_full_name|default:payment.user.username }}</span>
+                </div>
+                
+                <div class="info-row">
+                    <span class="info-label"><i class="fas fa-envelope"></i>Email</span>
+                    <span class="info-value">{{ payment.user.email }}</span>
+                </div>
+                
+                <div class="info-row">
+                    <span class="info-label"><i class="fas fa-phone"></i>Phone</span>
+                    <span class="info-value">{{ payment.phone_number|default:"N/A" }}</span>
+                </div>
+                
+                {% if payment.location %}
+                <div class="info-row">
+                    <span class="info-label"><i class="fas fa-map-marker-alt"></i>Location</span>
+                    <span class="info-value">{{ payment.location }}</span>
+                </div>
+                {% endif %}
+                
+                {% if payment.gps_location %}
+                <div class="info-row">
+                    <span class="info-label"><i class="fas fa-map-pin"></i>GPS Location</span>
+                    <span class="info-value">{{ payment.gps_location }}</span>
+                </div>
+                {% endif %}
+                
+                {% if payment.hostel_name %}
+                <div class="info-row">
+                    <span class="info-label"><i class="fas fa-building"></i>Hostel</span>
+                    <span class="info-value">{{ payment.hostel_name }}</span>
+                </div>
+                {% endif %}
+                
+                {% if payment.room_number %}
+                <div class="info-row">
+                    <span class="info-label"><i class="fas fa-door-open"></i>Room Number</span>
+                    <span class="info-value">{{ payment.room_number }}</span>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Related Orders -->
+    {% if orders %}
+    <div class="detail-card">
+        <h3 class="card-title">
+            <i class="fas fa-shopping-bag"></i>Related Orders ({{ orders.count }})
+        </h3>
+        
+        {% for order in orders %}
+        <div class="order-item">
+            {% if order.product.image %}
+                <img src="{{ order.product.image.url }}" alt="{{ order.product.name }}" class="order-image">
+            {% else %}
+                <div class="order-image" style="background: linear-gradient(135deg, rgba(212, 175, 55, 0.1), rgba(184, 148, 31, 0.1)); display: flex; align-items: center; justify-content: center;">
+                    <i class="fas fa-image" style="color: var(--gold-accent); opacity: 0.3;"></i>
+                </div>
+            {% endif %}
+            
+            <div class="order-details">
+                <div class="order-name">{{ order.product.name }}</div>
+                <div class="order-meta">
+                    Quantity: {{ order.quantity }} | Status: {{ order.get_status_display }}
+                </div>
+            </div>
+            
+            <div class="order-price">
+                ZMW {{ order.total_price|floatformat:2 }}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Action Buttons -->
+    {% if payment.status == 'pending' %}
+    <div class="detail-card">
+        <h3 class="card-title">
+            <i class="fas fa-tasks"></i>Actions
+        </h3>
+        
+        <div class="action-buttons">
+            <a href="{% url 'custom_admin:mark_payment_processing' payment.id %}" class="btn-action btn-processing">
+                <i class="fas fa-spinner"></i>Mark as Processing
+            </a>
+            <a href="{% url 'custom_admin:approve_payment' payment.id %}" class="btn-action btn-approve" onclick="return confirm('Are you sure you want to approve this payment?')">
+                <i class="fas fa-check"></i>Approve Payment
+            </a>
+            <button type="button" class="btn-action btn-reject" onclick="document.getElementById('rejectForm').style.display='block'">
+                <i class="fas fa-times"></i>Reject Payment
+            </button>
+        </div>
+        
+        <!-- Reject Form (Hidden by default) -->
+        <form method="post" action="{% url 'custom_admin:reject_payment' payment.id %}" id="rejectForm" class="reject-form" style="display: none;">
+            {% csrf_token %}
+            <label class="form-label"><i class="fas fa-comment me-1"></i>Rejection Reason</label>
+            <textarea name="reason" class="form-control" rows="3" placeholder="Enter reason for rejection..." required></textarea>
+            <div class="action-buttons" style="margin-top: 1rem;">
+                <button type="button" class="btn-action btn-processing" onclick="document.getElementById('rejectForm').style.display='none'">
+                    <i class="fas fa-times"></i>Cancel
+                </button>
+                <button type="submit" class="btn-action btn-reject">
+                    <i class="fas fa-check"></i>Confirm Rejection
+                </button>
+            </div>
+        </form>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

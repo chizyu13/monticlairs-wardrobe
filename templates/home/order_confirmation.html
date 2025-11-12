@@ -1,0 +1,117 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Order Confirmation - Montclair Wardrobe{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-lg border-0">
+                <div class="card-header bg-success text-white text-center py-4">
+                    <i class="fas fa-check-circle fa-3x mb-3"></i>
+                    <h2 class="mb-0">Order Confirmed!</h2>
+                    <p class="mb-0 opacity-75">Thank you for your purchase</p>
+                </div>
+                
+                <div class="card-body p-5">
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h5 class="text-muted mb-3">Order Details</h5>
+                            <p><strong>Order Number:</strong> {{ order.order_number }}</p>
+                            <p><strong>Total Amount:</strong> ZMW {{ order.total_amount }}</p>
+                            <p><strong>Payment Method:</strong> {{ order.payment_method|title }}</p>
+                            <p><strong>Delivery Area:</strong> {{ order.delivery_area }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h5 class="text-muted mb-3">What's Next?</h5>
+                            <div class="timeline">
+                                <div class="timeline-item active">
+                                    <i class="fas fa-check-circle text-success"></i>
+                                    <span>Order Placed</span>
+                                </div>
+                                <div class="timeline-item">
+                                    <i class="fas fa-clock text-muted"></i>
+                                    <span>Processing (1-2 hours)</span>
+                                </div>
+                                <div class="timeline-item">
+                                    <i class="fas fa-truck text-muted"></i>
+                                    <span>Out for Delivery</span>
+                                </div>
+                                <div class="timeline-item">
+                                    <i class="fas fa-home text-muted"></i>
+                                    <span>Delivered</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>Important:</strong> 
+                        {% if order.payment_method == 'delivery' %}
+                            Please have the exact amount ready for payment on delivery.
+                        {% elif order.payment_method == 'mtn' or order.payment_method == 'airtel' %}
+                            You will receive a mobile money prompt shortly. Please complete the payment to confirm your order.
+                        {% else %}
+                            We will contact you shortly to confirm your order details.
+                        {% endif %}
+                    </div>
+                    
+                    <div class="text-center mt-4">
+                        <a href="{% url 'home:user_checkouts' %}" class="btn btn-primary me-3">
+                            <i class="fas fa-list me-2"></i>View My Orders
+                        </a>
+                        <a href="{% url 'home:products' %}" class="btn btn-outline-primary">
+                            <i class="fas fa-shopping-bag me-2"></i>Continue Shopping
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.timeline {
+    position: relative;
+}
+
+.timeline-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding-left: 2rem;
+    position: relative;
+}
+
+.timeline-item i {
+    position: absolute;
+    left: 0;
+    width: 1.5rem;
+    height: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.timeline-item.active {
+    color: #28a745;
+    font-weight: 600;
+}
+
+.timeline-item:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    left: 0.75rem;
+    top: 1.5rem;
+    width: 2px;
+    height: 1rem;
+    background: #dee2e6;
+}
+
+.timeline-item.active:not(:last-child)::after {
+    background: #28a745;
+}
+</style>
+{% endblock %}

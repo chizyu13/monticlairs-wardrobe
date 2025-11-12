@@ -44,7 +44,7 @@ class MobileMoney:
             "currency": "ZMW",  # Adjust currency based on your region (e.g., UGX, ZMW)
             "externalId": external_id,
             "payer": {"partyIdType": "MSISDN", "partyId": phone_number},
-            "payerMessage": "Payment for EHC Marketplace",
+            "payerMessage": "Payment for Montclair Wardrobe",
             "payeeNote": "Order payment"
         }
         response = requests.post(url, json=payload, headers=headers)
@@ -77,7 +77,7 @@ class MobileMoney:
             "currency": "ZMW",  # Adjust currency
             "msisdn": phone_number,
             "reference": external_id,
-            "description": "Payment for EHC Marketplace"
+            "description": "Payment for Montclair Wardrobe"
         }
         response = requests.post(url, json=payload, headers=headers)
         return {"success": response.status_code == 200, "transaction_id": external_id}

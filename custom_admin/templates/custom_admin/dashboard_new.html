@@ -1,0 +1,519 @@
+{% extends 'custom_admin/base.html' %}
+{% load static %}
+
+{% block title %}Dashboard - Admin{% endblock %}
+
+{% block content %}
+<style>
+    /* Professional Dashboard Styles */
+    .dashboard-header {
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        border: 1px solid var(--glass-border);
+        border-radius: 20px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .dashboard-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, var(--gold-accent), var(--gold-light), var(--gold-accent));
+        background-size: 200% 100%;
+        animation: shimmer 3s ease-in-out infinite;
+    }
+    
+    @keyframes shimmer {
+        0%, 100% { background-position: 200% 0; }
+        50% { background-position: -200% 0; }
+    }
+    
+    .welcome-section {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+    }
+    
+    .admin-avatar {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        border: 3px solid var(--gold-accent);
+        object-fit: cover;
+        box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3);
+    }
+    
+    .avatar-placeholder {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--gold-accent), #b8941f);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 3px solid var(--gold-accent);
+        box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3);
+    }
+    
+    .welcome-text h2 {
+        font-family: 'Playfair Display', serif;
+        color: var(--gold-accent);
+        margin-bottom: 0.5rem;
+        font-size: 1.8rem;
+    }
+    
+    .welcome-text p {
+        color: var(--text-secondary);
+        margin: 0;
+    }
+    
+    /* Stats Cards */
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .stat-card {
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        border: 1px solid var(--glass-border);
+        border-radius: 16px;
+        padding: 1.5rem;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .stat-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.1), transparent);
+        transition: left 0.6s;
+    }
+    
+    .stat-card:hover::before {
+        left: 100%;
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-8px);
+        border-color: var(--gold-accent);
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5);
+    }
+    
+    .stat-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.8rem;
+        margin-bottom: 1rem;
+    }
+    
+    .stat-icon.gold {
+        background: linear-gradient(135deg, var(--gold-accent), #b8941f);
+        color: var(--primary-dark);
+    }
+    
+    .stat-icon.green {
+        background: linear-gradient(135deg, #28a745, #1e7e34);
+        color: white;
+    }
+    
+    .stat-icon.blue {
+        background: linear-gradient(135deg, #17a2b8, #117a8b);
+        color: white;
+    }
+    
+    .stat-icon.orange {
+        background: linear-gradient(135deg, #ffc107, #e0a800);
+        color: var(--primary-dark);
+    }
+    
+    .stat-value {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+        font-family: 'Playfair Display', serif;
+    }
+    
+    .stat-label {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .stat-change {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        margin-top: 0.5rem;
+    }
+    
+    .stat-change.positive {
+        background: rgba(40, 167, 69, 0.2);
+        color: #28a745;
+    }
+    
+    .stat-change.warning {
+        background: rgba(255, 193, 7, 0.2);
+        color: #ffc107;
+    }
+    
+    /* Quick Actions */
+    .section-title {
+        font-family: 'Playfair Display', serif;
+        color: var(--gold-accent);
+        font-size: 1.5rem;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+    
+    .section-title i {
+        font-size: 1.2rem;
+    }
+    
+    .actions-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+    
+    .action-card {
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        border: 1px solid var(--glass-border);
+        border-radius: 12px;
+        padding: 1.5rem;
+        text-align: center;
+        text-decoration: none;
+        color: var(--text-primary);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .action-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(135deg, var(--gold-accent), #b8941f);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+    
+    .action-card:hover::before {
+        opacity: 1;
+    }
+    
+    .action-card:hover {
+        transform: translateY(-4px);
+        border-color: var(--gold-accent);
+        box-shadow: 0 8px 25px rgba(212, 175, 55, 0.3);
+        color: var(--primary-dark);
+    }
+    
+    .action-card i {
+        font-size: 2rem;
+        margin-bottom: 0.75rem;
+        position: relative;
+        z-index: 1;
+    }
+    
+    .action-card h6 {
+        margin-bottom: 0.25rem;
+        font-weight: 600;
+        position: relative;
+        z-index: 1;
+    }
+    
+    .action-card small {
+        font-size: 0.8rem;
+        opacity: 0.8;
+        position: relative;
+        z-index: 1;
+    }
+    
+    /* Recent Activity */
+    .activity-card {
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        border: 1px solid var(--glass-border);
+        border-radius: 16px;
+        padding: 1.5rem;
+    }
+    
+    .activity-item {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem;
+        border-radius: 10px;
+        transition: all 0.3s ease;
+        border: 1px solid transparent;
+    }
+    
+    .activity-item:hover {
+        background: rgba(212, 175, 55, 0.1);
+        border-color: var(--gold-accent);
+    }
+    
+    .activity-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+    
+    .activity-content {
+        flex: 1;
+    }
+    
+    .activity-title {
+        color: var(--text-primary);
+        font-weight: 500;
+        margin-bottom: 0.25rem;
+    }
+    
+    .activity-time {
+        color: var(--text-muted);
+        font-size: 0.85rem;
+    }
+    
+    /* System Status */
+    .status-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+    }
+    
+    .status-item {
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        border: 1px solid var(--glass-border);
+        border-radius: 12px;
+        padding: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+    
+    .status-indicator {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        animation: pulse 2s infinite;
+    }
+    
+    .status-indicator.online {
+        background: #28a745;
+        box-shadow: 0 0 10px #28a745;
+    }
+    
+    @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.5; }
+    }
+    
+    .status-label {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+    }
+    
+    .status-value {
+        color: var(--text-primary);
+        font-weight: 600;
+        margin-left: auto;
+    }
+</style>
+
+<div class="container-fluid">
+    <!-- Dashboard Header -->
+    <div class="dashboard-header">
+        <div class="welcome-section">
+            {% if request.user.profile.profile_picture %}
+                <img src="{{ request.user.profile.profile_picture.url }}" alt="Admin" class="admin-avatar">
+            {% else %}
+                <div class="avatar-placeholder">
+                    <i class="fas fa-user-shield fa-2x" style="color: var(--primary-dark);"></i>
+                </div>
+            {% endif %}
+            <div class="welcome-text">
+                <h2>Welcome back, {{ request.user.get_full_name|default:request.user.username }}!</h2>
+                <p>Here's what's happening with your boutique today</p>
+            </div>
+            <div class="ms-auto text-end">
+                <div style="color: var(--text-secondary); font-size: 0.9rem;">
+                    <i class="fas fa-calendar-alt me-2"></i>
+                    {% now "l, F j, Y" %}
+                </div>
+                <div style="color: var(--text-muted); font-size: 0.85rem; margin-top: 0.25rem;">
+                    <i class="fas fa-clock me-2"></i>
+                    {% now "g:i A" %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Grid -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon gold">
+                <i class="fas fa-users"></i>
+            </div>
+            <div class="stat-value">{{ total_users|default:0 }}</div>
+            <div class="stat-label">Total Users</div>
+            <div class="stat-change positive">
+                <i class="fas fa-arrow-up"></i>
+                <span>Active</span>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon green">
+                <i class="fas fa-tshirt"></i>
+            </div>
+            <div class="stat-value">{{ total_products|default:0 }}</div>
+            <div class="stat-label">Total Products</div>
+            <div class="stat-change positive">
+                <i class="fas fa-check"></i>
+                <span>In Stock</span>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon blue">
+                <i class="fas fa-shopping-cart"></i>
+            </div>
+            <div class="stat-value">{{ total_orders|default:0 }}</div>
+            <div class="stat-label">Total Orders</div>
+            <div class="stat-change positive">
+                <i class="fas fa-chart-line"></i>
+                <span>Growing</span>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon orange">
+                <i class="fas fa-clock"></i>
+            </div>
+            <div class="stat-value">{{ pending_products|default:0 }}</div>
+            <div class="stat-label">Pending Approval</div>
+            <div class="stat-change warning">
+                <i class="fas fa-hourglass-half"></i>
+                <span>Review</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="mb-4">
+        <h3 class="section-title">
+            <i class="fas fa-bolt"></i>
+            Quick Actions
+        </h3>
+        <div class="actions-grid">
+            <a href="{% url 'custom_admin:manage_products' %}" class="action-card">
+                <i class="fas fa-tshirt"></i>
+                <h6>Manage Products</h6>
+                <small>View & Edit Inventory</small>
+            </a>
+            <a href="{% url 'custom_admin:add_product' %}" class="action-card">
+                <i class="fas fa-plus-circle"></i>
+                <h6>Add Product</h6>
+                <small>New Item</small>
+            </a>
+            <a href="{% url 'custom_admin:manage_orders' %}" class="action-card">
+                <i class="fas fa-shopping-cart"></i>
+                <h6>Orders</h6>
+                <small>Process Orders</small>
+            </a>
+            <a href="{% url 'custom_admin:manage_customers' %}" class="action-card">
+                <i class="fas fa-users"></i>
+                <h6>Customers</h6>
+                <small>User Management</small>
+            </a>
+            <a href="{% url 'custom_admin:analytics_dashboard' %}" class="action-card">
+                <i class="fas fa-chart-line"></i>
+                <h6>Analytics</h6>
+                <small>Performance Data</small>
+            </a>
+            <a href="{% url 'custom_admin:sales_reports' %}" class="action-card">
+                <i class="fas fa-file-invoice-dollar"></i>
+                <h6>Sales Reports</h6>
+                <small>Revenue Analysis</small>
+            </a>
+            <a href="{% url 'admin:index' %}" class="action-card">
+                <i class="fas fa-cogs"></i>
+                <h6>Django Admin</h6>
+                <small>System Settings</small>
+            </a>
+            <a href="{% url 'home:main_page' %}" class="action-card">
+                <i class="fas fa-store"></i>
+                <h6>View Store</h6>
+                <small>Customer View</small>
+            </a>
+        </div>
+    </div>
+
+    <!-- System Status -->
+    <div class="mb-4">
+        <h3 class="section-title">
+            <i class="fas fa-server"></i>
+            System Status
+        </h3>
+        <div class="status-grid">
+            <div class="status-item">
+                <div class="status-indicator online"></div>
+                <div class="status-label">System</div>
+                <div class="status-value">Online</div>
+            </div>
+            <div class="status-item">
+                <div class="status-indicator online"></div>
+                <div class="status-label">Database</div>
+                <div class="status-value">Connected</div>
+            </div>
+            <div class="status-item">
+                <div class="status-indicator online"></div>
+                <div class="status-label">Security</div>
+                <div class="status-value">Secure</div>
+            </div>
+            <div class="status-item">
+                <div class="status-indicator online"></div>
+                <div class="status-label">Performance</div>
+                <div class="status-value">Optimal</div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

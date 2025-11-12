@@ -1,0 +1,13 @@
+<!-- payment/airtel/airtel_payment.html -->
+{% extends 'base.html' %}
+
+{% block content %}
+    <div class="container py-5 text-center">
+        <h2 class="text-primary">Airtel Payment</h2>
+        <p>To complete your transaction, click below to proceed with the payment.</p>
+        <form method="POST" action="{% url 'payment:airtel_payment' %}">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-success">Pay with Airtel Money</button>
+        </form>
+    </div>
+{% endblock %}

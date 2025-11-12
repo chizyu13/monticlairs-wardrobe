@@ -1,0 +1,153 @@
+{% load static %}
+
+<!-- Pickup Point Selector Modal -->
+<div class="modal fade" id="pickupModal" tabindex="-1" aria-labelledby="pickupModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="pickupModalLabel">
+                    <i class="fas fa-map-marker-alt"></i> Select Pickup Location
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Map -->
+                <div id="pickupMap" style="height: 400px; width: 100%; border-radius: 8px; margin-bottom: 20px;"></div>
+                
+                <!-- Store List -->
+                <div class="row">
+                    {% for store in pickup_stores %}
+                    <div class="col-md-6 mb-3">
+                        <div class="card pickup-store-card" data-store-id="{{ store.id }}" 
+                             data-lat="{{ store.latitude }}" data-lng="{{ store.longitude }}"
+                             onclick="selectPickupStore({{ store.id }}, '{{ store.name|escapejs }}', '{{ store.address|escapejs }}', {{ store.latitude }}, {{ store.longitude }})">
+                            <div class="card-body">
+                                <h6 class="card-title">
+                                    <i class="fas fa-store text-primary"></i> {{ store.name }}
+                                </h6>
+                                <p class="card-text small mb-2">
+                                    <i class="fas fa-map-marker-alt text-danger"></i> {{ store.address }}, {{ store.city }}
+                                </p>
+                                <p class="card-text small mb-2">
+                                    <i class="fas fa-clock text-info"></i> {{ store.opening_hours|linebreaksbr }}
+                                </p>
+                                <button type="button" class="btn btn-sm btn-primary" 
+                                        onclick="selectPickupStore({{ store.id }}, '{{ store.name|escapejs }}', '{{ store.address|escapejs }}', {{ store.latitude }}, {{ store.longitude }})">
+                                    <i class="fas fa-check"></i> Select This Location
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="col-12">
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle"></i> No pickup locations available at the moment.
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .pickup-store-card {
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border-left: 3px solid #007bff;
+    }
+    
+    .pickup-store-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    }
+    
+    .pickup-store-card.selected {
+        border-left-color: #28a745;
+        background-color: #f0f8f5;
+    }
+</style>
+
+<script>
+    let pickupMap;
+    let pickupMarkers = [];
+    
+    function initPickupMap() {
+        const defaultCenter = { lat: -15.4167, lng: 28.2833 };
+        
+        pickupMap = new google.maps.Map(document.getElementById('pickupMap'), {
+            zoom: 12,
+            center: defaultCenter
+        });
+        
+        const stores = [
+            {% for store in pickup_stores %}
+            {
+                id: {{ store.id }},
+                name: "{{ store.name|escapejs }}",
+                address: "{{ store.address|escapejs }}",
+                lat: parseFloat("{{ store.latitude }}"),
+                lng: parseFloat("{{ store.longitude }}")
+            }{% if not forloop.last %},{% endif %}
+            {% endfor %}
+        ];
+        
+        stores.forEach(store => {
+            const marker = new google.maps.Marker({
+                position: { lat: store.lat, lng: store.lng },
+                map: pickupMap,
+                title: store.name,
+                icon: 'http://maps.google.com/mapfiles/ms/icons/green-dot.png'
+            });
+            
+            const infoWindow = new google.maps.InfoWindow({
+                content: `<div><strong>${store.name}</strong><br>${store.address}</div>`
+            });
+            
+            marker.addListener('click', () => {
+                infoWindow.open(pickupMap, marker);
+            });
+            
+            pickupMarkers.push(marker);
+        });
+        
+        if (stores.length > 0) {
+            const bounds = new google.maps.LatLngBounds();
+            stores.forEach(store => bounds.extend({ lat: store.lat, lng: store.lng }));
+            pickupMap.fitBounds(bounds);
+        }
+    }
+    
+    function selectPickupStore(storeId, storeName, storeAddress, lat, lng) {
+        // Update hidden fields
+        document.getElementById('pickup_store_id').value = storeId;
+        document.getElementById('pickup_store_name').value = storeName;
+        document.getElementById('pickup_store_address').value = storeAddress;
+        
+        // Update display
+        document.getElementById('selected_pickup_display').innerHTML = `
+            <div class="alert alert-success">
+                <i class="fas fa-check-circle"></i> <strong>${storeName}</strong><br>
+                <small>${storeAddress}</small>
+            </div>
+        `;
+        
+        // Highlight selected card
+        document.querySelectorAll('.pickup-store-card').forEach(card => {
+            card.classList.remove('selected');
+        });
+        document.querySelector(`[data-store-id="${storeId}"]`).classList.add('selected');
+        
+        // Close modal
+        const modal = bootstrap.Modal.getInstance(document.getElementById('pickupModal'));
+        modal.hide();
+    }
+    
+    // Initialize map when modal is shown
+    document.getElementById('pickupModal').addEventListener('shown.bs.modal', function () {
+        if (!pickupMap) {
+            initPickupMap();
+        }
+    });
+</script>

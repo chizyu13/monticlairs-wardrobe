@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout - Montclair Wardrobe</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #0a0a0a;
+            color: white;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .checkout-form {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #d4af37;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #333;
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            box-sizing: border-box;
+        }
+        .btn {
+            background: #d4af37;
+            color: #000;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            width: 100%;
+            font-size: 16px;
+        }
+        .btn:hover {
+            background: #f4e4a6;
+        }
+        .order-summary {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 15px;
+        }
+        .hidden {
+            display: none;
+        }
+        h1 {
+            color: #d4af37;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        h3 {
+            color: #d4af37;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🛒 Secure Checkout</h1>
+        
+        <div class="checkout-form">
+            <h3>📍 Delivery Information</h3>
+            <form method="POST" action="{% url 'home:checkout_process' %}">
+                {% csrf_token %}
+                
+                <div class="form-group">
+                    <label for="location">Delivery Location</label>
+                    <select id="location" name="location" required>
+                        <option value="">Select delivery location</option>
+                        <option value="inside">Inside Campus</option>
+                        <option value="outside">Outside Campus</option>
+                    </select>
+                </div>
+
+                <div id="hostel-container" class="form-group hidden">
+                    <label for="hostel_name">Hostel Name</label>
+                    <input type="text" id="hostel_name" name="hostel_name" placeholder="Enter your hostel name">
+                </div>
+
+                <div class="form-group">
+                    <label for="phone_number">Phone Number</label>
+                    <input type="tel" id="phone_number" name="phone_number" required placeholder="+260XXXXXXXXX">
+                </div>
+
+                <div class="form-group">
+                    <label for="address">Delivery Address</label>
+                    <textarea id="address" name="address" required placeholder="Enter your full delivery address" rows="3"></textarea>
+                </div>
+
+                <h3>💳 Payment Method</h3>
+                <div class="form-group">
+                    <label for="payment-method">Choose Payment Method</label>
+                    <select id="payment-method" name="payment_method" required>
+                        <option value="">Select payment method</option>
+                        <option value="cash">Cash on Delivery</option>
+                        <option value="mtn">MTN Mobile Money</option>
+                        <option value="airtel">Airtel Money</option>
+                    </select>
+                </div>
+
+                <input type="hidden" name="total_price" id="total_price_input" value="{{ total_price }}">
+                <input type="hidden" name="gps_location" value="-15.4081, 28.2871">
+
+                <button type="submit" class="btn">🔒 Complete Secure Checkout</button>
+            </form>
+        </div>
+
+        <div class="order-summary">
+            <h3>📋 Order Summary</h3>
+            <p><strong>Subtotal:</strong> ZMW {{ base_price|floatformat:2 }}</p>
+            <p><strong>Delivery Fee:</strong> <span id="delivery-cost">ZMW 50.00</span></p>
+            <hr style="border-color: #333;">
+            <p><strong>Total: ZMW <span id="total-price">{{ total_price|floatformat:2 }}</span></strong></p>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const locationSelect = document.getElementById('location');
+            const hostelContainer = document.getElementById('hostel-container');
+            const deliveryCost = document.getElementById('delivery-cost');
+            const totalPrice = document.getElementById('total-price');
+            const totalPriceInput = document.getElementById('total_price_input');
+            const basePrice = parseFloat('{{ base_price }}') || 0;
+
+            locationSelect.addEventListener('change', function() {
+                if (this.value === 'inside') {
+                    hostelContainer.classList.remove('hidden');
+                    deliveryCost.textContent = 'ZMW 20.00';
+                    const newTotal = basePrice + 20;
+                    totalPrice.textContent = newTotal.toFixed(2);
+                    totalPriceInput.value = newTotal.toFixed(2);
+                } else if (this.value === 'outside') {
+                    hostelContainer.classList.add('hidden');
+                    deliveryCost.textContent = 'ZMW 50.00';
+                    const newTotal = basePrice + 50;
+                    totalPrice.textContent = newTotal.toFixed(2);
+                    totalPriceInput.value = newTotal.toFixed(2);
+                }
+            });
+        });
+    </script>
+</body>
+</html>

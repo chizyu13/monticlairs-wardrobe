@@ -1,0 +1,445 @@
+{% extends 'custom_admin/base.html' %}
+
+{% block title %}Manage Users - Admin{% endblock %}
+
+{% block content %}
+<style>
+    .user-management-card {
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        border: 1px solid var(--glass-border);
+        border-radius: 20px;
+        box-shadow: 0 20px 60px var(--shadow-dark);
+        overflow: hidden;
+        position: relative;
+    }
+    
+    .user-management-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, var(--gold-accent), #b8941f, var(--gold-light), var(--gold-accent));
+        background-size: 200% 100%;
+        animation: shimmer 3s ease-in-out infinite;
+    }
+    
+    @keyframes shimmer {
+        0%, 100% { background-position: 200% 0; }
+        50% { background-position: -200% 0; }
+    }
+    
+    .user-card {
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        border: 1px solid var(--glass-border);
+        border-radius: 16px;
+        transition: all 0.3s ease;
+        overflow: hidden;
+        position: relative;
+    }
+    
+    .user-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.1), transparent);
+        transition: left 0.6s;
+    }
+    
+    .user-card:hover::before {
+        left: 100%;
+    }
+    
+    .user-card:hover {
+        transform: translateY(-8px) scale(1.02);
+        box-shadow: 0 20px 40px var(--shadow-dark);
+        border-color: var(--gold-accent);
+    }
+    
+    .user-avatar {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 3px solid var(--gold-accent);
+    }
+    
+    .user-status {
+        border-radius: 20px;
+        padding: 6px 12px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .status-admin { background: rgba(255, 193, 7, 0.2); color: var(--warning-color); border: 1px solid var(--warning-color); }
+    .status-staff { background: rgba(23, 162, 184, 0.2); color: var(--info-color); border: 1px solid var(--info-color); }
+    .status-user { background: rgba(40, 167, 69, 0.2); color: var(--success-color); border: 1px solid var(--success-color); }
+    
+    .action-btn {
+        border-radius: 12px;
+        padding: 8px 16px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        border: none;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .action-btn::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.2), transparent);
+        transition: left 0.5s;
+    }
+    
+    .action-btn:hover::before {
+        left: 100%;
+    }
+    
+    .action-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px var(--shadow-dark);
+    }
+    
+    .btn-primary-custom {
+        background: linear-gradient(135deg, var(--gold-accent), #b8941f);
+        color: var(--primary-dark);
+    }
+    
+    .btn-info-custom {
+        background: linear-gradient(135deg, var(--info-color), #117a8b);
+        color: white;
+    }
+    
+    .btn-warning-custom {
+        background: linear-gradient(135deg, var(--warning-color), #e0a800);
+        color: var(--primary-dark);
+    }
+    
+    .btn-success-custom {
+        background: linear-gradient(135deg, var(--success-color), #1e7e34);
+        color: white;
+    }
+    
+    .btn-outline-custom {
+        background: var(--glass-bg);
+        color: var(--text-secondary);
+        border: 1px solid var(--glass-border);
+        backdrop-filter: blur(10px);
+    }
+    
+    .btn-outline-custom:hover {
+        background: var(--accent-dark);
+        color: var(--text-primary);
+        border-color: var(--gold-accent);
+    }
+    
+    .stats-card {
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        border: 1px solid var(--glass-border);
+        border-radius: 16px;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+        padding: 1.5rem;
+        text-align: center;
+    }
+    
+    .stats-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.1), transparent);
+        transition: left 0.6s;
+    }
+    
+    .stats-card:hover::before {
+        left: 100%;
+    }
+    
+    .stats-card:hover {
+        transform: translateY(-8px) scale(1.02);
+        box-shadow: 0 20px 40px var(--shadow-dark);
+        border-color: var(--gold-accent);
+    }
+    
+    .gradient-text {
+        font-family: 'Playfair Display', serif;
+        background: linear-gradient(135deg, var(--gold-accent), var(--gold-light));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        font-weight: bold;
+    }
+</style>
+
+<div class="container-fluid mt-4">
+    <!-- Header Section -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="gradient-text mb-2">
+                <i class="fas fa-users me-3"></i>User Management
+            </h2>
+            <p style="color: var(--text-secondary);">Manage all registered users and their permissions</p>
+        </div>
+        <div class="d-flex gap-2">
+            <button class="btn action-btn btn-outline-custom" onclick="exportUsers()">
+                <i class="fas fa-download me-2"></i>Export Users
+            </button>
+            <button class="btn action-btn btn-info-custom" onclick="refreshUsers()">
+                <i class="fas fa-sync me-2"></i>Refresh
+            </button>
+        </div>
+    </div>
+
+    <div class="user-management-card">
+        <div class="card-header text-center py-4" style="background: linear-gradient(135deg, var(--gold-accent), #b8941f); border: none;">
+            <h3 class="mb-0" style="color: var(--primary-dark);">
+                <i class="fas fa-users-cog me-3"></i>
+                User Directory
+            </h3>
+            <p class="mb-0 mt-2" style="color: rgba(10, 10, 10, 0.7);">Complete user management and analytics</p>
+        </div>
+        <div class="card-body p-4">
+            <!-- User Statistics -->
+            <div class="row mb-5">
+                <div class="col-md-3 mb-3">
+                    <div class="stats-card">
+                        <i class="fas fa-users fa-3x mb-3" style="color: var(--info-color);"></i>
+                        <h3 style="color: var(--text-primary);" class="mb-2">{{ users.count }}</h3>
+                        <h6 style="color: var(--text-secondary);">Total Users</h6>
+                        <div class="mt-3">
+                            <span class="badge" style="background: linear-gradient(135deg, var(--info-color), #117a8b); padding: 8px 16px;">
+                                <i class="fas fa-arrow-up me-1"></i>Active
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="stats-card">
+                        <i class="fas fa-user-shield fa-3x mb-3" style="color: var(--success-color);"></i>
+                        <h3 style="color: var(--text-primary);" class="mb-2">{{ users|length|add:"-1" }}</h3>
+                        <h6 style="color: var(--text-secondary);">Regular Users</h6>
+                        <div class="mt-3">
+                            <span class="badge" style="background: linear-gradient(135deg, var(--success-color), #1e7e34); padding: 8px 16px;">
+                                <i class="fas fa-users me-1"></i>Members
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="stats-card">
+                        <i class="fas fa-crown fa-3x mb-3" style="color: var(--gold-accent);"></i>
+                        <h3 style="color: var(--text-primary);" class="mb-2">1</h3>
+                        <h6 style="color: var(--text-secondary);">Admin Users</h6>
+                        <div class="mt-3">
+                            <span class="badge" style="background: linear-gradient(135deg, var(--gold-accent), #b8941f); padding: 8px 16px; color: var(--primary-dark);">
+                                <i class="fas fa-shield-alt me-1"></i>Admins
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="stats-card">
+                        <i class="fas fa-user-clock fa-3x mb-3" style="color: var(--warning-color);"></i>
+                        <h3 style="color: var(--text-primary);" class="mb-2">{{ users|length }}</h3>
+                        <h6 style="color: var(--text-secondary);">Active Today</h6>
+                        <div class="mt-3">
+                            <span class="badge" style="background: linear-gradient(135deg, var(--warning-color), #e0a800); padding: 8px 16px; color: var(--primary-dark);">
+                                <i class="fas fa-clock me-1"></i>Online
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Users List Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h4 class="gradient-text mb-1">
+                        <i class="fas fa-list me-2"></i>User Directory
+                    </h4>
+                    <small style="color: var(--text-secondary);">Manage user accounts and permissions</small>
+                </div>
+                <div class="d-flex gap-2">
+                    <div class="input-group" style="width: 300px;">
+                        <input type="text" class="form-control" placeholder="Search users..." 
+                               style="background: var(--glass-bg); border: 1px solid var(--glass-border); color: var(--text-primary);">
+                        <button class="btn action-btn btn-primary-custom">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                {% for user in users %}
+                <div class="col-lg-6 col-xl-4 mb-4">
+                    <div class="user-card">
+                        <div class="card-body p-4">
+                            <div class="d-flex align-items-center mb-3">
+                                {% if user.profile.profile_picture %}
+                                    <img src="{{ user.profile.profile_picture.url }}" alt="{{ user.username }}" class="user-avatar me-3">
+                                {% else %}
+                                    <div class="user-avatar me-3 d-flex align-items-center justify-content-center" style="background: linear-gradient(135deg, var(--gold-accent), #b8941f);">
+                                        <i class="fas fa-user" style="color: var(--primary-dark);"></i>
+                                    </div>
+                                {% endif %}
+                                <div class="flex-grow-1">
+                                    <h6 style="color: var(--text-primary);" class="mb-1">{{ user.get_full_name|default:user.username }}</h6>
+                                    <small style="color: var(--text-muted);">@{{ user.username }}</small>
+                                </div>
+                                {% if user.is_superuser %}
+                                    <span class="user-status status-admin">
+                                        <i class="fas fa-crown me-1"></i>Admin
+                                    </span>
+                                {% elif user.is_staff %}
+                                    <span class="user-status status-staff">
+                                        <i class="fas fa-user-tie me-1"></i>Staff
+                                    </span>
+                                {% else %}
+                                    <span class="user-status status-user">
+                                        <i class="fas fa-user me-1"></i>User
+                                    </span>
+                                {% endif %}
+                            </div>
+
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span style="color: var(--text-secondary);">
+                                        <i class="fas fa-envelope me-1" style="color: var(--info-color);"></i>Email:
+                                    </span>
+                                    <span style="color: var(--text-primary); font-weight: 500;">{{ user.email|default:"Not provided" }}</span>
+                                </div>
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span style="color: var(--text-secondary);">
+                                        <i class="fas fa-calendar me-1" style="color: var(--success-color);"></i>Joined:
+                                    </span>
+                                    <span style="color: var(--text-primary); font-weight: 500;">{{ user.date_joined|date:"M d, Y" }}</span>
+                                </div>
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span style="color: var(--text-secondary);">
+                                        <i class="fas fa-clock me-1" style="color: var(--warning-color);"></i>Last Login:
+                                    </span>
+                                    <span style="color: var(--text-primary); font-weight: 500;">
+                                        {% if user.last_login %}
+                                            {{ user.last_login|date:"M d, Y" }}
+                                        {% else %}
+                                            Never
+                                        {% endif %}
+                                    </span>
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <span style="color: var(--text-secondary);">
+                                        <i class="fas fa-toggle-on me-1" style="color: var(--gold-accent);"></i>Status:
+                                    </span>
+                                    {% if user.is_active %}
+                                        <span style="color: var(--success-color); font-weight: 600;">
+                                            <i class="fas fa-check-circle me-1"></i>Active
+                                        </span>
+                                    {% else %}
+                                        <span style="color: var(--danger-color); font-weight: 600;">
+                                            <i class="fas fa-times-circle me-1"></i>Inactive
+                                        </span>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <!-- User Actions -->
+                            <div class="d-flex gap-2 flex-wrap">
+                                <a href="{% url 'custom_admin:customer_detail' user.id %}" class="btn action-btn btn-info-custom flex-fill">
+                                    <i class="fas fa-eye me-1"></i>View Details
+                                </a>
+                                {% if not user.is_superuser %}
+                                    {% if user.is_active %}
+                                        <button class="btn action-btn btn-warning-custom flex-fill" onclick="toggleUserStatus({{ user.id }}, false)">
+                                            <i class="fas fa-user-slash me-1"></i>Deactivate
+                                        </button>
+                                    {% else %}
+                                        <button class="btn action-btn btn-success-custom flex-fill" onclick="toggleUserStatus({{ user.id }}, true)">
+                                            <i class="fas fa-user-check me-1"></i>Activate
+                                        </button>
+                                    {% endif %}
+                                {% else %}
+                                    <button class="btn action-btn btn-primary-custom flex-fill" disabled>
+                                        <i class="fas fa-shield-alt me-1"></i>Super Admin
+                                    </button>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="card-footer" style="background: var(--glass-bg); border-top: 1px solid var(--glass-border); backdrop-filter: blur(10px);">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <small style="color: var(--text-secondary);">
+                                    <i class="fas fa-shopping-bag me-1" style="color: var(--info-color);"></i>
+                                    Orders: <span style="color: var(--text-primary); font-weight: 600;">0</span>
+                                </small>
+                                <small style="color: var(--text-secondary);">
+                                    <i class="fas fa-coins me-1" style="color: var(--gold-accent);"></i>
+                                    Spent: <span style="color: var(--gold-accent); font-weight: 600;">ZMW 0</span>
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="col-12">
+                    <div class="text-center py-5">
+                        <i class="fas fa-users fa-4x mb-4" style="color: var(--gold-accent); opacity: 0.6;"></i>
+                        <h4 style="color: var(--text-primary);" class="mb-3">No Users Found</h4>
+                        <p style="color: var(--text-secondary);" class="mb-4">No registered users in the system yet</p>
+                        <button class="btn action-btn btn-primary-custom">
+                            <i class="fas fa-user-plus me-2"></i>Invite Users
+                        </button>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Back to Dashboard -->
+            <div class="text-center mt-4">
+                <a href="{% url 'custom_admin:dashboard' %}" class="btn action-btn btn-outline-custom">
+                    <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function toggleUserStatus(userId, activate) {
+        const action = activate ? 'activate' : 'deactivate';
+        if (confirm(`Are you sure you want to ${action} this user?`)) {
+            // Here you would make an AJAX call to toggle user status
+            // For now, we'll just show a message
+            alert(`User ${action}d successfully! (This would be implemented with AJAX)`);
+            location.reload();
+        }
+    }
+    
+    function exportUsers() {
+        alert('Export functionality would be implemented here');
+    }
+    
+    function refreshUsers() {
+        location.reload();
+    }
+</script>
+
+{% endblock %}

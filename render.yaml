@@ -1,0 +1,20 @@
+databases:
+  - name: montclair_db
+    databaseName: montclair_wardrobe
+    user: montclair_user
+
+services:
+  - type: web
+    name: montclair-wardrobe
+    runtime: python
+    buildCommand: "./build.sh"
+    startCommand: "gunicorn montclair_wardrobe.wsgi:application"
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: montclair_db
+          property: connectionString
+      - key: SECRET_KEY
+        generateValue: true
+      - key: WEB_CONCURRENCY
+        value: 4

@@ -757,8 +757,8 @@
             <div class="products-grid">
                 {% for product in products %}
                 <div class="product-card">
-                    {% if product.image %}
-                        <img src="{{ product.image.url }}" 
+                    {% if product.get_image_url %}
+                        <img src="{{ product.get_image_url }}" 
                              class="product-image" 
                              alt="{{ product.name }}" 
                              loading="lazy"

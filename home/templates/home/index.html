@@ -297,8 +297,8 @@
     {% for product in products %}
     <div class="col-lg-3 col-md-4 col-sm-6">
         <div class="card product-card">
-            {% if product.image %}
-                <img src="{{ product.image.url }}" 
+            {% if product.get_image_url %}
+                <img src="{{ product.get_image_url }}" 
                      alt="{{ product.name }}" 
                      class="card-img-top" 
                      loading="lazy"

@@ -10,7 +10,7 @@ admin.site.unregister(User)  # Unregister the default User admin
 # Register Product model
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
-    list_display = ['name', 'price', 'seller', 'category', 'status', 'stock', 'created_at', 'updated_at']
+    list_display = ['name', 'price', 'seller', 'category', 'status', 'stock', 'has_image', 'created_at', 'updated_at']
     search_fields = ['name', 'description', 'seller__username']
     list_filter = ['status', 'category', 'seller', 'created_at', 'updated_at']
     ordering = ['-created_at']
@@ -20,7 +20,28 @@ class ProductAdmin(admin.ModelAdmin):
     list_per_page = 20
     autocomplete_fields = ['seller', 'category']
     actions = ['mark_as_sold', 'mark_as_active', 'reduce_stock']
-    prepopulated_fields = {'name': ('name',)}  # Note: This is unusual; typically used with slugs
+    prepopulated_fields = {'name': ('name',)}
+    fieldsets = (
+        ('Basic Information', {
+            'fields': ('name', 'description', 'price', 'category', 'seller')
+        }),
+        ('Images', {
+            'fields': ('image', 'static_image'),
+            'description': 'Upload an image OR specify a path to static image (e.g., images/Jewerly/watch1.jpg)'
+        }),
+        ('Inventory', {
+            'fields': ('stock', 'status', 'approval_status', 'approved_by', 'approved_at')
+        }),
+        ('Timestamps', {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ('collapse',)
+        }),
+    )
+    
+    def has_image(self, obj):
+        return bool(obj.image or obj.static_image)
+    has_image.short_description = 'Has Image'
+    has_image.boolean = True  # Note: This is unusual; typically used with slugs
 
     def mark_as_sold(self, request, queryset):
         updated = queryset.update(status='sold', stock=0)

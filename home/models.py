@@ -82,6 +82,13 @@ class Product(models.Model):
         blank=True,
         verbose_name=_("Product Image")
     )
+    static_image = models.CharField(
+        max_length=500,
+        null=True,
+        blank=True,
+        verbose_name=_("Static Image Path"),
+        help_text=_("Path to image in static folder (e.g., 'images/Jewerly/watch1.jpg')")
+    )
     status = models.CharField(
         max_length=50,
         choices=STATUS_CHOICES,
@@ -122,6 +129,15 @@ class Product(models.Model):
 
     def __str__(self):
         return self.name
+    
+    def get_image_url(self):
+        """Get the image URL, preferring uploaded image over static image."""
+        if self.image:
+            return self.image.url
+        elif self.static_image:
+            from django.templatetags.static import static
+            return static(self.static_image)
+        return None
 
     def is_in_stock(self):
         """Check if the product is available for purchase."""

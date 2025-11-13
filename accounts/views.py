@@ -76,8 +76,7 @@ def login_view(request):
     
     return render(request, 'registration/login.html', {'form': form})
 
-# Logout View (New, using POST)
-@require_POST
+# Logout View (accepts both GET and POST)
 def logout_view(request):
     logout(request)
     messages.success(request, "You have been logged out successfully.")

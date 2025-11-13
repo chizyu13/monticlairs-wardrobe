@@ -7,8 +7,16 @@ from .models import Profile
 def save_profile(sender, instance, created, **kwargs):
     if created:
         # Only create profile if it doesn't exist
-        Profile.objects.get_or_create(user=instance)
+        # Use get_or_create to prevent duplicates
+        try:
+            Profile.objects.get_or_create(user=instance)
+        except Exception as e:
+            # Log error but don't crash
+            print(f"Profile creation error in signal: {e}")
     else:
         # Only save if profile exists
-        if hasattr(instance, 'profile'):
-            instance.profile.save()
+        try:
+            if hasattr(instance, 'profile'):
+                instance.profile.save()
+        except Exception as e:
+            print(f"Profile save error in signal: {e}")

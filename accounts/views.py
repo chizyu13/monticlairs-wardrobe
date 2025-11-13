@@ -23,17 +23,30 @@ def register_view(request):
         user_form = SignUpForm(request.POST)
         profile_form = ProfileForm(request.POST, request.FILES)
         if user_form.is_valid() and profile_form.is_valid():
-            user = user_form.save()
+            user = user_form.save(commit=False)
+            user.save()
             
             # Profile is automatically created by signal
-            # Get or create to avoid duplicates
-            profile, created = Profile.objects.get_or_create(user=user)
-            
-            # Update profile with form data
-            profile.bio = profile_form.cleaned_data.get('bio', '')
-            if profile_form.cleaned_data.get('profile_picture'):
-                profile.profile_picture = profile_form.cleaned_data.get('profile_picture')
-            profile.save()
+            # Use get_or_create to handle race conditions
+            try:
+                profile, created = Profile.objects.get_or_create(
+                    user=user,
+                    defaults={
+                        'bio': profile_form.cleaned_data.get('bio', ''),
+                    }
+                )
+                
+                # Update profile with form data if not just created
+                if not created:
+                    profile.bio = profile_form.cleaned_data.get('bio', '')
+                
+                if profile_form.cleaned_data.get('profile_picture'):
+                    profile.profile_picture = profile_form.cleaned_data.get('profile_picture')
+                    profile.save()
+                    
+            except Exception as e:
+                # If profile creation fails, still allow login
+                print(f"Profile creation warning: {e}")
             
             login(request, user)
             messages.success(request, "Welcome to Montclair Wardrobe! Your account has been created successfully.")

@@ -759,7 +759,7 @@
                                         <i class="fas fa-hashtag"></i> MW{{ order.checkout.id|stringformat:"06d" }}
                                     </span>
                                     <span class="order-status status-{{ order.status|lower }}">
-                                        {{ order.status|title }}
+                                        {{ order.get_status_display }}
                                     </span>
                                 </div>
 

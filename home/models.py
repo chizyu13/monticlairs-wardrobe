@@ -372,7 +372,7 @@ class Order(models.Model):
     class StatusChoices(models.TextChoices):
         PENDING = "pending", _("Pending")
         PROCESSING = "processing", _("Processing")
-        SHIPPED = "shipped", _("Shipped")
+        SHIPPED = "shipped", _("Courier is on the way")
         DELIVERED = "delivered", _("Delivered")
         CANCELLED = "cancelled", _("Cancelled")
 

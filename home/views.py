@@ -111,121 +111,38 @@ def products(request):
 
 
 def category_products(request, category_slug):
-    """Display products for a specific category."""
-    static_images_path = os.path.join(settings.BASE_DIR, 'static', 'images')
+    """Display products for a specific category using database categories."""
+    # Get all categories from database
+    db_categories = Category.objects.all()
     categories = []
     selected_category = None
-
-    category_icons = {
-        'jewelry': 'fas fa-gem',
-        'kids': 'fas fa-child',
-        'ladies-wear': 'fas fa-female',
-        'mens-wear': 'fas fa-male',
-        'msimbi-babies': 'fas fa-baby',
-        'shoes': 'fas fa-shoe-prints',
-        'sports-wear': 'fas fa-running',
-        'watches': 'fas fa-clock',
-    }
-
-    if os.path.exists(static_images_path):
-        for item in os.listdir(static_images_path):
-            item_path = os.path.join(static_images_path, item)
-            if os.path.isdir(item_path):
-                folder_slug = item.lower().replace(' ', '-').replace("'", "")
-                icon = category_icons.get(folder_slug, 'fas fa-shopping-bag')
-                
-                # Look for category image (same logic as home view)
-                category_image = None
-                image_extensions = ['.jpg', '.jpeg', '.png', '.webp']
-                
-                for ext in image_extensions:
-                    for name in ['category', 'cover', 'main', 'hero']:
-                        potential_image = os.path.join(item_path, f"{name}{ext}")
-                        if os.path.exists(potential_image):
-                            category_image = f"images/{item}/{name}{ext}"
-                            break
-                    if category_image:
-                        break
-                
-                if not category_image:
-                    try:
-                        files = os.listdir(item_path)
-                        for file in files:
-                            if any(file.lower().endswith(ext) for ext in image_extensions):
-                                category_image = f"images/{item}/{file}"
-                                break
-                    except (OSError, PermissionError):
-                        pass
-                
-                if not category_image:
-                    default_images = {
-                        'jewerly': 'images/defaults/jewelry-default.jpg',
-                        'jewelry': 'images/defaults/jewelry-default.jpg',
-                        'kids': 'images/defaults/kids-default.jpg',
-                        'ladies-wear': 'images/defaults/ladies-default.jpg',
-                        'mens-wear': 'images/defaults/mens-default.jpg',
-                        'men-s-wear': 'images/defaults/mens-default.jpg',
-                        'msimbi-babies': 'images/defaults/babies-default.jpg',
-                        'shoes': 'images/defaults/shoes-default.jpg',
-                        'sports-wear': 'images/defaults/sports-default.jpg',
-                        'watches': 'images/defaults/watches-default.jpg'
-                    }
-                    category_image = default_images.get(folder_slug, 'images/defaults/category-default.jpg')
-                
-                cat_data = {
-                    'name': item, 
-                    'slug': folder_slug, 
-                    'icon': icon,
-                    'image': category_image,
-                    'folder_name': item
-                }
-                categories.append(cat_data)
-                if folder_slug == category_slug:
-                    selected_category = cat_data
+    
+    for category in db_categories:
+        slug = category.slug if hasattr(category, 'slug') and category.slug else category.name.lower().replace(" ", "-").replace("'", "")
+        icon = category.icon if category.icon else 'fas fa-shopping-bag'
+        
+        cat_data = {
+            'name': category.name,
+            'slug': slug,
+            'icon': icon,
+            'image': category.image.url if category.image else None,
+            'db_id': category.id
+        }
+        categories.append(cat_data)
+        
+        if slug == category_slug:
+            selected_category = cat_data
+            selected_db_category = category
 
     if not selected_category:
         raise Http404("Category not found")
 
-    products = Product.objects.filter(status='active', approval_status='approved')
-    
-    # Create a mapping from folder names to database category names
-    folder_to_db_category = {
-        'Watches': 'Watches',
-        'Jewerly': 'Jewerly',  # Keep the typo as it exists in DB
-        'Kids': 'Kids',
-        'Ladies-Wear': 'Ladies Wear',
-        'Mens-Wear': 'Men\'s Wear',
-        'Baby-Wear': 'Msimbi (Babies)',
-        'Shoes': 'Shoes',
-        'Sports-Wear': 'Sports Wear',
-    }
-    
-    # Try to find the category using the mapping
-    folder_name = selected_category['folder_name']
-    db_category_name = folder_to_db_category.get(folder_name, selected_category['name'])
-    
-    try:
-        db_category = Category.objects.get(name=db_category_name)
-        products = products.filter(category=db_category)
-        print(f"Found category: {db_category.name}, Products count: {products.count()}")
-    except Category.DoesNotExist:
-        print(f"Category not found: {db_category_name}")
-        # Try alternative names
-        alternative_names = [
-            selected_category['name'],
-            folder_name,
-            folder_name.replace('-', ' '),
-            folder_name.replace('-', '\'s ') if 'mens' in folder_name.lower() else folder_name
-        ]
-        
-        for alt_name in alternative_names:
-            try:
-                db_category = Category.objects.get(name__iexact=alt_name)
-                products = products.filter(category=db_category)
-                print(f"Found alternative category: {db_category.name}")
-                break
-            except Category.DoesNotExist:
-                continue
+    # Get products for this category
+    products = Product.objects.filter(
+        status='active',
+        approval_status='approved',
+        category=selected_db_category
+    )
 
     return render(request, 'home/category_products.html', {
         'selected_category': selected_category,

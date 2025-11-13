@@ -255,7 +255,8 @@ def checkout(request):
     return render(request, 'home/checkout.html', {
         'cart_items': cart_items, 
         'base_price': base_price,
-        'total_price': total_price
+        'total_price': total_price,
+        'GOOGLE_MAPS_API_KEY': settings.GOOGLE_MAPS_API_KEY
     })
 
 

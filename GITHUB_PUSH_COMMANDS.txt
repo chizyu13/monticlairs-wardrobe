@@ -1,21 +1,23 @@
-# After creating your GitHub repository, run these commands:
+# STEP 1: Set the correct remote URL
+git remote set-url origin https://github.com/chiz13/monticlairs-wardrobe.git
 
-# Add your GitHub repository as remote (replace YOUR_USERNAME with your actual GitHub username)
-git remote add origin https://github.com/YOUR_USERNAME/montclair-wardrobe.git
-
-# Push your code to GitHub
-git branch -M main
+# STEP 2: Push to GitHub (use your Personal Access Token as password)
 git push -u origin main
 
-# If you get an authentication error, you may need to:
-# 1. Use a Personal Access Token instead of password
-# 2. Or use GitHub Desktop application
-# 3. Or use SSH keys
+# When prompted:
+# Username: chiz13
+# Password: [paste your token here - starts with ghp_...]
 
-# To generate a Personal Access Token:
-# 1. Go to GitHub.com → Settings → Developer settings → Personal access tokens → Tokens (classic)
-# 2. Click "Generate new token (classic)"
-# 3. Give it a name like "Montclair Wardrobe"
-# 4. Select scopes: repo (all)
-# 5. Click "Generate token"
-# 6. Copy the token and use it as your password when pushing
+# IMPORTANT: The token is your password, NOT your GitHub account password!
+SECRET_KEY=django-insecure-@fns+_42mp_h^2k#2!@dnq%we%^oj+evcu=g2^a9-ofpydp1__
+
+DEBUG=False
+
+ALLOWED_HOSTS=chiz13.pythonanywhere.com
+
+DATABASE_URL=mysql://chiz13:YOUR_MYSQL_PASSWORD_HERE@chiz13.mysql.pythonanywhere-services.com/chiz13$montclair
+
+STRIPE_SECRET_KEY=sk_test_51RF8Qg4fsNGmT5PiLlT64QiXrpzO7F83qdYfbywV0bjDrQQVa09QXCGNjYECk2B1IKsrQYGxjfkfdxe2R5Iz7YLz00ZAtw0xiF
+
+STRIPE_PUBLISHABLE_KEY=pk_test_51RF8Qg4fsNGmT5PiLlT64QiXrpzO7F83qdYfbywV0bjDrQQVa09QXCGNjYECk2B1IKsrQYGxjfkfdxe2R5Iz7YLz00ZAtw0xiF
+

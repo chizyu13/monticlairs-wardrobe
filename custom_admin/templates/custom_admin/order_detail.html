@@ -87,8 +87,12 @@
                     </div>
                 </div>
                 <p><strong>Phone:</strong> {{ order.checkout.phone_number }}</p>
+                {% if order.checkout.gps_location %}
+                <p><strong>Location:</strong> <span id="locationName"><i class="fas fa-spinner fa-spin"></i> Loading...</span></p>
+                <p><strong>GPS Coordinates:</strong> {{ order.checkout.gps_location }}</p>
+                {% else %}
                 <p><strong>Location:</strong> {{ order.checkout.location|title }}</p>
-                <p><strong>GPS:</strong> {{ order.checkout.gps_location }}</p>
+                {% endif %}
             </div>
         </div>
 
@@ -200,4 +204,38 @@
     margin-left: 1rem;
 }
 </style>
+
+<script>
+// Reverse geocode GPS coordinates to get location name
+{% if order.checkout.gps_location %}
+document.addEventListener('DOMContentLoaded', function() {
+    const gpsLocation = "{{ order.checkout.gps_location }}";
+    const locationElement = document.getElementById('locationName');
+    
+    // Parse GPS coordinates (format: "lat, lng")
+    const coords = gpsLocation.split(',').map(c => c.trim());
+    if (coords.length === 2) {
+        const lat = coords[0];
+        const lng = coords[1];
+        
+        // Use OpenStreetMap Nominatim API for reverse geocoding (free, no API key needed)
+        fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`)
+            .then(response => response.json())
+            .then(data => {
+                if (data && data.display_name) {
+                    locationElement.innerHTML = `<i class="fas fa-map-marker-alt me-1"></i>${data.display_name}`;
+                } else {
+                    locationElement.textContent = gpsLocation;
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching location:', error);
+                locationElement.textContent = gpsLocation;
+            });
+    } else {
+        locationElement.textContent = gpsLocation;
+    }
+});
+{% endif %}
+</script>
 {% endblock %}

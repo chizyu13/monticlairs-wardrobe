@@ -13,7 +13,10 @@
         rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://js.stripe.com/v3/"></script>
-    <script src="https://maps.googleapis.com/maps/api/js?key={{ GOOGLE_MAPS_API_KEY }}&libraries=places&callback=initMap" async defer></script>
+    
+    <!-- OpenStreetMap with Leaflet - Free, no API key needed -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
     <style>
         * {
@@ -821,10 +824,10 @@
             }
         }
 
-        // Initialize Google Map
+        // Initialize OpenStreetMap with Leaflet
         function initMap() {
             try {
-                console.log('Initializing Google Map...');
+                console.log('Initializing OpenStreetMap...');
                 
                 const mapElement = document.getElementById('map');
                 if (!mapElement) {
@@ -839,107 +842,54 @@
                     return false;
                 }
 
-                // Create Google Map instance
-                map = new google.maps.Map(mapElement, {
-                    center: lusakaCenter,
-                    zoom: 13,
-                    mapTypeControl: true,
-                    streetViewControl: false,
-                    fullscreenControl: true,
-                    zoomControl: true,
-                    styles: [
-                        {
-                            "featureType": "all",
-                            "elementType": "geometry",
-                            "stylers": [{"color": "#242f3e"}]
-                        },
-                        {
-                            "featureType": "all",
-                            "elementType": "labels.text.stroke",
-                            "stylers": [{"lightness": -80}]
-                        },
-                        {
-                            "featureType": "administrative",
-                            "elementType": "labels.text.fill",
-                            "stylers": [{"color": "#746855"}]
-                        },
-                        {
-                            "featureType": "poi",
-                            "elementType": "labels.text.fill",
-                            "stylers": [{"color": "#d59563"}]
-                        },
-                        {
-                            "featureType": "road",
-                            "elementType": "geometry.fill",
-                            "stylers": [{"color": "#2b3544"}]
-                        },
-                        {
-                            "featureType": "road",
-                            "elementType": "labels.text.fill",
-                            "stylers": [{"color": "#9ca5b3"}]
-                        },
-                        {
-                            "featureType": "water",
-                            "elementType": "geometry",
-                            "stylers": [{"color": "#17263c"}]
-                        }
-                    ]
-                });
+                // Create Leaflet Map instance with OpenStreetMap
+                map = L.map(mapElement).setView([lusakaCenter.lat, lusakaCenter.lng], 13);
+                
+                // Add OpenStreetMap tile layer
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '© OpenStreetMap contributors',
+                    maxZoom: 19
+                }).addTo(map);
 
-                // Initialize geocoder
-                geocoder = new google.maps.Geocoder();
-
-                // Initialize autocomplete for address input
-                const addressInput = document.getElementById('street_address');
-                autocomplete = new google.maps.places.Autocomplete(addressInput, {
-                    componentRestrictions: { country: 'zm' }, // Restrict to Zambia
-                    fields: ['formatted_address', 'geometry', 'name'],
-                    types: ['address']
-                });
-
-                // When user selects an address from autocomplete
-                autocomplete.addListener('place_changed', function() {
-                    const place = autocomplete.getPlace();
-                    
-                    if (!place.geometry) {
-                        console.log('No geometry for selected place');
-                        return;
-                    }
-
-                    // Get coordinates
-                    const lat = place.geometry.location.lat();
-                    const lng = place.geometry.location.lng();
-
-                    // Update map and marker
-                    placeMarker({ lat, lng });
-                    map.setCenter({ lat, lng });
-                    map.setZoom(16);
-
-                    console.log('Address selected:', place.formatted_address, lat, lng);
-                });
+                // Add store location marker (Lilayi)
+                const storeLocation = [-15.5500, 28.3500];
+                const storeMarker = L.marker(storeLocation, {
+                    icon: L.divIcon({
+                        className: 'store-marker',
+                        html: '<div style="background-color: #2196F3; width: 30px; height: 30px; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.3);"></div>',
+                        iconSize: [30, 30]
+                    })
+                }).addTo(map);
+                
+                storeMarker.bindPopup('<b>Montclair Wardrobe</b><br>Lilayi, Lusaka').openPopup();
 
                 // Add click event to map
-                map.addListener('click', function(event) {
-                    const lat = event.latLng.lat();
-                    const lng = event.latLng.lng();
+                map.on('click', function(event) {
+                    const lat = event.latlng.lat;
+                    const lng = event.latlng.lng;
                     
                     placeMarker({ lat, lng });
                     
-                    // Reverse geocode to get address
-                    geocoder.geocode({ location: { lat, lng } }, function(results, status) {
-                        if (status === 'OK' && results[0]) {
-                            document.getElementById('street_address').value = results[0].formatted_address;
-                            console.log('Reverse geocoded address:', results[0].formatted_address);
-                        }
-                    });
+                    // Reverse geocode using Nominatim
+                    fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.display_name) {
+                                document.getElementById('street_address').value = data.display_name;
+                                console.log('Reverse geocoded address:', data.display_name);
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Reverse geocoding error:', error);
+                        });
                 });
 
-                console.log('Google Map initialized successfully');
+                console.log('OpenStreetMap initialized successfully');
                 hideMapLoading();
                 return true;
 
             } catch (error) {
-                console.error('Error initializing Google Map:', error);
+                console.error('Error initializing OpenStreetMap:', error);
                 hideMapLoading();
                 
                 const mapStatus = document.getElementById('map-status');
@@ -956,23 +906,17 @@
         function placeMarker(location) {
             // Remove existing marker
             if (marker) {
-                marker.setMap(null);
+                map.removeLayer(marker);
             }
 
-            // Create new marker with custom icon
-            marker = new google.maps.Marker({
-                position: location,
-                map: map,
-                animation: google.maps.Animation.DROP,
-                icon: {
-                    path: google.maps.SymbolPath.CIRCLE,
-                    scale: 10,
-                    fillColor: '#d4af37',
-                    fillOpacity: 1,
-                    strokeColor: '#ffffff',
-                    strokeWeight: 2
-                }
-            });
+            // Create new marker with custom icon (gold color)
+            marker = L.marker([location.lat, location.lng], {
+                icon: L.divIcon({
+                    className: 'delivery-marker',
+                    html: '<div style="background-color: #d4af37; width: 20px; height: 20px; border-radius: 50%; border: 2px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.3);"></div>',
+                    iconSize: [20, 20]
+                })
+            }).addTo(map);
 
             // Update hidden input with GPS coordinates
             document.getElementById('gps_location').value = `${location.lat},${location.lng}`;
@@ -997,7 +941,7 @@
             console.log('Marker placed at:', location.lat, location.lng);
         }
 
-        // Make initMap globally accessible for Google Maps callback
+        // Make initMap globally accessible
         window.initMap = initMap;
 
         // Location change handler
@@ -1029,14 +973,14 @@
 
                 // Initialize map if not already done
                 if (!map) {
-                    console.log('Map not initialized, waiting for Google Maps to load...');
+                    console.log('Map not initialized, waiting for Leaflet to load...');
                     showMapLoading();
                     
-                    // Check if Google Maps is loaded
-                    const checkGoogleMaps = setInterval(function() {
-                        if (typeof google !== 'undefined' && google.maps) {
-                            clearInterval(checkGoogleMaps);
-                            console.log('Google Maps loaded, initializing...');
+                    // Check if Leaflet is loaded
+                    const checkLeaflet = setInterval(function() {
+                        if (typeof L !== 'undefined') {
+                            clearInterval(checkLeaflet);
+                            console.log('Leaflet loaded, initializing...');
                             
                             setTimeout(function() {
                                 initMap();
@@ -1047,7 +991,7 @@
                     // Timeout after 10 seconds
                     setTimeout(function() {
                         if (!map) {
-                            clearInterval(checkGoogleMaps);
+                            clearInterval(checkLeaflet);
                             hideMapLoading();
                             const mapStatus = document.getElementById('map-status');
                             if (mapStatus) {
@@ -1060,9 +1004,9 @@
                 } else {
                     console.log('Map already exists');
                     // Recenter map if needed
-                    if (google && google.maps) {
-                        google.maps.event.trigger(map, 'resize');
-                        map.setCenter(lusakaCenter);
+                    if (map) {
+                        map.invalidateSize();
+                        map.setView([lusakaCenter.lat, lusakaCenter.lng], 13);
                     }
                 }
             } else {

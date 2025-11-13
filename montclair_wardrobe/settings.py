@@ -101,7 +101,7 @@ WSGI_APPLICATION = 'montclair_wardrobe.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-# Check if running on PythonAnywhere (use MySQL)
+# Check if running on PythonAnywhere (use PythonAnywhere MySQL)
 if 'PYTHONANYWHERE_DOMAIN' in os.environ or os.path.exists('/home/chiz13'):
     DATABASES = {
         'default': {
@@ -121,12 +121,19 @@ elif 'DATABASE_URL' in os.environ:
         conn_max_age=600,
         conn_health_checks=True,
     )
-# Default to SQLite for local development
+# Use XAMPP MySQL for local development (Windows)
 else:
     DATABASES = {
         'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': BASE_DIR / 'db.sqlite3',
+            'ENGINE': 'django.db.backends.mysql',
+            'NAME': 'montclair_wardrobe',  # Create this database in phpMyAdmin
+            'USER': 'root',  # Default XAMPP MySQL user
+            'PASSWORD': '',  # Default XAMPP MySQL password is empty
+            'HOST': 'localhost',
+            'PORT': '3307',
+            'OPTIONS': {
+                'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
+            },
         }
     }
 

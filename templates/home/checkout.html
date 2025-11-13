@@ -941,6 +941,30 @@
             console.log('Marker placed at:', location.lat, location.lng);
         }
 
+        // Address search with Nominatim
+        let searchTimeout;
+        const addressInput = document.getElementById('street_address');
+        
+        if (addressInput) {
+            addressInput.addEventListener('input', function() {
+                clearTimeout(searchTimeout);
+                const query = this.value;
+                
+                if (query.length < 3) return;
+                
+                // Debounce to respect Nominatim rate limit (1 req/sec)
+                searchTimeout = setTimeout(() => {
+                    fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&countrycodes=zm&limit=5`)
+                        .then(response => response.json())
+                        .then(data => {
+                            // You can add autocomplete dropdown here if needed
+                            console.log('Search results:', data);
+                        })
+                        .catch(error => console.error('Search error:', error));
+                }, 1000);
+            });
+        }
+
         // Make initMap globally accessible
         window.initMap = initMap;
 

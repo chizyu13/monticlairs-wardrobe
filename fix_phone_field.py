@@ -1,5 +1,5 @@
 """
-Run this script on PythonAnywhere to fix the phone_number field length
+Run this script on PythonAnywhere to fix field lengths in database
 """
 import os
 import django
@@ -16,6 +16,13 @@ with connection.cursor() as cursor:
         MODIFY COLUMN phone_number VARCHAR(20) NOT NULL
     """)
     print("✓ Updated home_checkout.phone_number to VARCHAR(20)")
+    
+    # Alter the room_number column in home_checkout table (increase length)
+    cursor.execute("""
+        ALTER TABLE home_checkout 
+        MODIFY COLUMN room_number VARCHAR(500)
+    """)
+    print("✓ Updated home_checkout.room_number to VARCHAR(500)")
     
     # Alter the phone_number column in home_profile table
     cursor.execute("""
@@ -35,4 +42,4 @@ with connection.cursor() as cursor:
         """)
         print("✓ Updated home_store.phone_number to VARCHAR(20)")
     
-    print("\nAll phone_number fields updated successfully!")
+    print("\nAll fields updated successfully!")

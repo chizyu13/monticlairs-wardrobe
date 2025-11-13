@@ -276,9 +276,9 @@ class Checkout(models.Model):
 
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="checkouts", verbose_name=_("User"))
     location = models.CharField(max_length=10, choices=LocationChoices.choices, verbose_name=_("Delivery Area"), blank=True, null=True)
-    room_number = models.CharField(max_length=255, blank=True, null=True, verbose_name=_("Delivery Address"))
-    delivery_address = models.TextField(blank=True, null=True, verbose_name=_("Full Delivery Address"))
-    phone_number = models.CharField(max_length=15, validators=[validate_zambian_phone], verbose_name=_("Phone Number"))
+    room_number = models.CharField(max_length=500, blank=True, null=True, verbose_name=_("Street Address / Building / Landmark"))
+    delivery_address = models.TextField(blank=True, null=True, verbose_name=_("Additional Delivery Instructions"))
+    phone_number = models.CharField(max_length=20, validators=[validate_zambian_phone], verbose_name=_("Phone Number"))
     gps_location = models.CharField(max_length=255, verbose_name=_("GPS Location"))
     payment_method = models.CharField(max_length=10, choices=PaymentChoices.choices, verbose_name=_("Payment Method"))
     delivery_fee = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, validators=[MinValueValidator(0.00)], verbose_name=_("Delivery Fee"))
@@ -340,7 +340,7 @@ class Profile(models.Model):
         verbose_name=_("Location")
     )
     phone_number = models.CharField(
-        max_length=15,
+        max_length=20,
         blank=True,
         null=True,
         validators=[validate_zambian_phone],

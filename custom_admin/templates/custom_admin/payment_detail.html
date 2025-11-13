@@ -350,19 +350,24 @@
                     <span class="info-value">{{ payment.phone_number|default:"N/A" }}</span>
                 </div>
                 
-                {% if payment.location %}
+                {% if payment.gps_location %}
+                <div class="info-row">
+                    <span class="info-label"><i class="fas fa-map-marker-alt"></i>Location</span>
+                    <span class="info-value" id="locationName">
+                        <i class="fas fa-spinner fa-spin"></i> Loading location...
+                    </span>
+                </div>
+                
+                <div class="info-row">
+                    <span class="info-label"><i class="fas fa-map-pin"></i>GPS Coordinates</span>
+                    <span class="info-value">{{ payment.gps_location }}</span>
+                </div>
+                {% elif payment.location %}
                 <div class="info-row">
                     <span class="info-label"><i class="fas fa-map-marker-alt"></i>Location</span>
                     <span class="info-value">{{ payment.location }}</span>
                 </div>
-                {% endif %}
-                
-                {% if payment.gps_location %}
-                <div class="info-row">
-                    <span class="info-label"><i class="fas fa-map-pin"></i>GPS Location</span>
-                    <span class="info-value">{{ payment.gps_location }}</span>
-                </div>
-                {% endif %}
+                {% endif %}""
             </div>
         </div>
     </div>
@@ -435,4 +440,38 @@
     </div>
     {% endif %}
 </div>
+
+<script>
+// Reverse geocode GPS coordinates to get location name
+{% if payment.gps_location %}
+document.addEventListener('DOMContentLoaded', function() {
+    const gpsLocation = "{{ payment.gps_location }}";
+    const locationElement = document.getElementById('locationName');
+    
+    // Parse GPS coordinates (format: "lat, lng")
+    const coords = gpsLocation.split(',').map(c => c.trim());
+    if (coords.length === 2) {
+        const lat = coords[0];
+        const lng = coords[1];
+        
+        // Use OpenStreetMap Nominatim API for reverse geocoding (free, no API key needed)
+        fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`)
+            .then(response => response.json())
+            .then(data => {
+                if (data && data.display_name) {
+                    locationElement.innerHTML = `<i class="fas fa-map-marker-alt me-1"></i>${data.display_name}`;
+                } else {
+                    locationElement.textContent = gpsLocation;
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching location:', error);
+                locationElement.textContent = gpsLocation;
+            });
+    } else {
+        locationElement.textContent = gpsLocation;
+    }
+});
+{% endif %}
+</script>
 {% endblock %}

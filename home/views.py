@@ -571,6 +571,7 @@ def checkout_process(request):
                 location=location,
                 phone_number=phone_number,
                 gps_location=gps_location,
+                delivery_address=street_address,
                 payment_method=payment_method,
                 delivery_fee=delivery_fee,
                 transaction_id=transaction_ref,

@@ -275,8 +275,9 @@ class Checkout(models.Model):
         FAILED = "failed", _("Failed")
 
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="checkouts", verbose_name=_("User"))
-    location = models.CharField(max_length=10, choices=LocationChoices.choices, verbose_name=_("Delivery Area"))
+    location = models.CharField(max_length=10, choices=LocationChoices.choices, verbose_name=_("Delivery Area"), blank=True, null=True)
     room_number = models.CharField(max_length=255, blank=True, null=True, verbose_name=_("Delivery Address"))
+    delivery_address = models.TextField(blank=True, null=True, verbose_name=_("Full Delivery Address"))
     phone_number = models.CharField(max_length=15, validators=[validate_zambian_phone], verbose_name=_("Phone Number"))
     gps_location = models.CharField(max_length=255, verbose_name=_("GPS Location"))
     payment_method = models.CharField(max_length=10, choices=PaymentChoices.choices, verbose_name=_("Payment Method"))

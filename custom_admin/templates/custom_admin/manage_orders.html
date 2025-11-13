@@ -68,7 +68,7 @@
                             <td class="fw-bold text-success">ZMW {{ order.total_price }}</td>
                             <td>
                                 <span class="badge bg-{% if order.status == 'delivered' %}success{% elif order.status == 'shipped' %}info{% elif order.status == 'processing' %}warning{% else %}secondary{% endif %}">
-                                    {{ order.status|title }}
+                                    {% if order.status == 'shipped' %}Courier Is On The Way{% else %}{{ order.status|title }}{% endif %}
                                 </span>
                             </td>
                             <td>{{ order.created_at|date:"M d, Y H:i" }}</td>

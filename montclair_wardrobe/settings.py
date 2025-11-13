@@ -101,19 +101,34 @@ WSGI_APPLICATION = 'montclair_wardrobe.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+# Check if running on PythonAnywhere (use MySQL)
+if 'PYTHONANYWHERE_DOMAIN' in os.environ or os.path.exists('/home/chiz13'):
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.mysql',
+            'NAME': 'chiz13$default',
+            'USER': 'chiz13',
+            'PASSWORD': 'muna130820',
+            'HOST': 'chiz13.mysql.pythonanywhere-services.com',
+            'OPTIONS': {
+                'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
+            },
+        }
     }
-}
-
 # Use PostgreSQL on Render
-if 'DATABASE_URL' in os.environ:
+elif 'DATABASE_URL' in os.environ:
     DATABASES['default'] = dj_database_url.config(
         conn_max_age=600,
         conn_health_checks=True,
     )
+# Default to SQLite for local development
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
 
 
 # Password validation
@@ -174,7 +189,7 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.example.com'  # Your SMTP server
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'josephaaronsimukanze@gmail.com'
+EMAIL_HOST_USER = 'munachizyuka58@gmail.com'
 EMAIL_HOST_PASSWORD = 'admin'
 DEFAULT_FROM_EMAIL = 'no-reply@example.com'
 

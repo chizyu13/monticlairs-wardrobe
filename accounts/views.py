@@ -25,13 +25,9 @@ def register_view(request):
         if user_form.is_valid() and profile_form.is_valid():
             user = user_form.save()
             
-            # Profile is automatically created by signal, just update it
-            # Use a small delay to ensure signal has completed
-            try:
-                profile = user.profile
-            except Profile.DoesNotExist:
-                # Fallback: create profile if signal didn't work
-                profile = Profile.objects.create(user=user)
+            # Profile is automatically created by signal
+            # Get or create to avoid duplicates
+            profile, created = Profile.objects.get_or_create(user=user)
             
             # Update profile with form data
             profile.bio = profile_form.cleaned_data.get('bio', '')

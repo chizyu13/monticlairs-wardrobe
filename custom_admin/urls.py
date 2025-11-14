@@ -31,4 +31,16 @@ urlpatterns = [
     path('payments/<int:payment_id>/approve/', views.approve_payment, name='approve_payment'),
     path('payments/<int:payment_id>/reject/', views.reject_payment, name='reject_payment'),
     path('payments/<int:payment_id>/processing/', views.mark_payment_processing, name='mark_payment_processing'),
+    
+    # Product Manual Management URLs
+    path('product/<int:product_id>/manual/upload/', views.upload_product_manual, name='upload_product_manual'),
+    path('product/<int:product_id>/manual/delete/', views.delete_product_manual, name='delete_product_manual'),
+    
+    # Platform Guide Management URLs
+    path('guides/', views.guide_list, name='guide_list'),
+    path('guides/create/', views.manage_guide, name='create_guide'),
+    path('guides/<int:guide_id>/edit/', views.manage_guide, name='edit_guide'),
+    path('guides/<int:guide_id>/delete/', views.delete_guide, name='delete_guide'),
+    path('guides/<int:guide_id>/attachment/upload/', views.upload_guide_attachment, name='upload_guide_attachment'),
+    path('guides/attachment/<int:attachment_id>/delete/', views.delete_guide_attachment, name='delete_guide_attachment'),
 ]

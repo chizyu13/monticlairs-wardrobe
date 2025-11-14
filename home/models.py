@@ -903,3 +903,207 @@ class Store(models.Model):
         ordering = ['city', 'name']
         verbose_name = _("Store")
         verbose_name_plural = _("Stores")
+
+
+from django.core.validators import FileExtensionValidator
+from django.utils.text import slugify
+
+
+class ProductManual(models.Model):
+    """Model for product-specific user manuals."""
+    product = models.OneToOneField(
+        Product,
+        on_delete=models.CASCADE,
+        related_name='manual',
+        verbose_name=_("Product")
+    )
+    file = models.FileField(
+        upload_to='manuals/products/%Y/%m/%d/',
+        validators=[FileExtensionValidator(['pdf'])],
+        verbose_name=_("Manual File")
+    )
+    filename = models.CharField(
+        max_length=255,
+        verbose_name=_("Display Filename")
+    )
+    file_size = models.PositiveIntegerField(
+        verbose_name=_("File Size (bytes)")
+    )
+    uploaded_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name='uploaded_product_manuals',
+        verbose_name=_("Uploaded By")
+    )
+    uploaded_at = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name=_("Uploaded At")
+    )
+    updated_at = models.DateTimeField(
+        auto_now=True,
+        verbose_name=_("Updated At")
+    )
+
+    def __str__(self):
+        return f"Manual for {self.product.name}"
+
+    def save(self, *args, **kwargs):
+        if self.file:
+            self.file_size = self.file.size
+            if not self.filename:
+                self.filename = self.file.name
+        super().save(*args, **kwargs)
+
+    def get_file_size_display(self):
+        """Return human-readable file size."""
+        size_bytes = self.file_size
+        if size_bytes < 1024:
+            return f"{size_bytes} bytes"
+        elif size_bytes < 1024 * 1024:
+            return f"{size_bytes / 1024:.1f} KB"
+        else:
+            return f"{size_bytes / (1024 * 1024):.1f} MB"
+
+    class Meta:
+        verbose_name = _("Product Manual")
+        verbose_name_plural = _("Product Manuals")
+
+
+class PlatformGuide(models.Model):
+    """Model for platform usage guides and tutorials."""
+    
+    CATEGORY_CHOICES = [
+        ('getting_started', _('Getting Started')),
+        ('shopping', _('Shopping')),
+        ('checkout', _('Checkout & Payment')),
+        ('account', _('Account Management')),
+        ('other', _('Other')),
+    ]
+    
+    title = models.CharField(
+        max_length=255,
+        verbose_name=_("Guide Title")
+    )
+    slug = models.SlugField(
+        max_length=255,
+        unique=True,
+        verbose_name=_("URL Slug")
+    )
+    category = models.CharField(
+        max_length=50,
+        choices=CATEGORY_CHOICES,
+        default='other',
+        verbose_name=_("Category")
+    )
+    description = models.TextField(
+        verbose_name=_("Short Description"),
+        help_text=_("Brief summary shown in guide listings")
+    )
+    content = models.TextField(
+        verbose_name=_("Guide Content"),
+        help_text=_("Full guide content (supports HTML)")
+    )
+    featured = models.BooleanField(
+        default=False,
+        verbose_name=_("Featured Guide"),
+        help_text=_("Display prominently on Help Center homepage")
+    )
+    display_order = models.PositiveIntegerField(
+        default=0,
+        verbose_name=_("Display Order"),
+        help_text=_("Lower numbers appear first")
+    )
+    view_count = models.PositiveIntegerField(
+        default=0,
+        verbose_name=_("View Count")
+    )
+    is_published = models.BooleanField(
+        default=True,
+        verbose_name=_("Published")
+    )
+    created_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name='created_guides',
+        verbose_name=_("Created By")
+    )
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name=_("Created At")
+    )
+    updated_at = models.DateTimeField(
+        auto_now=True,
+        verbose_name=_("Updated At")
+    )
+
+    def __str__(self):
+        return self.title
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.title)
+        super().save(*args, **kwargs)
+
+    def increment_view_count(self):
+        """Increment the view count using F() expression to avoid race conditions."""
+        from django.db.models import F
+        PlatformGuide.objects.filter(pk=self.pk).update(view_count=F('view_count') + 1)
+        self.refresh_from_db()
+
+    class Meta:
+        ordering = ['display_order', '-created_at']
+        verbose_name = _("Platform Guide")
+        verbose_name_plural = _("Platform Guides")
+        indexes = [
+            models.Index(fields=['slug']),
+            models.Index(fields=['category', 'is_published']),
+            models.Index(fields=['featured', 'is_published']),
+        ]
+
+
+class GuideAttachment(models.Model):
+    """Model for images and PDF attachments for platform guides."""
+    guide = models.ForeignKey(
+        PlatformGuide,
+        on_delete=models.CASCADE,
+        related_name='attachments',
+        verbose_name=_("Guide")
+    )
+    file = models.FileField(
+        upload_to='manuals/guides/%Y/%m/%d/',
+        validators=[FileExtensionValidator(['pdf', 'jpg', 'jpeg', 'png'])],
+        verbose_name=_("Attachment File")
+    )
+    file_type = models.CharField(
+        max_length=10,
+        choices=[('image', 'Image'), ('pdf', 'PDF')],
+        verbose_name=_("File Type")
+    )
+    caption = models.CharField(
+        max_length=255,
+        blank=True,
+        verbose_name=_("Caption")
+    )
+    uploaded_at = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name=_("Uploaded At")
+    )
+
+    def __str__(self):
+        return f"Attachment for {self.guide.title}"
+
+    def save(self, *args, **kwargs):
+        if self.file and not self.file_type:
+            ext = self.file.name.lower().split('.')[-1]
+            if ext in ['jpg', 'jpeg', 'png']:
+                self.file_type = 'image'
+            elif ext == 'pdf':
+                self.file_type = 'pdf'
+        super().save(*args, **kwargs)
+
+    class Meta:
+        verbose_name = _("Guide Attachment")
+        verbose_name_plural = _("Guide Attachments")
+        ordering = ['uploaded_at']

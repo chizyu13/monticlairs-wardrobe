@@ -632,6 +632,22 @@
                             {% endif %}
                         </div>
                         
+                        <!-- Product Manual Download -->
+                        {% if product.manual %}
+                        <div class="product-manual" style="margin: 20px 0; padding: 15px; background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 8px;">
+                            <h4 style="color: var(--gold-accent); margin-bottom: 10px; font-size: 16px;">
+                                <i class="fas fa-file-pdf"></i> User Manual Available
+                            </h4>
+                            <p style="color: var(--text-secondary); font-size: 14px; margin-bottom: 10px;">
+                                Download the product manual for detailed instructions and specifications.
+                            </p>
+                            <a href="{% url 'home:download_product_manual' product.id %}" class="btn btn-secondary" style="display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; font-size: 14px;">
+                                <i class="fas fa-download"></i>
+                                Download Manual ({{ product.manual.get_file_size_display }})
+                            </a>
+                        </div>
+                        {% endif %}
+                        
                         <!-- Action Buttons -->
                         {% if not user.is_authenticated %}
                             <a href="{% url 'login' %}" class="btn btn-secondary">

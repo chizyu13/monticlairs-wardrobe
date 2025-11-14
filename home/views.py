@@ -853,3 +853,114 @@ def view_receipt(request, checkout_id):
 
 
 
+
+
+
+# ===========================
+# PRODUCT MANUAL VIEWS
+# ===========================
+
+def download_product_manual(request, product_id):
+    """Serve product manual for download."""
+    product = get_object_or_404(Product, id=product_id)
+    
+    try:
+        manual = product.manual
+        
+        # Serve the file
+        response = HttpResponse(manual.file, content_type='application/pdf')
+        response['Content-Disposition'] = f'attachment; filename="{manual.filename}"'
+        return response
+        
+    except ProductManual.DoesNotExist:
+        raise Http404("Manual not found for this product")
+    except Exception as e:
+        logger.error(f"Error downloading manual for product {product_id}: {str(e)}")
+        messages.error(request, "Error downloading manual. Please try again later.")
+        return redirect('home:product_detail', id=product_id)
+
+
+# ===========================
+# HELP CENTER VIEWS
+# ===========================
+
+from home.models import PlatformGuide, ProductManual
+
+
+def help_center(request):
+    """Display help center with guide categories and featured guides."""
+    # Get featured guides
+    featured_guides = PlatformGuide.objects.filter(
+        is_published=True,
+        featured=True
+    ).order_by('display_order')[:3]
+    
+    # Get guides by category
+    categories = {}
+    for category_code, category_name in PlatformGuide.CATEGORY_CHOICES:
+        guides = PlatformGuide.objects.filter(
+            is_published=True,
+            category=category_code
+        ).order_by('display_order', '-created_at')[:5]
+        
+        if guides.exists():
+            categories[category_code] = {
+                'name': category_name,
+                'guides': guides,
+                'count': PlatformGuide.objects.filter(
+                    is_published=True,
+                    category=category_code
+                ).count()
+            }
+    
+    context = {
+        'featured_guides': featured_guides,
+        'categories': categories
+    }
+    return render(request, 'home/help_center.html', context)
+
+
+def guide_detail(request, slug):
+    """Display full guide content and increment view count."""
+    guide = get_object_or_404(PlatformGuide, slug=slug, is_published=True)
+    
+    # Increment view count
+    guide.increment_view_count()
+    
+    # Get related guides from same category
+    related_guides = PlatformGuide.objects.filter(
+        is_published=True,
+        category=guide.category
+    ).exclude(id=guide.id).order_by('display_order', '-created_at')[:3]
+    
+    context = {
+        'guide': guide,
+        'related_guides': related_guides
+    }
+    return render(request, 'home/guide_detail.html', context)
+
+
+def guide_category(request, category):
+    """Display guides filtered by category."""
+    # Validate category
+    valid_categories = dict(PlatformGuide.CATEGORY_CHOICES)
+    if category not in valid_categories:
+        raise Http404("Category not found")
+    
+    # Get guides for this category
+    guides = PlatformGuide.objects.filter(
+        is_published=True,
+        category=category
+    ).order_by('display_order', '-created_at')
+    
+    # Pagination
+    paginator = Paginator(guides, 10)
+    page_number = request.GET.get('page')
+    guides = paginator.get_page(page_number)
+    
+    context = {
+        'category_code': category,
+        'category_name': valid_categories[category],
+        'guides': guides
+    }
+    return render(request, 'home/guide_category.html', context)

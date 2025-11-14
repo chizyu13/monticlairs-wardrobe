@@ -1,5 +1,6 @@
 from django import forms
-from .models import Product, Checkout, Category, Review
+from django.utils.translation import gettext_lazy as _
+from .models import Product, Checkout, Category, Review, ProductManual, PlatformGuide, GuideAttachment
 
 # Product Form
 from django import forms
@@ -176,3 +177,146 @@ class ReviewForm(forms.ModelForm):
         if len(title) < 3:
             raise forms.ValidationError('Title must be at least 3 characters long.')
         return title
+
+
+
+# Product Manual Form
+class ProductManualForm(forms.ModelForm):
+    """Form for uploading product manuals."""
+    
+    class Meta:
+        model = ProductManual
+        fields = ['file']
+        widgets = {
+            'file': forms.ClearableFileInput(attrs={
+                'class': 'form-control',
+                'accept': '.pdf'
+            })
+        }
+    
+    def clean_file(self):
+        file = self.cleaned_data.get('file')
+        if file:
+            # Validate file size (max 10MB)
+            if file.size > 10 * 1024 * 1024:
+                raise forms.ValidationError(_("File size must not exceed 10MB"))
+            
+            # Validate file extension
+            if not file.name.lower().endswith('.pdf'):
+                raise forms.ValidationError(_("Only PDF files are allowed"))
+            
+            # Validate file content type
+            if file.content_type != 'application/pdf':
+                raise forms.ValidationError(_("Invalid file type. Only PDF files are allowed"))
+        
+        return file
+
+
+# Platform Guide Form
+class PlatformGuideForm(forms.ModelForm):
+    """Form for creating/editing platform guides."""
+    
+    class Meta:
+        model = PlatformGuide
+        fields = ['title', 'category', 'description', 'content', 'featured', 'display_order', 'is_published']
+        widgets = {
+            'title': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Enter guide title'
+            }),
+            'category': forms.Select(attrs={
+                'class': 'form-select'
+            }),
+            'description': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 3,
+                'placeholder': 'Brief summary of the guide'
+            }),
+            'content': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 15,
+                'placeholder': 'Full guide content (HTML supported)'
+            }),
+            'featured': forms.CheckboxInput(attrs={
+                'class': 'form-check-input'
+            }),
+            'display_order': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'min': '0'
+            }),
+            'is_published': forms.CheckboxInput(attrs={
+                'class': 'form-check-input'
+            }),
+        }
+        labels = {
+            'title': 'Guide Title',
+            'category': 'Category',
+            'description': 'Short Description',
+            'content': 'Guide Content',
+            'featured': 'Feature this guide',
+            'display_order': 'Display Order',
+            'is_published': 'Publish this guide',
+        }
+        help_texts = {
+            'display_order': 'Lower numbers appear first',
+            'featured': 'Featured guides appear prominently on the Help Center homepage',
+        }
+    
+    def clean_title(self):
+        """Validate title length."""
+        title = self.cleaned_data.get('title')
+        if len(title) < 5:
+            raise forms.ValidationError('Title must be at least 5 characters long.')
+        return title
+    
+    def clean_description(self):
+        """Validate description length."""
+        description = self.cleaned_data.get('description')
+        if len(description) < 10:
+            raise forms.ValidationError('Description must be at least 10 characters long.')
+        return description
+    
+    def clean_content(self):
+        """Validate content length."""
+        content = self.cleaned_data.get('content')
+        if len(content) < 50:
+            raise forms.ValidationError('Content must be at least 50 characters long.')
+        return content
+
+
+# Guide Attachment Form
+class GuideAttachmentForm(forms.ModelForm):
+    """Form for uploading guide attachments."""
+    
+    class Meta:
+        model = GuideAttachment
+        fields = ['file', 'caption']
+        widgets = {
+            'file': forms.ClearableFileInput(attrs={
+                'class': 'form-control',
+                'accept': '.pdf,.jpg,.jpeg,.png'
+            }),
+            'caption': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Optional caption for the attachment'
+            })
+        }
+    
+    def clean_file(self):
+        file = self.cleaned_data.get('file')
+        if file:
+            # Validate file size (max 10MB)
+            if file.size > 10 * 1024 * 1024:
+                raise forms.ValidationError(_("File size must not exceed 10MB"))
+            
+            # Validate file type
+            ext = file.name.lower().split('.')[-1]
+            if ext not in ['pdf', 'jpg', 'jpeg', 'png']:
+                raise forms.ValidationError(_("Only PDF and image files (JPG, PNG) are allowed"))
+            
+            # Validate content type
+            valid_types = ['application/pdf', 'image/jpeg', 'image/png']
+            if file.content_type not in valid_types:
+                raise forms.ValidationError(_("Invalid file type"))
+        
+        return file

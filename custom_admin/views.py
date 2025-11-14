@@ -624,3 +624,236 @@ def mark_payment_processing(request, payment_id):
         messages.info(request, f'Payment {payment.reference} marked as processing')
     
     return redirect('custom_admin:payment_detail', payment_id=payment_id)
+
+
+
+# --- Product Manual Management ---
+from home.models import ProductManual
+from home.forms import ProductManualForm
+from django.http import HttpResponse, Http404
+
+
+@login_required
+@user_passes_test(is_admin)
+def upload_product_manual(request, product_id):
+    """Upload or replace a product manual."""
+    product = get_object_or_404(Product, id=product_id)
+    
+    # Check if manual already exists
+    try:
+        manual = product.manual
+        is_replacement = True
+    except ProductManual.DoesNotExist:
+        manual = None
+        is_replacement = False
+    
+    if request.method == 'POST':
+        form = ProductManualForm(request.POST, request.FILES, instance=manual)
+        if form.is_valid():
+            # Delete old file if replacing
+            if is_replacement and manual.file:
+                old_file = manual.file
+                try:
+                    old_file.delete(save=False)
+                except Exception as e:
+                    messages.warning(request, f'Could not delete old file: {str(e)}')
+            
+            # Save new manual
+            manual = form.save(commit=False)
+            manual.product = product
+            manual.uploaded_by = request.user
+            manual.save()
+            
+            action = 'replaced' if is_replacement else 'uploaded'
+            messages.success(request, f'Product manual {action} successfully for "{product.name}"!')
+            return redirect('custom_admin:manage_products')
+        else:
+            messages.error(request, 'Please correct the errors below.')
+    else:
+        form = ProductManualForm(instance=manual)
+    
+    context = {
+        'form': form,
+        'product': product,
+        'manual': manual,
+        'is_replacement': is_replacement
+    }
+    return render(request, 'custom_admin/upload_product_manual.html', context)
+
+
+@login_required
+@user_passes_test(is_admin)
+def delete_product_manual(request, product_id):
+    """Delete a product manual."""
+    product = get_object_or_404(Product, id=product_id)
+    
+    try:
+        manual = product.manual
+        manual_filename = manual.filename
+        
+        # Delete the file
+        if manual.file:
+            try:
+                manual.file.delete(save=False)
+            except Exception as e:
+                messages.warning(request, f'Could not delete file: {str(e)}')
+        
+        # Delete the database record
+        manual.delete()
+        
+        messages.success(request, f'Manual "{manual_filename}" deleted successfully for product "{product.name}"!')
+    except ProductManual.DoesNotExist:
+        messages.error(request, f'No manual found for product "{product.name}"')
+    
+    return redirect('custom_admin:manage_products')
+
+
+
+# --- Platform Guide Management ---
+from home.models import PlatformGuide, GuideAttachment
+from home.forms import PlatformGuideForm, GuideAttachmentForm
+
+
+@login_required
+@user_passes_test(is_admin)
+def guide_list(request):
+    """List all platform guides with filtering."""
+    guides = PlatformGuide.objects.all().order_by('display_order', '-created_at')
+    
+    # Filter by category
+    category_filter = request.GET.get('category')
+    if category_filter:
+        guides = guides.filter(category=category_filter)
+    
+    # Filter by published status
+    status_filter = request.GET.get('status')
+    if status_filter == 'published':
+        guides = guides.filter(is_published=True)
+    elif status_filter == 'draft':
+        guides = guides.filter(is_published=False)
+    
+    # Search
+    search_query = request.GET.get('search')
+    if search_query:
+        guides = guides.filter(
+            Q(title__icontains=search_query) |
+            Q(description__icontains=search_query)
+        )
+    
+    # Pagination
+    paginator = Paginator(guides, 20)
+    page_number = request.GET.get('page')
+    guides = paginator.get_page(page_number)
+    
+    context = {
+        'guides': guides,
+        'category_choices': PlatformGuide.CATEGORY_CHOICES,
+        'category_filter': category_filter,
+        'status_filter': status_filter,
+        'search_query': search_query
+    }
+    return render(request, 'custom_admin/guide_list.html', context)
+
+
+@login_required
+@user_passes_test(is_admin)
+def manage_guide(request, guide_id=None):
+    """Create new guide or edit existing guide."""
+    if guide_id:
+        guide = get_object_or_404(PlatformGuide, id=guide_id)
+        is_edit = True
+    else:
+        guide = None
+        is_edit = False
+    
+    if request.method == 'POST':
+        form = PlatformGuideForm(request.POST, instance=guide)
+        if form.is_valid():
+            guide = form.save(commit=False)
+            if not is_edit:
+                guide.created_by = request.user
+            guide.save()
+            
+            action = 'updated' if is_edit else 'created'
+            messages.success(request, f'Guide "{guide.title}" {action} successfully!')
+            return redirect('custom_admin:guide_list')
+        else:
+            messages.error(request, 'Please correct the errors below.')
+    else:
+        form = PlatformGuideForm(instance=guide)
+    
+    # Get attachments if editing
+    attachments = guide.attachments.all() if guide else []
+    
+    context = {
+        'form': form,
+        'guide': guide,
+        'is_edit': is_edit,
+        'attachments': attachments
+    }
+    return render(request, 'custom_admin/manage_guide.html', context)
+
+
+@login_required
+@user_passes_test(is_admin)
+def delete_guide(request, guide_id):
+    """Delete a platform guide."""
+    guide = get_object_or_404(PlatformGuide, id=guide_id)
+    guide_title = guide.title
+    
+    # Delete all attachments (files will be deleted by signal handlers)
+    guide.attachments.all().delete()
+    
+    # Delete the guide
+    guide.delete()
+    
+    messages.success(request, f'Guide "{guide_title}" and all its attachments deleted successfully!')
+    return redirect('custom_admin:guide_list')
+
+
+@login_required
+@user_passes_test(is_admin)
+def upload_guide_attachment(request, guide_id):
+    """Upload attachment for a guide."""
+    guide = get_object_or_404(PlatformGuide, id=guide_id)
+    
+    if request.method == 'POST':
+        form = GuideAttachmentForm(request.POST, request.FILES)
+        if form.is_valid():
+            attachment = form.save(commit=False)
+            attachment.guide = guide
+            attachment.save()
+            
+            messages.success(request, f'Attachment uploaded successfully for guide "{guide.title}"!')
+            return redirect('custom_admin:edit_guide', guide_id=guide_id)
+        else:
+            messages.error(request, 'Please correct the errors below.')
+    else:
+        form = GuideAttachmentForm()
+    
+    context = {
+        'form': form,
+        'guide': guide
+    }
+    return render(request, 'custom_admin/upload_guide_attachment.html', context)
+
+
+@login_required
+@user_passes_test(is_admin)
+def delete_guide_attachment(request, attachment_id):
+    """Delete a guide attachment."""
+    attachment = get_object_or_404(GuideAttachment, id=attachment_id)
+    guide_id = attachment.guide.id
+    
+    # Delete the file
+    if attachment.file:
+        try:
+            attachment.file.delete(save=False)
+        except Exception as e:
+            messages.warning(request, f'Could not delete file: {str(e)}')
+    
+    # Delete the database record
+    attachment.delete()
+    
+    messages.success(request, 'Attachment deleted successfully!')
+    return redirect('custom_admin:edit_guide', guide_id=guide_id)

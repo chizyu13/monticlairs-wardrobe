@@ -33,4 +33,12 @@ urlpatterns = [
     # Receipt URLs
     path('receipt/<int:checkout_id>/download/', views.download_receipt, name='download_receipt'),
     path('receipt/<int:checkout_id>/view/', views.view_receipt, name='view_receipt'),
+    
+    # Product Manual URLs
+    path('product/<int:product_id>/manual/download/', views.download_product_manual, name='download_product_manual'),
+    
+    # Help Center URLs
+    path('help/', views.help_center, name='help_center'),
+    path('help/<slug:slug>/', views.guide_detail, name='guide_detail'),
+    path('help/category/<str:category>/', views.guide_category, name='guide_category'),
 ]

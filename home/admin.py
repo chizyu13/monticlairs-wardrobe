@@ -299,3 +299,89 @@ class StoreAdmin(admin.ModelAdmin):
     
     def get_queryset(self, request):
         return super().get_queryset(request).select_related('manager')
+
+
+
+# Register ProductManual model
+from .models import ProductManual, PlatformGuide, GuideAttachment
+
+@admin.register(ProductManual)
+class ProductManualAdmin(admin.ModelAdmin):
+    list_display = ['product', 'filename', 'file_size_display', 'uploaded_by', 'uploaded_at']
+    search_fields = ['product__name', 'filename']
+    list_filter = ['uploaded_at', 'uploaded_by']
+    ordering = ['-uploaded_at']
+    readonly_fields = ['uploaded_at', 'updated_at', 'file_size']
+    date_hierarchy = 'uploaded_at'
+    list_per_page = 20
+    autocomplete_fields = ['product', 'uploaded_by']
+    
+    def file_size_display(self, obj):
+        return obj.get_file_size_display()
+    file_size_display.short_description = 'File Size'
+    
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related('product', 'uploaded_by')
+
+
+# Register PlatformGuide model with inline attachments
+class GuideAttachmentInline(admin.TabularInline):
+    model = GuideAttachment
+    extra = 1
+    fields = ['file', 'file_type', 'caption']
+    readonly_fields = ['uploaded_at']
+
+
+@admin.register(PlatformGuide)
+class PlatformGuideAdmin(admin.ModelAdmin):
+    list_display = ['title', 'category', 'featured', 'is_published', 'view_count', 
+                    'display_order', 'created_by', 'created_at']
+    search_fields = ['title', 'description', 'content']
+    list_filter = ['category', 'featured', 'is_published', 'created_at']
+    ordering = ['display_order', '-created_at']
+    readonly_fields = ['slug', 'view_count', 'created_at', 'updated_at']
+    date_hierarchy = 'created_at'
+    list_per_page = 20
+    autocomplete_fields = ['created_by']
+    list_editable = ['featured', 'is_published', 'display_order']
+    prepopulated_fields = {'slug': ('title',)}
+    inlines = [GuideAttachmentInline]
+    
+    fieldsets = (
+        ('Basic Information', {
+            'fields': ('title', 'slug', 'category', 'description')
+        }),
+        ('Content', {
+            'fields': ('content',),
+            'description': 'Full guide content (HTML supported)'
+        }),
+        ('Display Settings', {
+            'fields': ('featured', 'display_order', 'is_published')
+        }),
+        ('Statistics', {
+            'fields': ('view_count',),
+            'classes': ('collapse',)
+        }),
+        ('Metadata', {
+            'fields': ('created_by', 'created_at', 'updated_at'),
+            'classes': ('collapse',)
+        }),
+    )
+    
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related('created_by')
+
+
+@admin.register(GuideAttachment)
+class GuideAttachmentAdmin(admin.ModelAdmin):
+    list_display = ['guide', 'file_type', 'caption', 'uploaded_at']
+    search_fields = ['guide__title', 'caption']
+    list_filter = ['file_type', 'uploaded_at']
+    ordering = ['-uploaded_at']
+    readonly_fields = ['uploaded_at']
+    date_hierarchy = 'uploaded_at'
+    list_per_page = 20
+    autocomplete_fields = ['guide']
+    
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related('guide')

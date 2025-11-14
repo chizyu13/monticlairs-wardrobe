@@ -1,0 +1,132 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ category_name }} - Help Center{% endblock %}
+
+{% block content %}
+<div class="container" style="margin-top: 100px; margin-bottom: 60px;">
+    <div class="row">
+        <!-- Breadcrumb -->
+        <div class="col-12 mb-4">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb" style="background: transparent; padding: 0;">
+                    <li class="breadcrumb-item"><a href="{% url 'home:help_center' %}" style="color: var(--gold-accent);">Help Center</a></li>
+                    <li class="breadcrumb-item active" style="color: var(--text-primary);">{{ category_name }}</li>
+                </ol>
+            </nav>
+        </div>
+
+        <!-- Header -->
+        <div class="col-12 mb-5">
+            <h1 style="color: var(--gold-accent); font-family: 'Playfair Display', serif; font-size: 2.5rem; margin-bottom: 15px;">
+                <i class="fas fa-folder"></i> {{ category_name }}
+            </h1>
+            <p style="color: var(--text-secondary); font-size: 1.1rem;">
+                Browse all guides in this category
+            </p>
+        </div>
+
+        <!-- Guides List -->
+        <div class="col-12">
+            {% if guides %}
+            <div class="row">
+                {% for guide in guides %}
+                <div class="col-md-6 mb-4">
+                    <div class="card" style="background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 12px; padding: 25px; height: 100%; transition: all 0.3s ease;">
+                        <h3 style="color: var(--gold-accent); font-size: 1.4rem; margin-bottom: 15px;">
+                            {{ guide.title }}
+                        </h3>
+                        <p style="color: var(--text-secondary); margin-bottom: 20px; flex-grow: 1;">
+                            {{ guide.description }}
+                        </p>
+                        <div style="margin-top: auto;">
+                            <a href="{% url 'home:guide_detail' guide.slug %}" class="btn btn-secondary" style="width: 100%;">
+                                <i class="fas fa-book-open"></i> Read Guide
+                            </a>
+                            <div style="color: var(--text-muted); font-size: 0.85rem; margin-top: 10px; display: flex; justify-content: space-between;">
+                                <span><i class="fas fa-eye"></i> {{ guide.view_count }} views</span>
+                                <span><i class="fas fa-calendar"></i> {{ guide.created_at|date:"M d, Y" }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Pagination -->
+            {% if guides.has_other_pages %}
+            <nav aria-label="Page navigation" class="mt-4">
+                <ul class="pagination justify-content-center">
+                    {% if guides.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ guides.previous_page_number }}" style="background: var(--glass-bg); border-color: var(--glass-border); color: var(--text-primary);">
+                            <i class="fas fa-chevron-left"></i> Previous
+                        </a>
+                    </li>
+                    {% endif %}
+
+                    {% for num in guides.paginator.page_range %}
+                    {% if guides.number == num %}
+                    <li class="page-item active">
+                        <span class="page-link" style="background: var(--gold-accent); border-color: var(--gold-accent); color: var(--primary-dark);">{{ num }}</span>
+                    </li>
+                    {% elif num > guides.number|add:'-3' and num < guides.number|add:'3' %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ num }}" style="background: var(--glass-bg); border-color: var(--glass-border); color: var(--text-primary);">{{ num }}</a>
+                    </li>
+                    {% endif %}
+                    {% endfor %}
+
+                    {% if guides.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ guides.next_page_number }}" style="background: var(--glass-bg); border-color: var(--glass-border); color: var(--text-primary);">
+                            Next <i class="fas fa-chevron-right"></i>
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
+
+            {% else %}
+            <div class="col-12">
+                <div class="text-center" style="background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 12px; padding: 60px;">
+                    <i class="fas fa-folder-open" style="font-size: 4rem; color: var(--text-muted); margin-bottom: 20px;"></i>
+                    <h3 style="color: var(--text-primary); margin-bottom: 15px;">No Guides Found</h3>
+                    <p style="color: var(--text-secondary); margin-bottom: 25px;">
+                        There are no guides available in this category yet.
+                    </p>
+                    <a href="{% url 'home:help_center' %}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Back to Help Center
+                    </a>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Back Button -->
+        <div class="col-12 mt-4">
+            <a href="{% url 'home:help_center' %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back to Help Center
+            </a>
+        </div>
+    </div>
+</div>
+
+<style>
+    .card {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 30px rgba(212, 175, 55, 0.2);
+    }
+    
+    .page-link:hover {
+        background: var(--accent-dark) !important;
+        color: var(--gold-accent) !important;
+    }
+</style>
+{% endblock %}

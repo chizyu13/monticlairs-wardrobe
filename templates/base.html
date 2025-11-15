@@ -29,6 +29,9 @@
 
     <!-- Custom CSS -->
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    
+    <!-- Chat Widget CSS -->
+    <link rel="stylesheet" href="{% static 'css/chat-widget.css' %}">
 
     <style>
         :root {
@@ -662,6 +665,17 @@
                 setInterval(updateClock, 1000);
             }
         });
+    </script>
+
+    <!-- Chat Widget JavaScript -->
+    <script src="{% static 'js/chat-widget.js' %}"></script>
+    
+    <!-- Set authentication status for chat widget -->
+    <script>
+        document.body.dataset.authenticated = '{{ user.is_authenticated|yesno:"true,false" }}';
+        {% if product %}
+        document.body.dataset.productId = '{{ product.id }}';
+        {% endif %}
     </script>
 
     {% block extra_js %}{% endblock %}

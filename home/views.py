@@ -1052,13 +1052,20 @@ def send_message(request, session_id):
         
         # Verify ownership
         if request.user.is_authenticated:
-            if session.customer != request.user:
+            # Authenticated user - check if they own the session
+            if session.customer and session.customer != request.user:
                 return JsonResponse({
                     'success': False,
                     'error': 'Unauthorized'
                 }, status=403)
             sender_name = request.user.get_full_name() or request.user.username
         else:
+            # Guest user - session must not have a customer (must be guest session)
+            if session.customer is not None:
+                return JsonResponse({
+                    'success': False,
+                    'error': 'Unauthorized'
+                }, status=403)
             sender_name = session.guest_name
         
         # Create message

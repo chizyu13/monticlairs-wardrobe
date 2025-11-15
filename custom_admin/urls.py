@@ -1,5 +1,6 @@
 from django.urls import path
 from . import views
+from home import views as home_views
 
 app_name='custom_admin'
 
@@ -43,4 +44,12 @@ urlpatterns = [
     path('guides/<int:guide_id>/delete/', views.delete_guide, name='delete_guide'),
     path('guides/<int:guide_id>/attachment/upload/', views.upload_guide_attachment, name='upload_guide_attachment'),
     path('guides/attachment/<int:attachment_id>/delete/', views.delete_guide_attachment, name='delete_guide_attachment'),
+    
+    # Live Chat Management URLs
+    path('chat/', home_views.admin_chat_dashboard, name='chat_dashboard'),
+    path('chat/<str:session_id>/', home_views.admin_chat_session, name='chat_session'),
+    path('chat/<str:session_id>/send/', home_views.admin_send_message, name='chat_send_message'),
+    path('chat/<str:session_id>/messages/', home_views.admin_get_messages, name='chat_get_messages'),
+    path('chat/<str:session_id>/close/', home_views.admin_close_chat, name='chat_close'),
+    path('chat/<str:session_id>/assign/', home_views.admin_assign_chat, name='chat_assign'),
 ]

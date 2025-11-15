@@ -1,0 +1,260 @@
+{% extends 'custom_admin/base.html' %}
+{% load static %}
+
+{% block title %}Live Chat Dashboard - Admin{% endblock %}
+
+{% block extra_css %}
+<style>
+    .chat-dashboard {
+        padding: 20px;
+    }
+    
+    .stats-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+    
+    .stat-card {
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .stat-card h3 {
+        font-size: 14px;
+        color: #666;
+        margin: 0 0 10px 0;
+    }
+    
+    .stat-card .number {
+        font-size: 32px;
+        font-weight: bold;
+        color: #667eea;
+    }
+    
+    .filter-tabs {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 20px;
+        border-bottom: 2px solid #e0e0e0;
+    }
+    
+    .filter-tab {
+        padding: 10px 20px;
+        background: none;
+        border: none;
+        cursor: pointer;
+        font-weight: 500;
+        color: #666;
+        border-bottom: 2px solid transparent;
+        margin-bottom: -2px;
+    }
+    
+    .filter-tab.active {
+        color: #667eea;
+        border-bottom-color: #667eea;
+    }
+    
+    .sessions-list {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .session-item {
+        padding: 15px 20px;
+        border-bottom: 1px solid #e0e0e0;
+        cursor: pointer;
+        transition: background 0.2s;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .session-item:hover {
+        background: #f8f9fa;
+    }
+    
+    .session-item:last-child {
+        border-bottom: none;
+    }
+    
+    .session-info {
+        flex: 1;
+    }
+    
+    .session-customer {
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 5px;
+    }
+    
+    .session-product {
+        font-size: 13px;
+        color: #666;
+        margin-bottom: 5px;
+    }
+    
+    .session-preview {
+        font-size: 13px;
+        color: #999;
+    }
+    
+    .session-meta {
+        text-align: right;
+    }
+    
+    .session-time {
+        font-size: 12px;
+        color: #999;
+        margin-bottom: 5px;
+    }
+    
+    .unread-badge {
+        background: #ff4757;
+        color: white;
+        padding: 2px 8px;
+        border-radius: 12px;
+        font-size: 11px;
+        font-weight: bold;
+    }
+    
+    .status-badge {
+        display: inline-block;
+        padding: 4px 12px;
+        border-radius: 12px;
+        font-size: 11px;
+        font-weight: 600;
+        margin-top: 5px;
+    }
+    
+    .status-active {
+        background: #d4edda;
+        color: #155724;
+    }
+    
+    .status-waiting {
+        background: #fff3cd;
+        color: #856404;
+    }
+    
+    .status-closed {
+        background: #f8d7da;
+        color: #721c24;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: #999;
+    }
+    
+    .empty-state i {
+        font-size: 64px;
+        margin-bottom: 20px;
+        color: #ddd;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="chat-dashboard">
+    <h1>Live Chat Dashboard</h1>
+    
+    <!-- Statistics Cards -->
+    <div class="stats-cards">
+        <div class="stat-card">
+            <h3>Active Chats</h3>
+            <div class="number">{{ stats.active }}</div>
+        </div>
+        <div class="stat-card">
+            <h3>Waiting</h3>
+            <div class="number">{{ stats.waiting }}</div>
+        </div>
+        <div class="stat-card">
+            <h3>Total Unread</h3>
+            <div class="number">{{ stats.total_unread }}</div>
+        </div>
+        <div class="stat-card">
+            <h3>Closed Today</h3>
+            <div class="number">{{ stats.closed }}</div>
+        </div>
+    </div>
+    
+    <!-- Filter Tabs -->
+    <div class="filter-tabs">
+        <button class="filter-tab {% if current_filter == 'active' or not current_filter %}active{% endif %}" 
+                onclick="window.location.href='?status=active'">
+            Active
+        </button>
+        <button class="filter-tab {% if current_filter == 'waiting' %}active{% endif %}" 
+                onclick="window.location.href='?status=waiting'">
+            Waiting
+        </button>
+        <button class="filter-tab {% if current_filter == 'closed' %}active{% endif %}" 
+                onclick="window.location.href='?status=closed'">
+            Closed
+        </button>
+        <button class="filter-tab {% if current_filter == 'all' %}active{% endif %}" 
+                onclick="window.location.href='?status=all'">
+            All
+        </button>
+    </div>
+    
+    <!-- Chat Sessions List -->
+    <div class="sessions-list">
+        {% if sessions %}
+            {% for session in sessions %}
+            <div class="session-item" onclick="window.location.href='{% url 'custom_admin:chat_session' session.session_id %}'">
+                <div class="session-info">
+                    <div class="session-customer">
+                        {% if session.customer %}
+                            {{ session.customer.get_full_name|default:session.customer.username }}
+                        {% else %}
+                            {{ session.guest_name }} (Guest)
+                        {% endif %}
+                    </div>
+                    {% if session.product %}
+                    <div class="session-product">
+                        <i class="fas fa-tag"></i> {{ session.product.name }}
+                    </div>
+                    {% endif %}
+                    <div class="session-preview">
+                        Last activity: {{ session.last_message_at|timesince }} ago
+                    </div>
+                </div>
+                <div class="session-meta">
+                    <div class="session-time">{{ session.created_at|date:"M d, g:i A" }}</div>
+                    {% if session.get_unread_count %}
+                    <span class="unread-badge">{{ session.get_unread_count }} new</span>
+                    {% endif %}
+                    <div>
+                        <span class="status-badge status-{{ session.status }}">
+                            {{ session.get_status_display }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="empty-state">
+                <i class="fas fa-comments"></i>
+                <h3>No chat sessions</h3>
+                <p>Chat sessions will appear here when customers start conversations.</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Auto-refresh every 10 seconds
+    setTimeout(function() {
+        location.reload();
+    }, 10000);
+</script>
+{% endblock %}

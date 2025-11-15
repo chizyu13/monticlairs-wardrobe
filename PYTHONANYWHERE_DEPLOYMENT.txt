@@ -1,0 +1,53 @@
+# PythonAnywhere Deployment Commands for Live Chat System
+# Run these commands in your PythonAnywhere Bash console
+
+# 1. Navigate to your project directory
+cd ~/monticlairs-wardrobe
+
+# 2. Pull the latest changes from GitHub
+git pull origin main
+
+# 3. Activate your virtual environment
+source venv/bin/activate
+
+# 4. Run database migrations for the new chat models
+python manage.py migrate
+
+# 5. Collect static files (for the new CSS and JS files)
+python manage.py collectstatic --noinput
+
+# 6. Reload your web app
+touch /var/www/chizyu13_pythonanywhere_com_wsgi.py
+
+# Or use the PythonAnywhere API to reload:
+# curl -X POST https://www.pythonanywhere.com/api/v0/user/chizyu13/webapps/chizyu13.pythonanywhere.com/reload/ \
+#   -H "Authorization: Token YOUR_API_TOKEN"
+
+# 7. Verify the deployment
+python manage.py showmigrations home
+
+# 8. Check for any errors in the error log
+tail -n 50 /var/log/chizyu13.pythonanywhere.com.error.log
+
+# ============================================
+# IMPORTANT NOTES:
+# ============================================
+
+# New files added in this deployment:
+# - home/models.py (ChatSession, ChatMessage models)
+# - home/views.py (Customer and Admin chat API views)
+# - home/migrations/0029_*.py (Database migration)
+# - static/css/chat-widget.css (Chat widget styles)
+# - static/js/chat-widget.js (Chat widget functionality)
+
+# Next steps after deployment:
+# 1. Configure URL patterns for chat endpoints
+# 2. Add chat widget to product pages
+# 3. Create admin chat dashboard templates
+# 4. Test the chat functionality
+
+# Troubleshooting:
+# - If migration fails, check database permissions
+# - If static files don't load, verify STATIC_ROOT setting
+# - Check error logs for any Python errors
+# - Ensure all dependencies are installed in virtual environment

@@ -41,4 +41,11 @@ urlpatterns = [
     path('help/', views.help_center, name='help_center'),
     path('help/<slug:slug>/', views.guide_detail, name='guide_detail'),
     path('help/category/<str:category>/', views.guide_category, name='guide_category'),
+    
+    # Customer Chat URLs
+    path('chat/start/', views.start_chat_session, name='start_chat_session'),
+    path('chat/start/<int:product_id>/', views.start_chat_session, name='start_chat_session_product'),
+    path('chat/send/<str:session_id>/', views.send_message, name='send_message'),
+    path('chat/messages/<str:session_id>/', views.get_messages, name='get_messages'),
+    path('chat/close/<str:session_id>/', views.close_chat, name='close_chat'),
 ]

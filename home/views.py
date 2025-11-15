@@ -1170,7 +1170,7 @@ def admin_chat_dashboard(request):
     status_filter = request.GET.get('status', 'active')
     
     # Base queryset
-    sessions = ChatSession.objects.select_related('customer', 'product', 'assigned_to')
+    sessions = ChatSession.objects.select_related('customer', 'product', 'admin_assigned')
     
     # Apply filters
     if status_filter and status_filter != 'all':
@@ -1201,8 +1201,8 @@ def admin_chat_session(request, session_id):
     session = get_object_or_404(ChatSession, session_id=session_id)
     
     # Assign to current admin if not assigned
-    if not session.assigned_to:
-        session.assigned_to = request.user
+    if not session.admin_assigned:
+        session.admin_assigned = request.user
         session.save()
     
     # Get all messages
@@ -1341,15 +1341,15 @@ def admin_assign_chat(request, session_id):
         
         if admin_id:
             admin_user = get_object_or_404(User, id=admin_id, is_staff=True)
-            session.assigned_to = admin_user
+            session.admin_assigned = admin_user
         else:
-            session.assigned_to = None
+            session.admin_assigned = None
         
         session.save()
         
         return JsonResponse({
             'success': True,
-            'assigned_to': session.assigned_to.username if session.assigned_to else None
+            'assigned_to': session.admin_assigned.username if session.admin_assigned else None
         })
         
     except Exception as e:

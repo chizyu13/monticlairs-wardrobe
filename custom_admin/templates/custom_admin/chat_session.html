@@ -190,10 +190,10 @@
             <div class="info-value">{{ session.last_message_at|timesince }} ago</div>
         </div>
         
-        {% if session.assigned_to %}
+        {% if session.admin_assigned %}
         <div class="info-item">
             <div class="info-label">Assigned To</div>
-            <div class="info-value">{{ session.assigned_to.username }}</div>
+            <div class="info-value">{{ session.admin_assigned.username }}</div>
         </div>
         {% endif %}
     </div>

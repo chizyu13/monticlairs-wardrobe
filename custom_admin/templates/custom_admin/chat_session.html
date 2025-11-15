@@ -67,7 +67,13 @@
     
     .chat-header h2 {
         margin: 0;
-        font-size: 18px;
+        font-size: 20px;
+        font-weight: 600;
+        color: #d4af37;
+    }
+    
+    .chat-header > div:first-child {
+        flex: 1;
     }
     
     .chat-actions button {
@@ -195,7 +201,18 @@
     <!-- Main chat area -->
     <div class="chat-main">
         <div class="chat-header">
-            <h2>Chat Conversation</h2>
+            <div>
+                <h2>
+                    {% if session.customer %}
+                        {{ session.customer.get_full_name|default:session.customer.username }}
+                    {% else %}
+                        {{ session.guest_name }} (Guest)
+                    {% endif %}
+                </h2>
+                {% if session.guest_email %}
+                <p style="margin: 0; font-size: 14px; opacity: 0.9;">{{ session.guest_email }}</p>
+                {% endif %}
+            </div>
             <div class="chat-actions">
                 <button class="btn-back" onclick="window.location.href='{% url 'custom_admin:chat_dashboard' %}'">
                     <i class="fas fa-arrow-left"></i> Back
@@ -212,7 +229,12 @@
             {% for message in messages %}
             <div class="chat-message {% if message.is_admin %}admin{% else %}customer{% endif %}">
                 <div class="message-bubble">
-                    <div class="message-sender">{{ message.sender_name }}</div>
+                    <div class="message-sender">
+                        {{ message.sender_name }}
+                        {% if not message.is_admin %}
+                        <span style="background: #d4af37; color: #0a0a0a; padding: 2px 6px; border-radius: 4px; font-size: 10px; margin-left: 6px; font-weight: 600;">CUSTOMER</span>
+                        {% endif %}
+                    </div>
                     <div class="message-text">{{ message.message }}</div>
                     <div class="message-time">{{ message.created_at|date:"g:i A" }}</div>
                 </div>

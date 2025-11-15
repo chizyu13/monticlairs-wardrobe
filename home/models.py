@@ -1107,3 +1107,163 @@ class GuideAttachment(models.Model):
         verbose_name = _("Guide Attachment")
         verbose_name_plural = _("Guide Attachments")
         ordering = ['uploaded_at']
+
+
+
+import uuid
+
+
+class ChatSession(models.Model):
+    """Represents a chat conversation between customer and admin."""
+    
+    STATUS_CHOICES = [
+        ('active', _('Active')),
+        ('closed', _('Closed')),
+        ('pending', _('Pending Response')),
+    ]
+    
+    customer = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='chat_sessions',
+        null=True,
+        blank=True,
+        verbose_name=_("Customer")
+    )
+    guest_name = models.CharField(
+        max_length=100,
+        blank=True,
+        verbose_name=_("Guest Name")
+    )
+    guest_email = models.EmailField(
+        blank=True,
+        verbose_name=_("Guest Email")
+    )
+    session_id = models.CharField(
+        max_length=100,
+        unique=True,
+        verbose_name=_("Session ID")
+    )
+    product = models.ForeignKey(
+        Product,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='chat_sessions',
+        verbose_name=_("Product")
+    )
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default='active',
+        verbose_name=_("Status")
+    )
+    admin_assigned = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='assigned_chats',
+        verbose_name=_("Admin Assigned")
+    )
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name=_("Created At")
+    )
+    updated_at = models.DateTimeField(
+        auto_now=True,
+        verbose_name=_("Updated At")
+    )
+    last_message_at = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name=_("Last Message At")
+    )
+
+    def __str__(self):
+        if self.customer:
+            return f"Chat with {self.customer.username}"
+        return f"Guest chat: {self.guest_name or self.guest_email}"
+
+    def save(self, *args, **kwargs):
+        if not self.session_id:
+            self.session_id = str(uuid.uuid4())
+        super().save(*args, **kwargs)
+
+    def get_unread_count(self, for_admin=False):
+        """Get count of unread messages."""
+        return self.messages.filter(
+            is_read=False,
+            is_admin=not for_admin
+        ).count()
+
+    def get_participant_name(self):
+        """Get the name of the customer/guest."""
+        if self.customer:
+            return self.customer.get_full_name() or self.customer.username
+        return self.guest_name or self.guest_email
+
+    class Meta:
+        ordering = ['-last_message_at']
+        verbose_name = _("Chat Session")
+        verbose_name_plural = _("Chat Sessions")
+        indexes = [
+            models.Index(fields=['session_id']),
+            models.Index(fields=['status', '-last_message_at']),
+            models.Index(fields=['customer', 'status']),
+        ]
+
+
+class ChatMessage(models.Model):
+    """Individual messages within a chat session."""
+    
+    session = models.ForeignKey(
+        ChatSession,
+        on_delete=models.CASCADE,
+        related_name='messages',
+        verbose_name=_("Session")
+    )
+    sender = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='sent_messages',
+        null=True,
+        blank=True,
+        verbose_name=_("Sender")
+    )
+    sender_name = models.CharField(
+        max_length=100,
+        verbose_name=_("Sender Name")
+    )
+    is_admin = models.BooleanField(
+        default=False,
+        verbose_name=_("Is Admin")
+    )
+    message = models.TextField(
+        verbose_name=_("Message")
+    )
+    is_read = models.BooleanField(
+        default=False,
+        verbose_name=_("Is Read")
+    )
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name=_("Created At")
+    )
+
+    def __str__(self):
+        return f"{self.sender_name}: {self.message[:50]}"
+
+    def save(self, *args, **kwargs):
+        # Update session's last_message_at
+        super().save(*args, **kwargs)
+        self.session.last_message_at = self.created_at
+        self.session.save(update_fields=['last_message_at'])
+
+    class Meta:
+        ordering = ['created_at']
+        verbose_name = _("Chat Message")
+        verbose_name_plural = _("Chat Messages")
+        indexes = [
+            models.Index(fields=['session', '-created_at']),
+            models.Index(fields=['is_read', 'is_admin']),
+        ]

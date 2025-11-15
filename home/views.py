@@ -964,3 +964,389 @@ def guide_category(request, category):
         'guides': guides
     }
     return render(request, 'home/guide_category.html', context)
+
+
+
+# ===========================
+# LIVE CHAT API VIEWS
+# ===========================
+
+from home.models import ChatSession, ChatMessage
+from django.views.decorators.http import require_http_methods
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+import json
+
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def start_chat_session(request, product_id=None):
+    """Initialize a chat session for customer."""
+    try:
+        data = json.loads(request.body)
+        
+        # Get or create session
+        if request.user.is_authenticated:
+            # Authenticated user
+            session, created = ChatSession.objects.get_or_create(
+                customer=request.user,
+                status='active',
+                defaults={
+                    'product_id': product_id
+                }
+            )
+        else:
+            # Guest user
+            guest_name = data.get('guest_name', '')
+            guest_email = data.get('guest_email', '')
+            
+            if not guest_name or not guest_email:
+                return JsonResponse({
+                    'success': False,
+                    'error': 'Name and email required for guests'
+                }, status=400)
+            
+            session = ChatSession.objects.create(
+                guest_name=guest_name,
+                guest_email=guest_email,
+                product_id=product_id,
+                status='active'
+            )
+            created = True
+        
+        return JsonResponse({
+            'success': True,
+            'session_id': session.session_id,
+            'created': created
+        })
+        
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        }, status=500)
+
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def send_message(request, session_id):
+    """Send a message in a chat session."""
+    try:
+        data = json.loads(request.body)
+        message_text = data.get('message', '').strip()
+        
+        if not message_text:
+            return JsonResponse({
+                'success': False,
+                'error': 'Message cannot be empty'
+            }, status=400)
+        
+        if len(message_text) > 1000:
+            return JsonResponse({
+                'success': False,
+                'error': 'Message too long (max 1000 characters)'
+            }, status=400)
+        
+        # Get session
+        session = get_object_or_404(ChatSession, session_id=session_id)
+        
+        # Verify ownership
+        if request.user.is_authenticated:
+            if session.customer != request.user:
+                return JsonResponse({
+                    'success': False,
+                    'error': 'Unauthorized'
+                }, status=403)
+            sender_name = request.user.get_full_name() or request.user.username
+        else:
+            sender_name = session.guest_name
+        
+        # Create message
+        message = ChatMessage.objects.create(
+            session=session,
+            sender=request.user if request.user.is_authenticated else None,
+            sender_name=sender_name,
+            is_admin=False,
+            message=message_text
+        )
+        
+        return JsonResponse({
+            'success': True,
+            'message_id': message.id,
+            'created_at': message.created_at.isoformat()
+        })
+        
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        }, status=500)
+
+
+@require_http_methods(["GET"])
+def get_messages(request, session_id):
+    """Poll for new messages (called every 3 seconds)."""
+    try:
+        session = get_object_or_404(ChatSession, session_id=session_id)
+        
+        # Get last message ID from query params
+        last_message_id = request.GET.get('last_message_id', 0)
+        
+        # Get new messages
+        messages = session.messages.filter(
+            id__gt=last_message_id
+        ).values(
+            'id', 'sender_name', 'is_admin', 'message', 'created_at', 'is_read'
+        )
+        
+        # Mark admin messages as read
+        if not request.user.is_staff:
+            session.messages.filter(
+                id__gt=last_message_id,
+                is_admin=True,
+                is_read=False
+            ).update(is_read=True)
+        
+        return JsonResponse({
+            'success': True,
+            'messages': list(messages),
+            'unread_count': session.get_unread_count(for_admin=False)
+        })
+        
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        }, status=500)
+
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def close_chat(request, session_id):
+    """Close a chat session."""
+    try:
+        session = get_object_or_404(ChatSession, session_id=session_id)
+        
+        # Verify ownership
+        if request.user.is_authenticated:
+            if session.customer != request.user and not request.user.is_staff:
+                return JsonResponse({
+                    'success': False,
+                    'error': 'Unauthorized'
+                }, status=403)
+        
+        session.status = 'closed'
+        session.save()
+        
+        return JsonResponse({
+            'success': True
+        })
+        
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        }, status=500)
+
+
+# ===========================
+# ADMIN CHAT VIEWS
+# ===========================
+
+from django.contrib.admin.views.decorators import staff_member_required
+
+
+@staff_member_required
+def admin_chat_dashboard(request):
+    """Admin dashboard showing all chat sessions."""
+    # Get filter parameters
+    status_filter = request.GET.get('status', 'active')
+    
+    # Base queryset
+    sessions = ChatSession.objects.select_related('customer', 'product', 'assigned_to')
+    
+    # Apply filters
+    if status_filter and status_filter != 'all':
+        sessions = sessions.filter(status=status_filter)
+    
+    # Order by priority: unread first, then by last activity
+    sessions = sessions.order_by('-last_message_at')
+    
+    # Get statistics
+    stats = {
+        'active': ChatSession.objects.filter(status='active').count(),
+        'waiting': ChatSession.objects.filter(status='waiting').count(),
+        'closed': ChatSession.objects.filter(status='closed').count(),
+        'total_unread': sum(s.get_unread_count(for_admin=True) for s in ChatSession.objects.filter(status='active'))
+    }
+    
+    context = {
+        'sessions': sessions,
+        'stats': stats,
+        'current_filter': status_filter
+    }
+    return render(request, 'custom_admin/chat_dashboard.html', context)
+
+
+@staff_member_required
+def admin_chat_session(request, session_id):
+    """Admin view for a specific chat session."""
+    session = get_object_or_404(ChatSession, session_id=session_id)
+    
+    # Assign to current admin if not assigned
+    if not session.assigned_to:
+        session.assigned_to = request.user
+        session.save()
+    
+    # Get all messages
+    messages = session.messages.all().order_by('created_at')
+    
+    # Mark customer messages as read
+    session.messages.filter(is_admin=False, is_read=False).update(is_read=True)
+    
+    context = {
+        'session': session,
+        'messages': messages
+    }
+    return render(request, 'custom_admin/chat_session.html', context)
+
+
+@staff_member_required
+@csrf_exempt
+@require_http_methods(["POST"])
+def admin_send_message(request, session_id):
+    """Admin sends a message to customer."""
+    try:
+        data = json.loads(request.body)
+        message_text = data.get('message', '').strip()
+        
+        if not message_text:
+            return JsonResponse({
+                'success': False,
+                'error': 'Message cannot be empty'
+            }, status=400)
+        
+        if len(message_text) > 1000:
+            return JsonResponse({
+                'success': False,
+                'error': 'Message too long (max 1000 characters)'
+            }, status=400)
+        
+        # Get session
+        session = get_object_or_404(ChatSession, session_id=session_id)
+        
+        # Create admin message
+        message = ChatMessage.objects.create(
+            session=session,
+            sender=request.user,
+            sender_name=request.user.get_full_name() or request.user.username,
+            is_admin=True,
+            message=message_text
+        )
+        
+        # Update session status if it was waiting
+        if session.status == 'waiting':
+            session.status = 'active'
+            session.save()
+        
+        return JsonResponse({
+            'success': True,
+            'message_id': message.id,
+            'created_at': message.created_at.isoformat()
+        })
+        
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        }, status=500)
+
+
+@staff_member_required
+@require_http_methods(["GET"])
+def admin_get_messages(request, session_id):
+    """Admin polls for new messages from customer."""
+    try:
+        session = get_object_or_404(ChatSession, session_id=session_id)
+        
+        # Get last message ID from query params
+        last_message_id = request.GET.get('last_message_id', 0)
+        
+        # Get new messages
+        messages = session.messages.filter(
+            id__gt=last_message_id
+        ).values(
+            'id', 'sender_name', 'is_admin', 'message', 'created_at', 'is_read'
+        )
+        
+        # Mark customer messages as read
+        session.messages.filter(
+            id__gt=last_message_id,
+            is_admin=False,
+            is_read=False
+        ).update(is_read=True)
+        
+        return JsonResponse({
+            'success': True,
+            'messages': list(messages),
+            'unread_count': session.get_unread_count(for_admin=True)
+        })
+        
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        }, status=500)
+
+
+@staff_member_required
+@csrf_exempt
+@require_http_methods(["POST"])
+def admin_close_chat(request, session_id):
+    """Admin closes a chat session."""
+    try:
+        session = get_object_or_404(ChatSession, session_id=session_id)
+        
+        session.status = 'closed'
+        session.save()
+        
+        return JsonResponse({
+            'success': True
+        })
+        
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        }, status=500)
+
+
+@staff_member_required
+@csrf_exempt
+@require_http_methods(["POST"])
+def admin_assign_chat(request, session_id):
+    """Assign chat session to an admin."""
+    try:
+        data = json.loads(request.body)
+        admin_id = data.get('admin_id')
+        
+        session = get_object_or_404(ChatSession, session_id=session_id)
+        
+        if admin_id:
+            admin_user = get_object_or_404(User, id=admin_id, is_staff=True)
+            session.assigned_to = admin_user
+        else:
+            session.assigned_to = None
+        
+        session.save()
+        
+        return JsonResponse({
+            'success': True,
+            'assigned_to': session.assigned_to.username if session.assigned_to else None
+        })
+        
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        }, status=500)

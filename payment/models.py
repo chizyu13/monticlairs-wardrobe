@@ -30,7 +30,7 @@ class Payment(models.Model):
     location = models.CharField(max_length=100, blank=True, null=True)
     gps_location = models.CharField(max_length=100, blank=True, null=True)
     hostel_name = models.CharField(max_length=100, blank=True, null=True)
-    room_number = models.CharField(max_length=50, blank=True, null=True)
+    room_number = models.CharField(max_length=255, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     completed_at = models.DateTimeField(blank=True, null=True)

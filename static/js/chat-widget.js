@@ -237,10 +237,14 @@ class ChatWidget {
                 payload.guest_email = guestEmail;
             }
             
-            const response = await fetch(`/chat/start/${this.productId || ''}`, {
+            // Build URL - use /chat/start/ or /chat/start/<product_id>/
+            const url = this.productId ? `/chat/start/${this.productId}/` : '/chat/start/';
+            
+            const response = await fetch(url, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'X-CSRFToken': this.getCsrfToken(),
                 },
                 body: JSON.stringify(payload)
             });
@@ -264,11 +268,13 @@ class ChatWidget {
                     this.addSystemMessage('Chat session started. An admin will respond shortly.');
                 }
             } else {
+                console.error('Failed to start chat:', data.error);
                 alert('Failed to start chat: ' + data.error);
             }
         } catch (error) {
             console.error('Error starting chat:', error);
-            alert('Failed to start chat. Please try again.');
+            console.error('Response status:', error.response?.status);
+            alert('Failed to start chat. Please check your internet connection and try again.');
         }
     }
     
@@ -298,9 +304,17 @@ class ChatWidget {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'X-CSRFToken': this.getCsrfToken(),
                 },
                 body: JSON.stringify({ message })
             });
+            
+            // Check if response is ok
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error('Server error:', response.status, errorText);
+                throw new Error(`Server returned ${response.status}: ${errorText}`);
+            }
             
             const data = await response.json();
             
@@ -320,11 +334,12 @@ class ChatWidget {
                 // Update last message ID
                 this.lastMessageId = data.message_id;
             } else {
+                console.error('Failed to send message:', data.error);
                 alert('Failed to send message: ' + data.error);
             }
         } catch (error) {
             console.error('Error sending message:', error);
-            alert('Failed to send message. Please try again.');
+            alert('Failed to send message. Please check your internet connection and try again.');
         }
     }
     
@@ -461,6 +476,7 @@ class ChatWidget {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'X-CSRFToken': this.getCsrfToken(),
                 }
             });
             
@@ -486,6 +502,23 @@ class ChatWidget {
         const div = document.createElement('div');
         div.textContent = text;
         return div.innerHTML;
+    }
+    
+    getCsrfToken() {
+        // Get CSRF token from cookie
+        const name = 'csrftoken';
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
     }
 }
 

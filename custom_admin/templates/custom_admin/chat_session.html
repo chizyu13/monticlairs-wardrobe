@@ -276,7 +276,7 @@
         if (!message) return;
         
         try {
-            const response = await fetch(`/admin/chat/${sessionId}/send/`, {
+            const response = await fetch(`/custom-admin/chat/${sessionId}/send/`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -307,7 +307,7 @@
     // Poll for new messages
     async function pollMessages() {
         try {
-            const response = await fetch(`/admin/chat/${sessionId}/messages/?last_message_id=${lastMessageId}`);
+            const response = await fetch(`/custom-admin/chat/${sessionId}/messages/?last_message_id=${lastMessageId}`);
             const data = await response.json();
             
             if (data.success && data.messages.length > 0) {
@@ -348,7 +348,7 @@
         if (!confirm('Are you sure you want to close this chat?')) return;
         
         try {
-            const response = await fetch(`/admin/chat/${sessionId}/close/`, {
+            const response = await fetch(`/custom-admin/chat/${sessionId}/close/`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

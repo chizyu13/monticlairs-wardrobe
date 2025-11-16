@@ -323,16 +323,11 @@ class ChatWidget {
                 input.value = '';
                 input.style.height = 'auto';
                 
-                // Add message to UI immediately
-                this.addMessage({
-                    sender_name: 'You',
-                    message: message,
-                    is_admin: false,
-                    created_at: new Date().toISOString()
-                });
-                
-                // Update last message ID
+                // Update last message ID (don't add message to UI, let polling handle it)
                 this.lastMessageId = data.message_id;
+                
+                // Immediately poll to get the message
+                this.pollMessages();
             } else {
                 console.error('Failed to send message:', data.error);
                 alert('Failed to send message: ' + data.error);
@@ -396,10 +391,19 @@ class ChatWidget {
     
     addMessage(message) {
         const messagesContainer = document.getElementById('chat-messages');
+        
+        // Check if message already exists (prevent duplicates)
+        if (message.id && document.querySelector(`[data-message-id="${message.id}"]`)) {
+            return;
+        }
+        
         const isOwnMessage = !message.is_admin;
         
         const messageEl = document.createElement('div');
         messageEl.className = `chat-message ${isOwnMessage ? 'customer' : 'admin'}`;
+        if (message.id) {
+            messageEl.setAttribute('data-message-id', message.id);
+        }
         
         const time = new Date(message.created_at).toLocaleTimeString([], { 
             hour: '2-digit', 

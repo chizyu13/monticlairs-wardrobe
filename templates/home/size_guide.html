@@ -1,0 +1,157 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Size Guide - Montclair Wardrobe</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary-dark: #0a0a0a;
+            --secondary-dark: #1a1a1a;
+            --gold-accent: #d4af37;
+            --text-primary: #ffffff;
+            --text-secondary: #b0b0b0;
+            --glass-bg: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--primary-dark);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 100px 20px 60px;
+        }
+        h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5rem;
+            color: var(--gold-accent);
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        .size-section {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 40px;
+            margin-bottom: 30px;
+        }
+        h2 {
+            font-family: 'Playfair Display', serif;
+            color: var(--gold-accent);
+            margin-bottom: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--glass-border);
+        }
+        th {
+            background: var(--secondary-dark);
+            color: var(--gold-accent);
+            font-weight: 600;
+        }
+        .btn-back {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: linear-gradient(135deg, var(--gold-accent), #b8941f);
+            color: var(--primary-dark);
+            padding: 12px 24px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: transform 0.3s;
+        }
+        .btn-back:hover {
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1><i class="fas fa-ruler"></i> Size Guide</h1>
+        
+        <div class="size-section">
+            <h2>Women's Clothing</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Size</th>
+                        <th>Bust (inches)</th>
+                        <th>Waist (inches)</th>
+                        <th>Hips (inches)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td>XS</td><td>30-32</td><td>23-25</td><td>33-35</td></tr>
+                    <tr><td>S</td><td>32-34</td><td>25-27</td><td>35-37</td></tr>
+                    <tr><td>M</td><td>34-36</td><td>27-29</td><td>37-39</td></tr>
+                    <tr><td>L</td><td>36-38</td><td>29-31</td><td>39-41</td></tr>
+                    <tr><td>XL</td><td>38-40</td><td>31-33</td><td>41-43</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="size-section">
+            <h2>Men's Clothing</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Size</th>
+                        <th>Chest (inches)</th>
+                        <th>Waist (inches)</th>
+                        <th>Neck (inches)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td>S</td><td>34-36</td><td>28-30</td><td>14-14.5</td></tr>
+                    <tr><td>M</td><td>38-40</td><td>32-34</td><td>15-15.5</td></tr>
+                    <tr><td>L</td><td>42-44</td><td>36-38</td><td>16-16.5</td></tr>
+                    <tr><td>XL</td><td>46-48</td><td>40-42</td><td>17-17.5</td></tr>
+                    <tr><td>XXL</td><td>50-52</td><td>44-46</td><td>18-18.5</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="size-section">
+            <h2>Shoes</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>US Size</th>
+                        <th>UK Size</th>
+                        <th>EU Size</th>
+                        <th>Length (cm)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td>6</td><td>4</td><td>37</td><td>23.5</td></tr>
+                    <tr><td>7</td><td>5</td><td>38</td><td>24.1</td></tr>
+                    <tr><td>8</td><td>6</td><td>39</td><td>24.8</td></tr>
+                    <tr><td>9</td><td>7</td><td>40</td><td>25.4</td></tr>
+                    <tr><td>10</td><td>8</td><td>41</td><td>26.0</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div style="text-align: center; margin-top: 40px;">
+            <a href="{% url 'home:main_page' %}" class="btn-back">
+                <i class="fas fa-arrow-left"></i> Back to Home
+            </a>
+        </div>
+    </div>
+</body>
+</html>

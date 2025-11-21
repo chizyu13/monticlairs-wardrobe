@@ -100,6 +100,22 @@ def terms_of_service(request):
     return render(request, 'terms_of_service.html')
 
 
+def size_guide(request):
+    return render(request, 'home/size_guide.html')
+
+
+def delivery_info(request):
+    return render(request, 'home/delivery_info.html')
+
+
+def returns(request):
+    return render(request, 'home/returns.html')
+
+
+def faq(request):
+    return render(request, 'home/faq.html')
+
+
 def products(request):
     """Display all approved active products, optionally filter by category, search, and sort."""
     products = Product.objects.filter(status='active', approval_status='approved')

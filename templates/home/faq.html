@@ -1,0 +1,198 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FAQ - Montclair Wardrobe</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary-dark: #0a0a0a;
+            --secondary-dark: #1a1a1a;
+            --gold-accent: #d4af37;
+            --text-primary: #ffffff;
+            --text-secondary: #b0b0b0;
+            --glass-bg: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--primary-dark);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 100px 20px 60px;
+        }
+        h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5rem;
+            color: var(--gold-accent);
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        .faq-item {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .faq-item:hover {
+            border-color: var(--gold-accent);
+            transform: translateY(-2px);
+        }
+        .faq-question {
+            font-family: 'Playfair Display', serif;
+            color: var(--gold-accent);
+            font-size: 1.2rem;
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .faq-answer {
+            color: var(--text-secondary);
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid var(--glass-border);
+        }
+        .faq-icon {
+            transition: transform 0.3s;
+        }
+        .btn-back {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: linear-gradient(135deg, var(--gold-accent), #b8941f);
+            color: var(--primary-dark);
+            padding: 12px 24px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: transform 0.3s;
+        }
+        .btn-back:hover {
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1><i class="fas fa-question-circle"></i> Frequently Asked Questions</h1>
+        
+        <div class="faq-item">
+            <div class="faq-question">
+                <span>How do I place an order?</span>
+                <i class="fas fa-chevron-down faq-icon"></i>
+            </div>
+            <div class="faq-answer">
+                Browse our collections, add items to your cart, and proceed to checkout. You'll need to create an account or sign in. Fill in your delivery details and choose your payment method (Mobile Money or Cash on Delivery).
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question">
+                <span>What payment methods do you accept?</span>
+                <i class="fas fa-chevron-down faq-icon"></i>
+            </div>
+            <div class="faq-answer">
+                We accept MTN Mobile Money, Airtel Money, and Cash on Delivery. All mobile money payments are processed securely through our payment gateway.
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question">
+                <span>How long does delivery take?</span>
+                <i class="fas fa-chevron-down faq-icon"></i>
+            </div>
+            <div class="faq-answer">
+                Orders placed before 12:00 PM are delivered the same day. Orders after 12:00 PM are delivered the next business day. Weekend deliveries are available on Saturdays.
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question">
+                <span>Can I return or exchange an item?</span>
+                <i class="fas fa-chevron-down faq-icon"></i>
+            </div>
+            <div class="faq-answer">
+                Yes! You have 7 days from delivery to return or exchange items. Items must be unworn with original tags attached. Contact us to arrange a return or exchange.
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question">
+                <span>How do I track my order?</span>
+                <i class="fas fa-chevron-down faq-icon"></i>
+            </div>
+            <div class="faq-answer">
+                Once your order is dispatched, you'll receive an SMS with tracking details and the delivery person's contact information. You can also check your order status in your account dashboard.
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question">
+                <span>Do you offer gift wrapping?</span>
+                <i class="fas fa-chevron-down faq-icon"></i>
+            </div>
+            <div class="faq-answer">
+                Yes! We offer complimentary gift wrapping for all orders. Just add a note during checkout requesting gift wrapping, and we'll take care of the rest.
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question">
+                <span>What if my item is damaged or defective?</span>
+                <i class="fas fa-chevron-down faq-icon"></i>
+            </div>
+            <div class="faq-answer">
+                We're sorry if that happens! Contact us immediately at +260 77-117-2699 or contact@montclairwardrobe.com with photos of the damage. We'll arrange a replacement or full refund right away.
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question">
+                <span>Can I cancel my order?</span>
+                <i class="fas fa-chevron-down faq-icon"></i>
+            </div>
+            <div class="faq-answer">
+                Yes, you can cancel your order before it's dispatched. Contact us as soon as possible. Once the order is out for delivery, cancellation may not be possible, but you can still return it within 7 days.
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question">
+                <span>Do you have a physical store?</span>
+                <i class="fas fa-chevron-down faq-icon"></i>
+            </div>
+            <div class="faq-answer">
+                Yes! Visit our boutique at Lilayi Area 56, Lusaka. We're open Monday-Saturday 9:00 AM - 8:00 PM and Sunday 11:00 AM - 6:00 PM. Come see our collections in person!
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question">
+                <span>How do I contact customer service?</span>
+                <i class="fas fa-chevron-down faq-icon"></i>
+            </div>
+            <div class="faq-answer">
+                You can reach us at +260 77-117-2699, email contact@montclairwardrobe.com, or use our contact form. We respond within 24 hours during business days.
+            </div>
+        </div>
+
+        <div style="text-align: center; margin-top: 40px;">
+            <a href="{% url 'home:main_page' %}" class="btn-back">
+                <i class="fas fa-arrow-left"></i> Back to Home
+            </a>
+        </div>
+    </div>
+</body>
+</html>

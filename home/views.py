@@ -176,7 +176,7 @@ def monthly_report(request):
     return render(request, 'home/monthly_report.html', context)
 
 
-@login_req
+def products(request):
     """Display all approved active products, optionally filter by category, search, and sort."""
     products = Product.objects.filter(status='active', approval_status='approved')
     categories = Category.objects.all()

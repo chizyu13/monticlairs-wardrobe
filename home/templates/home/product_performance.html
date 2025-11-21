@@ -1,0 +1,141 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Performance Report</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary-dark: #0a0a0a;
+            --secondary-dark: #1a1a1a;
+            --gold-accent: #d4af37;
+            --text-primary: #ffffff;
+            --text-secondary: #b0b0b0;
+            --glass-bg: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--primary-dark);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 100px 20px 60px;
+        }
+        h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5rem;
+            color: var(--gold-accent);
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        .report-header {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 24px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, var(--gold-accent), #b8941f);
+            color: var(--primary-dark);
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--glass-border);
+        }
+        th {
+            background: var(--secondary-dark);
+            color: var(--gold-accent);
+            font-weight: 600;
+        }
+        tr:hover {
+            background: rgba(255, 255, 255, 0.03);
+        }
+        .rank {
+            font-weight: 700;
+            color: var(--gold-accent);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1><i class="fas fa-star"></i> Product Performance Report</h1>
+        
+        <div class="report-header">
+            <p style="color: var(--text-secondary); margin-bottom: 20px;">All-time product performance metrics</p>
+            <a href="?format=csv" class="btn btn-primary">
+                <i class="fas fa-file-csv"></i> Export CSV
+            </a>
+        </div>
+
+        <div style="background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 20px; padding: 30px;">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Rank</th>
+                        <th>Product</th>
+                        <th>Units Sold</th>
+                        <th>Total Revenue</th>
+                        <th>Orders</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for product in products %}
+                    <tr>
+                        <td class="rank">#{{ forloop.counter }}</td>
+                        <td>{{ product.product__name }}</td>
+                        <td>{{ product.total_sold }}</td>
+                        <td>ZMW {{ product.total_revenue|floatformat:2 }}</td>
+                        <td>{{ product.order_count }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" style="text-align: center; color: var(--text-secondary);">
+                            No sales data available
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div style="text-align: center; margin-top: 40px;">
+            <a href="{% url 'home:reports_dashboard' %}" class="btn btn-primary">
+                <i class="fas fa-arrow-left"></i> Back to Dashboard
+            </a>
+        </div>
+    </div>
+</body>
+</html>

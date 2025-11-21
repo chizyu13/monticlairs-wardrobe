@@ -116,7 +116,67 @@ def faq(request):
     return render(request, 'home/faq.html')
 
 
-def products(request):
+# ===========================
+# REPORTS VIEWS
+# ===========================
+
+@login_required
+def reports_dashboard(request):
+    """Main reports dashboard"""
+    from home.reports import get_inventory_report
+    from datetime import datetime
+    
+    # Check if user is staff or seller
+    if not (request.user.is_staff or request.user.is_superuser or 
+            Product.objects.filter(seller=request.user).exists()):
+        messages.error(request, "You don't have permission to access reports.")
+        return redirect('home:main_page')
+    
+    current_year = datetime.now().year
+    current_month = datetime.now().month
+    
+    inventory = get_inventory_report()
+    
+    context = {
+        'current_year': current_year,
+        'current_month': current_month,
+        'inventory': inventory,
+    }
+    
+    return render(request, 'home/reports_dashboard.html', context)
+
+
+@login_required
+def monthly_report(request):
+    """Generate monthly report"""
+    from home.reports import get_monthly_report, get_payment_report
+    from datetime import datetime
+    
+    if not (request.user.is_staff or request.user.is_superuser or 
+            Product.objects.filter(seller=request.user).exists()):
+        messages.error(request, "You don't have permission to access reports.")
+        return redirect('home:main_page')
+    
+    year = int(request.GET.get('year', datetime.now().year))
+    month = int(request.GET.get('month', datetime.now().month))
+    
+    seller = None if request.user.is_staff or request.user.is_superuser else request.user
+    
+    report_data = get_monthly_report(year, month, seller)
+    payment_data = get_payment_report(year, month)
+    
+    context = {
+        'report': report_data,
+        'payment_data': payment_data,
+        'year': year,
+        'month': month,
+        'is_admin': request.user.is_staff or request.user.is_superuser,
+    }
+    
+    return render(request, 'home/monthly_report.html', context)
+
+
+@login_req
     """Display all approved active products, optionally filter by category, search, and sort."""
     products = Product.objects.filter(status='active', approval_status='approved')
     categories = Category.objects.all()
@@ -1412,3 +1472,131 @@ def admin_assign_chat(request, session_id):
             'success': False,
             'error': str(e)
         }, status=500)
+
+
+# ===========================
+# REPORTS VIEWS
+# ===========================
+
+@login_required
+def reports_dashboard(request):
+    """Main reports dashboard"""
+    if not request.user.is_staff and not request.user.is_superuser:
+        messages.error(request, "You don't have permission to access reports.")
+        return redirect('home:main_page')
+    
+    from home.reports import ReportGenerator
+    from datetime import datetime, timedelta
+    
+    # Get current month data
+    now = datetime.now()
+    current_month = ReportGenerator.get_monthly_report(now.year, now.month)
+    
+    # Get last month data
+    last_month = now.replace(day=1) - timedelta(days=1)
+    previous_month = ReportGenerator.get_monthly_report(last_month.year, last_month.month)
+    
+    # Get current year data
+    current_year = ReportGenerator.get_annual_report(now.year)
+    
+    # Get top products
+    top_products = ReportGenerator.get_product_performance()[:10]
+    
+    context = {
+        'current_month': current_month,
+        'previous_month': previous_month,
+        'current_year': current_year,
+        'top_products': top_products,
+    }
+    
+    return render(request, 'home/reports_dashboard.html', context)
+
+
+@login_required
+def generate_monthly_report(request):
+    """Generate monthly report"""
+    if not request.user.is_staff and not request.user.is_superuser:
+        messages.error(request, "You don't have permission to generate reports.")
+        return redirect('home:main_page')
+    
+    from home.reports import ReportGenerator, generate_sales_csv
+    
+    year = int(request.GET.get('year', datetime.now().year))
+    month = int(request.GET.get('month', datetime.now().month))
+    export_format = request.GET.get('format', 'html')
+    
+    report_data = ReportGenerator.get_monthly_report(year, month)
+    
+    if export_format == 'csv':
+        filename = f'monthly_report_{year}_{month:02d}.csv'
+        return generate_sales_csv(report_data['sales'], filename)
+    
+    elif export_format == 'pdf':
+        from home.reports import ReportGenerator
+        filename = f'monthly_report_{year}_{month:02d}.pdf'
+        title = f'Monthly Sales Report - {datetime(year, month, 1).strftime("%B %Y")}'
+        return ReportGenerator.export_to_pdf({'summary': report_data}, filename, title)
+    
+    context = {
+        'report_data': report_data,
+        'year': year,
+        'month': month,
+        'month_name': datetime(year, month, 1).strftime('%B'),
+    }
+    
+    return render(request, 'home/monthly_report.html', context)
+
+
+@login_required
+def generate_annual_report(request):
+    """Generate annual report"""
+    if not request.user.is_staff and not request.user.is_superuser:
+        messages.error(request, "You don't have permission to generate reports.")
+        return redirect('home:main_page')
+    
+    from home.reports import ReportGenerator, generate_sales_csv
+    
+    year = int(request.GET.get('year', datetime.now().year))
+    export_format = request.GET.get('format', 'html')
+    
+    report_data = ReportGenerator.get_annual_report(year)
+    
+    if export_format == 'csv':
+        filename = f'annual_report_{year}.csv'
+        return generate_sales_csv(report_data['sales'], filename)
+    
+    elif export_format == 'pdf':
+        from home.reports import ReportGenerator
+        filename = f'annual_report_{year}.pdf'
+        title = f'Annual Sales Report - {year}'
+        return ReportGenerator.export_to_pdf({'summary': report_data}, filename, title)
+    
+    context = {
+        'report_data': report_data,
+        'year': year,
+    }
+    
+    return render(request, 'home/annual_report.html', context)
+
+
+@login_required
+def product_performance_report(request):
+    """Product performance report"""
+    if not request.user.is_staff and not request.user.is_superuser:
+        messages.error(request, "You don't have permission to access reports.")
+        return redirect('home:main_page')
+    
+    from home.reports import ReportGenerator, generate_product_performance_csv
+    
+    export_format = request.GET.get('format', 'html')
+    
+    products = ReportGenerator.get_product_performance()
+    
+    if export_format == 'csv':
+        return generate_product_performance_csv(products, 'product_performance.csv')
+    
+    context = {
+        'products': products,
+    }
+    
+    return render(request, 'home/product_performance.html', context)

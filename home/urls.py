@@ -54,4 +54,10 @@ urlpatterns = [
     path('chat/send/<str:session_id>/', views.send_message, name='send_message'),
     path('chat/messages/<str:session_id>/', views.get_messages, name='get_messages'),
     path('chat/close/<str:session_id>/', views.close_chat, name='close_chat'),
+    
+    # Reports URLs
+    path('reports/', views.reports_dashboard, name='reports_dashboard'),
+    path('reports/monthly/', views.generate_monthly_report, name='monthly_report'),
+    path('reports/annual/', views.generate_annual_report, name='annual_report'),
+    path('reports/products/', views.product_performance_report, name='product_performance'),
 ]

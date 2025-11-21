@@ -101,13 +101,34 @@ def terms_of_service(request):
 
 
 def products(request):
-    """Display all approved active products, optionally filter by category."""
+    """Display all approved active products, optionally filter by category, search, and sort."""
     products = Product.objects.filter(status='active', approval_status='approved')
     categories = Category.objects.all()
+    
+    # Filter by category
     category_id = request.GET.get('category')
     if category_id:
         products = products.filter(category_id=category_id)
-    return render(request, 'home/products.html', {'products': products, 'categories': categories})
+    
+    # Search functionality
+    search_query = request.GET.get('search', '').strip()
+    if search_query:
+        products = products.filter(
+            models.Q(name__icontains=search_query) |
+            models.Q(description__icontains=search_query) |
+            models.Q(category__name__icontains=search_query)
+        )
+    
+    # Sort functionality
+    sort_by = request.GET.get('sort', '')
+    if sort_by:
+        products = products.order_by(sort_by)
+    
+    return render(request, 'home/products.html', {
+        'products': products,
+        'categories': categories,
+        'search_query': search_query,
+    })
 
 
 def category_products(request, category_slug):

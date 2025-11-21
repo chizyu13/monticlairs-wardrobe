@@ -137,17 +137,35 @@ def category_products(request, category_slug):
     if not selected_category:
         raise Http404("Category not found")
 
-    # Get products for this category
-    products = Product.objects.filter(
-        status='active',
-        approval_status='approved',
-        category=selected_db_category
-    )
+    # Get search query
+    search_query = request.GET.get('search', '').strip()
+    
+    # Get products - search across all products if search query exists
+    if search_query:
+        products = Product.objects.filter(
+            status='active',
+            approval_status='approved'
+        ).filter(
+            models.Q(name__icontains=search_query) |
+            models.Q(description__icontains=search_query) |
+            models.Q(category__name__icontains=search_query)
+        )
+        search_performed = True
+    else:
+        # Get products for this category only
+        products = Product.objects.filter(
+            status='active',
+            approval_status='approved',
+            category=selected_db_category
+        )
+        search_performed = False
 
     return render(request, 'home/category_products.html', {
         'selected_category': selected_category,
         'products': products,
         'categories': categories,
+        'search_query': search_query,
+        'search_performed': search_performed,
     })
 
 

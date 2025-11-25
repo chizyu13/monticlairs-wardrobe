@@ -369,7 +369,7 @@
                 </div>
             {% endif %}
             <div class="welcome-text">
-                <h2>Welcome back, {{ request.user.get_full_name|default:request.user.username }}!</h2>
+                <h2>Hello, {{ request.user.get_full_name|default:request.user.username }}!</h2>
                 <p>Here's what's happening with your boutique today</p>
             </div>
             <div class="ms-auto text-end">

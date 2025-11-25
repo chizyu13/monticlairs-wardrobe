@@ -113,7 +113,7 @@
             <!-- Welcome Section -->
             <div class="text-center mb-5">
                 <h3 class="gradient-text mb-3">
-                    Welcome back, {{ request.user.get_full_name|default:request.user.username }}!
+                    Hello, {{ request.user.get_full_name|default:request.user.username }}!
                 </h3>
                 <p class="text-light opacity-75">Manage your boutique with powerful admin tools</p>
             </div>

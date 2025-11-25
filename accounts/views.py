@@ -69,7 +69,7 @@ def login_view(request):
             user = authenticate(request, username=username, password=password)
             if user is not None:
                 login(request, user)
-                messages.success(request, "Welcome back to Montclair Wardrobe!")
+                messages.success(request, "Hello! Welcome to Montclair Wardrobe!")
                 
                 # Check if user is staff/admin
                 if user.is_staff or user.is_superuser:

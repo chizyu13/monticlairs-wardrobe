@@ -574,7 +574,6 @@ def manage_users(request):
 def logout_view(request):
     """Handle logout for both GET and POST requests"""
     logout(request)
-    messages.success(request, "You have been logged out successfully.")
     return redirect('home:main_page')
 
 def order_confirmation(request):

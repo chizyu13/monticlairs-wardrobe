@@ -88,7 +88,6 @@ def login_view(request):
 # Logout View (accepts both GET and POST)
 def logout_view(request):
     logout(request)
-    messages.success(request, "You have been logged out successfully.")
     return redirect('home:main_page')
 
 

@@ -1270,25 +1270,26 @@
                 // Validate phone number based on payment method
                 const phoneInput = document.getElementById('phone_number');
                 if (phoneInput.required) {
-                    const phoneValue = phoneInput.value.trim();
+                    const phoneValue = phoneInput.value.trim().replace(/\s/g, '').replace(/\+260/g, '0');
                     let phonePattern;
                     let errorMsg;
                     
                     if (selectedPaymentMethod.value === 'airtel') {
-                        phonePattern = /^(097|077|057)[0-9]{7}$/;
-                        errorMsg = 'Please enter a valid Airtel number';
+                        phonePattern = /^(097|077|057)\d{7}$/;
+                        errorMsg = 'Please enter a valid Airtel number (097, 077, or 057)';
                     } else if (selectedPaymentMethod.value === 'mtn') {
-                        phonePattern = /^(096|076)[0-9]{7}$/;
+                        phonePattern = /^(096|076)\d{7}$/;
                         errorMsg = 'Please enter a valid MTN number (096 or 076)';
                     } else if (selectedPaymentMethod.value === 'cash') {
-                        phonePattern = /^(\+260|0)[0-9]{9}$/;
+                        phonePattern = /^0\d{9}$/;
                         errorMsg = 'Please enter a valid Zambian phone number';
                     }
                     
-                    if (!phoneValue || !phonePattern.test(phoneValue.replace(/\s/g, ''))) {
+                    if (!phoneValue || !phonePattern.test(phoneValue)) {
                         phoneInput.classList.add('is-invalid');
                         document.getElementById('phone-error').textContent = errorMsg;
                         isValid = false;
+                        phoneInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
                     } else {
                         phoneInput.classList.remove('is-invalid');
                     }

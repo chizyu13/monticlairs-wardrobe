@@ -33,6 +33,12 @@ urlpatterns = [
     path('payments/<int:payment_id>/reject/', views.reject_payment, name='reject_payment'),
     path('payments/<int:payment_id>/processing/', views.mark_payment_processing, name='mark_payment_processing'),
     
+    # Refund Management URLs
+    path('refunds/', views.manage_refunds, name='manage_refunds'),
+    path('refunds/<int:refund_id>/', views.refund_detail, name='refund_detail'),
+    path('refunds/<int:refund_id>/process/', views.process_refund, name='process_refund'),
+    path('orders/<int:order_id>/refund/initiate/', views.initiate_refund, name='initiate_refund'),
+    
     # Product Manual Management URLs
     path('product/<int:product_id>/manual/upload/', views.upload_product_manual, name='upload_product_manual'),
     path('product/<int:product_id>/manual/delete/', views.delete_product_manual, name='delete_product_manual'),

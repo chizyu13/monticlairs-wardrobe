@@ -15,7 +15,8 @@ try:
     cursor.execute("CREATE DATABASE IF NOT EXISTS montclair_wardrobe")
     print("✓ Database 'montclair_wardrobe' created successfully on port 3307")
     
-    # Show databases to confirm
+    # Show databases to confirm'
+    
     cursor.execute("SHOW DATABASES")
     databases = cursor.fetchall()
     print("\nAvailable databases on port 3307:")

@@ -1,0 +1,72 @@
+{% extends 'custom_admin/base.html' %}
+{% load static %}
+
+{% block title %}Initiate Refund - Admin{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-warning text-white">
+                    <h3 class="mb-0">
+                        <i class="fas fa-undo"></i> Initiate Refund
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <strong>Warning:</strong> This order has been cancelled and payment was completed. 
+                        A refund must be processed to return the money to the customer.
+                    </div>
+
+                    <h4>Order Details</h4>
+                    <table class="table table-bordered">
+                        <tr>
+                            <th>Order ID:</th>
+                            <td>#{{ order.id }}</td>
+                        </tr>
+                        <tr>
+                            <th>Customer:</th>
+                            <td>{{ order.user.get_full_name|default:order.user.username }}</td>
+                        </tr>
+                        <tr>
+                            <th>Product:</th>
+                            <td>{{ order.product.name }}</td>
+                        </tr>
+                        <tr>
+                            <th>Amount Paid:</th>
+                            <td class="text-danger"><strong>ZMW {{ order.total_price }}</strong></td>
+                        </tr>
+                        <tr>
+                            <th>Payment Method:</th>
+                            <td>{{ checkout.get_payment_method_display }}</td>
+                        </tr>
+                        <tr>
+                            <th>Payment Reference:</th>
+                            <td>{{ payment.reference }}</td>
+                        </tr>
+                    </table>
+
+                    <form method="post" class="mt-4">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <label for="reason">Refund Reason:</label>
+                            <textarea name="reason" id="reason" class="form-control" rows="3" required>Order cancelled - Customer refund required</textarea>
+                        </div>
+
+                        <div class="mt-4">
+                            <button type="submit" class="btn btn-warning btn-lg">
+                                <i class="fas fa-undo"></i> Initiate Refund
+                            </button>
+                            <a href="{% url 'custom_admin:order_detail' order.id %}" class="btn btn-secondary btn-lg">
+                                <i class="fas fa-times"></i> Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -38,7 +38,7 @@ with connection.cursor() as cursor:
     if cursor.fetchone():
         cursor.execute("""
             ALTER TABLE home_store 
-            MODIFY COLUMN phone_number VARCHAR(20) NOT NULL
+            MODIFY COLUMN phone_number VARCHAR(20) NOT NULLuu
         """)
         print("✓ Updated home_store.phone_number to VARCHAR(20)")
     

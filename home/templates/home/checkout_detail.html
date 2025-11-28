@@ -643,7 +643,7 @@
                         </div>
                         <div class="info-item">
                             <span class="info-label">Payment Method</span>
-                            <span class="info-value">{{ order.payment_method|default:"Credit Card"|title }}</span>
+                            <span class="info-value">{{ checkout.get_payment_method_display|title }}</span>
                         </div>
                         <div class="info-item">
                             <span class="info-label">Status</span>

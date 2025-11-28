@@ -351,6 +351,69 @@
             border-color: #ff6b6b !important;
         }
 
+        /* Payment Method Cards */
+        .payment-methods {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 10px;
+        }
+
+        .payment-card {
+            position: relative;
+            cursor: pointer;
+            margin: 0;
+        }
+
+        .payment-card input[type="radio"] {
+            position: absolute;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .payment-card-content {
+            background: var(--glass-bg);
+            border: 2px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 20px 15px;
+            text-align: center;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            min-height: 140px;
+        }
+
+        .payment-card-content img {
+            width: 60px;
+            height: 60px;
+            object-fit: contain;
+            border-radius: 8px;
+        }
+
+        .payment-card-content span {
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 0.9rem;
+        }
+
+        .payment-card-content small {
+            color: var(--text-muted);
+            font-size: 0.75rem;
+        }
+
+        .payment-card input[type="radio"]:checked ~ .payment-card-content {
+            border-color: var(--gold-accent);
+            background: rgba(212, 175, 55, 0.1);
+            box-shadow: 0 0 20px rgba(212, 175, 55, 0.2);
+        }
+
+        .payment-card:hover .payment-card-content {
+            border-color: var(--gold-accent);
+            transform: translateY(-3px);
+        }
+
         /* Map Styles */
         #map {
             height: 450px;
@@ -762,13 +825,53 @@
                         <i class="fas fa-credit-card"></i>
                         Payment Method
                     </label>
-                    <select class="form-select" id="payment_method" name="payment_method" required>
-                        <option value="">Select payment method</option>
-                        <option value="cash">Cash on Delivery</option>
-                        <option value="mtn">MTN Mobile Money</option>
-                        <option value="airtel">Airtel Money</option>
-                    </select>
+                    
+                    <!-- Payment Method Cards -->
+                    <div class="payment-methods">
+                        <label class="payment-card">
+                            <input type="radio" name="payment_method" value="airtel" required>
+                            <div class="payment-card-content">
+                                <img src="{% static 'images/airtel_money.jpg' %}" alt="Airtel Money">
+                                <span>Airtel Money</span>
+                                <small>097, 077, 057</small>
+                            </div>
+                        </label>
+                        
+                        <label class="payment-card">
+                            <input type="radio" name="payment_method" value="mtn" required>
+                            <div class="payment-card-content">
+                                <img src="{% static 'images/mtn_money.png' %}" alt="MTN Mobile Money">
+                                <span>MTN Mobile Money</span>
+                                <small>096, 076</small>
+                            </div>
+                        </label>
+                        
+                        <label class="payment-card">
+                            <input type="radio" name="payment_method" value="cash" required>
+                            <div class="payment-card-content">
+                                <img src="{% static 'images/kwacha.jpg' %}" alt="Cash on Delivery">
+                                <span>Cash on Delivery</span>
+                                <small>Pay when delivered</small>
+                            </div>
+                        </label>
+                    </div>
                     <div class="invalid-feedback">Please select a payment method.</div>
+                    
+                    <!-- Phone Number for Mobile Money -->
+                    <div id="phone-number-section" style="display: none; margin-top: 15px;">
+                        <label for="mobile_money_phone" class="form-label">
+                            <i class="fas fa-phone"></i>
+                            Mobile Money Number
+                        </label>
+                        <input type="tel" class="form-control" id="mobile_money_phone" name="mobile_money_phone" 
+                               placeholder="e.g., 0971234567" pattern="^(097|077|057|096|076)[0-9]{7}$">
+                        <div class="invalid-feedback" id="phone-error">
+                            Please enter a valid mobile money number
+                        </div>
+                        <small class="form-text text-muted" id="phone-hint">
+                            Enter your mobile money number
+                        </small>
+                    </div>
                 </div>
 
                 <!-- Submit Button -->
@@ -1041,6 +1144,35 @@
             }
         });
 
+        // Payment method change handler
+        const paymentMethods = document.querySelectorAll('input[name="payment_method"]');
+        const phoneSection = document.getElementById('phone-number-section');
+        const mobilePhone = document.getElementById('mobile_money_phone');
+        const phoneHint = document.getElementById('phone-hint');
+        const phoneError = document.getElementById('phone-error');
+        
+        paymentMethods.forEach(method => {
+            method.addEventListener('change', function() {
+                if (this.value === 'airtel' || this.value === 'mtn') {
+                    phoneSection.style.display = 'block';
+                    mobilePhone.required = true;
+                    
+                    // Update hint based on provider
+                    if (this.value === 'airtel') {
+                        phoneHint.textContent = 'Airtel numbers start with 097, 077, or 057';
+                        mobilePhone.placeholder = 'e.g., 0971234567';
+                    } else if (this.value === 'mtn') {
+                        phoneHint.textContent = 'MTN numbers start with 096 or 076';
+                        mobilePhone.placeholder = 'e.g., 0961234567';
+                    }
+                } else {
+                    phoneSection.style.display = 'none';
+                    mobilePhone.required = false;
+                    mobilePhone.classList.remove('is-invalid');
+                }
+            });
+        });
+
         // Form validation
         document.getElementById('checkout-form').addEventListener('submit', function (e) {
             e.preventDefault();
@@ -1136,12 +1268,34 @@
             }
 
             // Validate payment method
-            const paymentMethod = document.getElementById('payment_method');
-            if (!paymentMethod.value) {
-                paymentMethod.classList.add('is-invalid');
+            const selectedPaymentMethod = document.querySelector('input[name="payment_method"]:checked');
+            if (!selectedPaymentMethod) {
                 isValid = false;
+                alert('Please select a payment method');
             } else {
-                paymentMethod.classList.remove('is-invalid');
+                // Validate mobile money phone number if applicable
+                const mobilePhone = document.getElementById('mobile_money_phone');
+                if ((selectedPaymentMethod.value === 'airtel' || selectedPaymentMethod.value === 'mtn') && mobilePhone.required) {
+                    const phoneValue = mobilePhone.value.trim();
+                    let phonePattern;
+                    let errorMsg;
+                    
+                    if (selectedPaymentMethod.value === 'airtel') {
+                        phonePattern = /^(097|077|057)[0-9]{7}$/;
+                        errorMsg = 'Please enter a valid Airtel number (097, 077, or 057)';
+                    } else if (selectedPaymentMethod.value === 'mtn') {
+                        phonePattern = /^(096|076)[0-9]{7}$/;
+                        errorMsg = 'Please enter a valid MTN number (096 or 076)';
+                    }
+                    
+                    if (!phoneValue || !phonePattern.test(phoneValue)) {
+                        mobilePhone.classList.add('is-invalid');
+                        document.getElementById('phone-error').textContent = errorMsg;
+                        isValid = false;
+                    } else {
+                        mobilePhone.classList.remove('is-invalid');
+                    }
+                }
             }
 
             if (isValid) {

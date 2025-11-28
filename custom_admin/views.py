@@ -359,9 +359,17 @@ def update_order_status(request, order_id):
     
     if request.method == 'POST':
         new_status = request.POST.get('status')
+        cancellation_reason = request.POST.get('cancellation_reason', '')
+        
         if new_status in dict(Order.StatusChoices.choices):
             old_status = order.status
             order.status = new_status
+            
+            # Save cancellation reason if order is being cancelled
+            if new_status == 'cancelled' and cancellation_reason:
+                order.cancellation_reason = cancellation_reason
+                order.cancelled_by = request.user
+            
             order.save()
             
             # Automatically mark payment as completed when order is delivered

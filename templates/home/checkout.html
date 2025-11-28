@@ -807,18 +807,6 @@
                             <i class="fas fa-check-circle" style="color: #28a745;"></i>
           
 
-                <!-- Phone Number -->
-                <div class="form-group">
-                    <label for="phone_number" class="form-label">
-                        <i class="fas fa-phone"></i>
-                        Phone Number
-                    </label>
-                    <input type="tel" class="form-control" id="phone_number" name="phone_number"
-                        placeholder="+260 XXX XXX XXX" required>
-                    <small class="form-text">We'll call you for delivery coordination</small>
-                    <div class="invalid-feedback">Please enter a valid phone number.</div>
-                </div>
-
                 <!-- Payment Method -->
                 <div class="form-group">
                     <label for="payment_method" class="form-label">
@@ -857,19 +845,19 @@
                     </div>
                     <div class="invalid-feedback">Please select a payment method.</div>
                     
-                    <!-- Phone Number for Mobile Money -->
+                    <!-- Phone Number Section -->
                     <div id="phone-number-section" style="display: none; margin-top: 15px;">
-                        <label for="mobile_money_phone" class="form-label">
+                        <label for="phone_number" class="form-label">
                             <i class="fas fa-phone"></i>
-                            Mobile Money Number
+                            <span id="phone-label">Phone Number</span>
                         </label>
-                        <input type="tel" class="form-control" id="mobile_money_phone" name="mobile_money_phone" 
-                               placeholder="e.g., 0971234567" pattern="^(097|077|057|096|076)[0-9]{7}$">
+                        <input type="tel" class="form-control" id="phone_number" name="phone_number" 
+                               placeholder="Enter your phone number" required>
                         <div class="invalid-feedback" id="phone-error">
-                            Please enter a valid mobile money number
+                            Please enter a valid phone number
                         </div>
                         <small class="form-text text-muted" id="phone-hint">
-                            Enter your mobile money number
+                            We'll contact you for delivery coordination
                         </small>
                     </div>
                 </div>
@@ -1147,29 +1135,35 @@
         // Payment method change handler
         const paymentMethods = document.querySelectorAll('input[name="payment_method"]');
         const phoneSection = document.getElementById('phone-number-section');
-        const mobilePhone = document.getElementById('mobile_money_phone');
+        const phoneInput = document.getElementById('phone_number');
+        const phoneLabel = document.getElementById('phone-label');
         const phoneHint = document.getElementById('phone-hint');
         const phoneError = document.getElementById('phone-error');
         
         paymentMethods.forEach(method => {
             method.addEventListener('change', function() {
-                if (this.value === 'airtel' || this.value === 'mtn') {
-                    phoneSection.style.display = 'block';
-                    mobilePhone.required = true;
-                    
-                    // Update hint based on provider
-                    if (this.value === 'airtel') {
-                        phoneHint.textContent = 'Airtel numbers start with 097, 077, or 057';
-                        mobilePhone.placeholder = 'e.g., 0971234567';
-                    } else if (this.value === 'mtn') {
-                        phoneHint.textContent = 'MTN numbers start with 096 or 076';
-                        mobilePhone.placeholder = 'e.g., 0961234567';
-                    }
-                } else {
-                    phoneSection.style.display = 'none';
-                    mobilePhone.required = false;
-                    mobilePhone.classList.remove('is-invalid');
+                // Always show phone section when payment method is selected
+                phoneSection.style.display = 'block';
+                phoneInput.required = true;
+                
+                // Update label, hint and validation based on provider
+                if (this.value === 'airtel') {
+                    phoneLabel.textContent = 'Airtel Money Number';
+                    phoneHint.textContent = 'Airtel numbers start with 097, 077, or 057';
+                    phoneInput.placeholder = 'e.g., 0971234567';
+                    phoneInput.pattern = '^(097|077|057)[0-9]{7}$';
+                } else if (this.value === 'mtn') {
+                    phoneLabel.textContent = 'MTN Mobile Money Number';
+                    phoneHint.textContent = 'MTN numbers start with 096 or 076';
+                    phoneInput.placeholder = 'e.g., 0961234567';
+                    phoneInput.pattern = '^(096|076)[0-9]{7}$';
+                } else if (this.value === 'cash') {
+                    phoneLabel.textContent = 'Phone Number';
+                    phoneHint.textContent = "We'll call you for delivery coordination";
+                    phoneInput.placeholder = '+260 XXX XXX XXX';
+                    phoneInput.pattern = '^(\\+260|0)[0-9]{9}$';
                 }
+                phoneInput.classList.remove('is-invalid');
             });
         });
 
@@ -1273,10 +1267,10 @@
                 isValid = false;
                 alert('Please select a payment method');
             } else {
-                // Validate mobile money phone number if applicable
-                const mobilePhone = document.getElementById('mobile_money_phone');
-                if ((selectedPaymentMethod.value === 'airtel' || selectedPaymentMethod.value === 'mtn') && mobilePhone.required) {
-                    const phoneValue = mobilePhone.value.trim();
+                // Validate phone number based on payment method
+                const phoneInput = document.getElementById('phone_number');
+                if (phoneInput.required) {
+                    const phoneValue = phoneInput.value.trim();
                     let phonePattern;
                     let errorMsg;
                     
@@ -1286,14 +1280,17 @@
                     } else if (selectedPaymentMethod.value === 'mtn') {
                         phonePattern = /^(096|076)[0-9]{7}$/;
                         errorMsg = 'Please enter a valid MTN number (096 or 076)';
+                    } else if (selectedPaymentMethod.value === 'cash') {
+                        phonePattern = /^(\+260|0)[0-9]{9}$/;
+                        errorMsg = 'Please enter a valid Zambian phone number';
                     }
                     
-                    if (!phoneValue || !phonePattern.test(phoneValue)) {
-                        mobilePhone.classList.add('is-invalid');
+                    if (!phoneValue || !phonePattern.test(phoneValue.replace(/\s/g, ''))) {
+                        phoneInput.classList.add('is-invalid');
                         document.getElementById('phone-error').textContent = errorMsg;
                         isValid = false;
                     } else {
-                        mobilePhone.classList.remove('is-invalid');
+                        phoneInput.classList.remove('is-invalid');
                     }
                 }
             }

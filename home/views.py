@@ -766,10 +766,13 @@ def checkout_process(request):
 def checkout_detail(request, checkout_id):
     """Display detailed information about a specific checkout/order"""
     checkout = get_object_or_404(Checkout, id=checkout_id, user=request.user)
-    orders = Order.objects.filter(checkout=checkout).select_related('product')
+    orders = Order.objects.filter(checkout=checkout).select_related('product', 'cancelled_by')
+    
+    # Get the first order for status display (assuming all orders in checkout have same status)
+    first_order = orders.first() if orders.exists() else None
     
     return render(request, 'home/checkout_detail.html', {
-        'order': checkout,  # Using 'order' to match template variable
+        'order': first_order,  # Pass actual Order object for status and cancellation reason
         'checkout': checkout,
         'orders': orders
     })

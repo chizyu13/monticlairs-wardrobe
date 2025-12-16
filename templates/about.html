@@ -1,0 +1,280 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}About Us - Montclair Wardrobe{% endblock %}
+
+{% block content %}
+<div class="about-container">
+    <section class="about-hero">
+        <div class="about-content">
+            <h1>About Montclair Wardrobe</h1>
+            <p class="lead">Curated Fashion for the Discerning Individual</p>
+        </div>
+    </section>
+
+    <section class="about-section">
+        <div class="container">
+            <div class="about-grid">
+                <div class="about-text">
+                    <h2>Our Story</h2>
+                    <p>
+                        Montclair Wardrobe was founded with a simple mission: to bring premium, 
+                        carefully curated fashion to Lusaka. We believe that style is not just about 
+                        following trends, but about expressing your unique personality and confidence 
+                        through what you wear.
+                    </p>
+                    <p>
+                        Our boutique partners with emerging designers and established fashion houses 
+                        to bring you an exclusive collection of pieces that you won't find anywhere else. 
+                        Every item in our collection is handpicked to ensure quality, style, and value.
+                    </p>
+                </div>
+                <div class="about-image">
+                    <img src="{% static 'images/about-image.jpg' %}" alt="Montclair Wardrobe" class="img-fluid">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="about-section bg-light">
+        <div class="container">
+            <h2 class="text-center mb-5">Why Choose Us</h2>
+            <div class="features-grid">
+                <div class="feature-item">
+                    <div class="feature-icon">
+                        <i class="fas fa-crown"></i>
+                    </div>
+                    <h3>Premium Quality</h3>
+                    <p>Every piece is carefully selected for quality, style, and durability.</p>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">
+                        <i class="fas fa-shipping-fast"></i>
+                    </div>
+                    <h3>Fast Delivery</h3>
+                    <p>Express delivery across Lusaka with real-time tracking.</p>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">
+                        <i class="fas fa-user-tie"></i>
+                    </div>
+                    <h3>Expert Styling</h3>
+                    <p>Personal styling advice from fashion experts.</p>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">
+                        <i class="fas fa-undo"></i>
+                    </div>
+                    <h3>Easy Returns</h3>
+                    <p>Hassle-free returns within 14 days of purchase.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="about-section">
+        <div class="container">
+            <h2 class="text-center mb-5">Our Values</h2>
+            <div class="values-grid">
+                <div class="value-card">
+                    <h3>Quality</h3>
+                    <p>We never compromise on quality. Every item meets our strict standards.</p>
+                </div>
+                <div class="value-card">
+                    <h3>Authenticity</h3>
+                    <p>We celebrate individuality and help you express your true style.</p>
+                </div>
+                <div class="value-card">
+                    <h3>Sustainability</h3>
+                    <p>We partner with ethical brands that care about the environment.</p>
+                </div>
+                <div class="value-card">
+                    <h3>Customer First</h3>
+                    <p>Your satisfaction is our priority. We're here to help you look and feel great.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="about-section bg-light">
+        <div class="container text-center">
+            <h2 class="mb-4">Get in Touch</h2>
+            <p class="lead mb-4">Have questions? We'd love to hear from you!</p>
+            <a href="{% url 'home:contact' %}" class="btn btn-primary btn-lg">Contact Us</a>
+        </div>
+    </section>
+</div>
+
+<style>
+    .about-container {
+        min-height: 100vh;
+    }
+
+    .about-hero {
+        background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+        color: white;
+        padding: 100px 20px;
+        text-align: center;
+    }
+
+    .about-hero h1 {
+        font-size: 3rem;
+        margin-bottom: 20px;
+        color: #d4af37;
+    }
+
+    .about-hero .lead {
+        font-size: 1.3rem;
+        color: #b0b0b0;
+    }
+
+    .about-section {
+        padding: 80px 0;
+    }
+
+    .about-section.bg-light {
+        background-color: #f8f9fa;
+    }
+
+    .about-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 40px;
+        align-items: center;
+    }
+
+    .about-text h2 {
+        font-size: 2rem;
+        margin-bottom: 20px;
+        color: #d4af37;
+    }
+
+    .about-text p {
+        font-size: 1.1rem;
+        line-height: 1.8;
+        color: #555;
+        margin-bottom: 15px;
+    }
+
+    .about-image img {
+        border-radius: 10px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    }
+
+    .features-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 30px;
+    }
+
+    .feature-item {
+        text-align: center;
+        padding: 30px;
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .feature-icon {
+        font-size: 2.5rem;
+        color: #d4af37;
+        margin-bottom: 15px;
+    }
+
+    .feature-item h3 {
+        font-size: 1.3rem;
+        margin-bottom: 10px;
+        color: #333;
+    }
+
+    .feature-item p {
+        color: #666;
+        line-height: 1.6;
+    }
+
+    .values-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 30px;
+    }
+
+    .value-card {
+        background: white;
+        padding: 30px;
+        border-radius: 10px;
+        border-left: 4px solid #d4af37;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .value-card h3 {
+        font-size: 1.3rem;
+        margin-bottom: 10px;
+        color: #d4af37;
+    }
+
+    .value-card p {
+        color: #666;
+        line-height: 1.6;
+    }
+
+    .btn-primary {
+        background-color: #d4af37;
+        border-color: #d4af37;
+        color: #0a0a0a;
+        padding: 12px 30px;
+        font-weight: 600;
+        border-radius: 5px;
+        text-decoration: none;
+        display: inline-block;
+        transition: all 0.3s ease;
+    }
+
+    .btn-primary:hover {
+        background-color: #b8941f;
+        border-color: #b8941f;
+        color: #0a0a0a;
+    }
+
+    .btn-lg {
+        padding: 15px 40px;
+        font-size: 1.1rem;
+    }
+
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 20px;
+    }
+
+    .text-center {
+        text-align: center;
+    }
+
+    .mb-4 {
+        margin-bottom: 1.5rem;
+    }
+
+    .mb-5 {
+        margin-bottom: 3rem;
+    }
+
+    .img-fluid {
+        max-width: 100%;
+        height: auto;
+    }
+
+    @media (max-width: 768px) {
+        .about-hero h1 {
+            font-size: 2rem;
+        }
+
+        .about-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .about-section {
+            padding: 50px 0;
+        }
+    }
+</style>
+{% endblock %}

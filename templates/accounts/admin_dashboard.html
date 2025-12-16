@@ -210,7 +210,6 @@
         <!-- Dashboard Header -->
         <div class="dashboard-header">
             <h1 class="admin-welcome">Admin Dashboard</h1>
-            <p class="admin-subtitle">Welcome back, {{ user.username }}! Manage your e-commerce platform</p>
         </div>
         
         <!-- Statistics Cards -->
@@ -277,9 +276,39 @@
                     Categories
                 </a>
                 
-                <a href="#" class="action-btn">
+                <a href="{% url 'reports:dashboard' %}" class="action-btn">
                     <i class="fas fa-chart-bar"></i>
-                    Analytics
+                    Reports Dashboard
+                </a>
+                
+                <a href="{% url 'reports:daily_sales' %}" class="action-btn">
+                    <i class="fas fa-chart-line"></i>
+                    Daily Sales
+                </a>
+                
+                <a href="{% url 'reports:order_status' %}" class="action-btn">
+                    <i class="fas fa-shopping-bag"></i>
+                    Order Status
+                </a>
+                
+                <a href="{% url 'reports:product_sales' %}" class="action-btn">
+                    <i class="fas fa-box"></i>
+                    Product Sales
+                </a>
+                
+                <a href="{% url 'reports:stock_level' %}" class="action-btn">
+                    <i class="fas fa-warehouse"></i>
+                    Stock Level
+                </a>
+                
+                <a href="{% url 'reports:customer_growth' %}" class="action-btn">
+                    <i class="fas fa-users"></i>
+                    Customer Growth
+                </a>
+                
+                <a href="{% url 'staff_dashboard:dashboard' %}" class="action-btn">
+                    <i class="fas fa-briefcase"></i>
+                    Staff Dashboard
                 </a>
                 
                 <a href="#" class="action-btn">

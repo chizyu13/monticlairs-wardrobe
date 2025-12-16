@@ -1,0 +1,383 @@
+{% extends 'reports/base.html' %}
+{% load static %}
+
+{% block title %}Customer Growth Report - Montclair Wardrobe{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --primary-color: #2c3e50;
+        --accent-color: #d4af37;
+        --text-dark: #2c3e50;
+        --text-light: #6c757d;
+        --bg-light: #f8f9fa;
+        --white: #ffffff;
+        /* Modern Design Variables */
+        --primary-dark: #0a0a0a;
+        --secondary-dark: #1a1a1a;
+        --accent-dark: #2a2a2a;
+        --gold-accent: #d4af37;
+        --gold-light: #f4e4a6;
+        --text-primary: #ffffff;
+        --text-secondary: #b0b0b0;
+        --text-muted: #808080;
+        --glass-bg: rgba(255, 255, 255, 0.05);
+        --glass-border: rgba(255, 255, 255, 0.1);
+        --success-color: #28a745;
+        --warning-color: #ffc107;
+        --danger-color: #dc3545;
+    }
+
+    .date-picker-section {
+        background: linear-gradient(135deg, var(--secondary-dark) 0%, var(--accent-dark) 100%);
+        padding: 2rem;
+        border-radius: 15px;
+        margin-bottom: 2rem;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        border: 1px solid var(--glass-border);
+    }
+    
+    .date-picker-section form {
+        display: flex;
+        gap: 1rem;
+        align-items: flex-end;
+        flex-wrap: wrap;
+    }
+    
+    .date-picker-section .filter-group {
+        flex: 1;
+        min-width: 200px;
+    }
+    
+    .date-picker-section label {
+        color: var(--gold-accent);
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+    
+    .date-picker-section input {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid var(--glass-border);
+        border-radius: 8px;
+        font-size: 1rem;
+        background: var(--glass-bg);
+        color: var(--text-primary);
+    }
+    
+    .date-picker-section input::placeholder {
+        color: var(--text-muted);
+    }
+    
+    .date-picker-section button {
+        background: linear-gradient(135deg, var(--gold-accent) 0%, var(--gold-light) 100%);
+        color: var(--primary-dark);
+        padding: 0.75rem 2rem;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .date-picker-section button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(212, 175, 55, 0.4);
+    }
+    
+    .metrics-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .metric-card {
+        background: var(--glass-bg);
+        border-radius: 15px;
+        padding: 2rem;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        border-left: 5px solid var(--gold-accent);
+        border: 1px solid var(--glass-border);
+        transition: all 0.3s ease;
+    }
+    
+    .metric-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 40px rgba(212, 175, 55, 0.2);
+        border-color: rgba(212, 175, 55, 0.4);
+    }
+    
+    .metric-icon {
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+        color: var(--gold-accent);
+    }
+    
+    .metric-value {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+    }
+    
+    .metric-label {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+    
+    .ltv-card {
+        background: linear-gradient(135deg, var(--gold-accent) 0%, var(--gold-light) 100%);
+        padding: 2rem;
+        border-radius: 15px;
+        color: var(--primary-dark);
+        margin-bottom: 2rem;
+        box-shadow: 0 10px 30px rgba(212, 175, 55, 0.2);
+    }
+    
+    .ltv-card h4 {
+        color: var(--primary-dark);
+        margin-bottom: 0.5rem;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+    
+    .ltv-card .value {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: var(--primary-dark);
+    }
+    
+    .export-section {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 2rem;
+        flex-wrap: wrap;
+    }
+    
+    .export-btn {
+        flex: 1;
+        min-width: 150px;
+        padding: 1rem;
+        background: linear-gradient(135deg, var(--gold-accent) 0%, var(--gold-light) 100%);
+        color: var(--primary-dark);
+        border: none;
+        border-radius: 10px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+    
+    .export-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 25px rgba(212, 175, 55, 0.4);
+        color: var(--primary-dark);
+        text-decoration: none;
+    }
+    
+    .section-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .section-title i {
+        color: var(--gold-accent);
+    }
+    
+    .data-table {
+        background: var(--glass-bg);
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        margin-bottom: 2rem;
+        border: 1px solid var(--glass-border);
+    }
+    
+    .data-table table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    
+    .data-table thead {
+        background: linear-gradient(135deg, var(--gold-accent) 0%, var(--gold-light) 100%);
+        color: var(--primary-dark);
+    }
+    
+    .data-table th {
+        padding: 1.5rem;
+        text-align: left;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.85rem;
+        letter-spacing: 1px;
+    }
+    
+    .data-table td {
+        padding: 1.5rem;
+        border-bottom: 1px solid var(--glass-border);
+        color: var(--text-primary);
+    }
+    
+    .data-table tbody tr:hover {
+        background: rgba(212, 175, 55, 0.1);
+    }
+    
+    .data-table tbody tr:last-child td {
+        border-bottom: none;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 3rem;
+        color: var(--text-secondary);
+    }
+    
+    .back-button {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 1rem 2rem;
+        background: rgba(212, 175, 55, 0.1);
+        color: var(--gold-accent);
+        border: 2px solid var(--gold-accent);
+        border-radius: 10px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+    }
+    
+    .back-button:hover {
+        background: var(--gold-accent);
+        color: var(--primary-dark);
+    }
+</style>
+{% endblock %}
+
+{% block report_content %}
+<div class="reports-header">
+    <h1 class="reports-title">👥 Customer Growth Report</h1>
+    <p class="reports-subtitle">Customer acquisition and retention analysis from <strong>{{ date_from }}</strong> to <strong>{{ date_to }}</strong></p>
+</div>
+
+<!-- Date Picker Section -->
+<div class="date-picker-section">
+    <form method="get">
+        <div class="filter-group">
+            <label for="date_from">📅 From Date:</label>
+            <input type="date" id="date_from" name="date_from" value="{{ date_from }}">
+        </div>
+        <div class="filter-group">
+            <label for="date_to">📅 To Date:</label>
+            <input type="date" id="date_to" name="date_to" value="{{ date_to }}">
+        </div>
+        <button type="submit">
+            <i class="fas fa-search"></i> Generate Report
+        </button>
+    </form>
+</div>
+
+<!-- Key Metrics -->
+<div class="metrics-container">
+    <div class="metric-card">
+        <div class="metric-icon">
+            <i class="fas fa-user-plus"></i>
+        </div>
+        <div class="metric-value">{{ report_data.new_customers }}</div>
+        <div class="metric-label">New Customers</div>
+    </div>
+    
+    <div class="metric-card">
+        <div class="metric-icon">
+            <i class="fas fa-users"></i>
+        </div>
+        <div class="metric-value">{{ report_data.total_customers }}</div>
+        <div class="metric-label">Total Active Customers</div>
+    </div>
+    
+    <div class="metric-card">
+        <div class="metric-icon">
+            <i class="fas fa-shopping-cart"></i>
+        </div>
+        <div class="metric-value">{{ report_data.customers_with_orders }}</div>
+        <div class="metric-label">Customers with Orders</div>
+    </div>
+    
+    <div class="metric-card">
+        <div class="metric-icon">
+            <i class="fas fa-redo"></i>
+        </div>
+        <div class="metric-value">{{ report_data.repeat_customers }}</div>
+        <div class="metric-label">Repeat Customers</div>
+    </div>
+</div>
+
+<!-- Average LTV -->
+<div class="ltv-card">
+    <h4>💰 Average Customer Lifetime Value</h4>
+    <div class="value">ZMW {{ report_data.average_ltv|floatformat:2 }}</div>
+</div>
+
+<!-- Export Options -->
+<div class="export-section">
+    <a href="{% url 'reports:export' %}?type=customer_growth&format=csv&date_from={{ date_from }}&date_to={{ date_to }}" class="export-btn">
+        <i class="fas fa-file-csv"></i> Export CSV
+    </a>
+    <a href="{% url 'reports:export' %}?type=customer_growth&format=pdf&date_from={{ date_from }}&date_to={{ date_to }}" class="export-btn">
+        <i class="fas fa-file-pdf"></i> Export PDF
+    </a>
+</div>
+
+<!-- Daily Customer Growth -->
+<div class="data-table">
+    <div style="padding: 2rem; border-bottom: 1px solid #ecf0f1;">
+        <h3 class="section-title">
+            <i class="fas fa-chart-line"></i> Daily Customer Growth
+        </h3>
+    </div>
+    <table>
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>New Customers</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for day in report_data.daily_growth %}
+            <tr>
+                <td><strong>{{ day.date }}</strong></td>
+                <td><span style="background: #e8f4f8; padding: 0.5rem 1rem; border-radius: 20px; display: inline-block;">{{ day.new_customers }} customers</span></td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="2" class="empty-state">
+                    <i class="fas fa-inbox" style="font-size: 2rem; margin-bottom: 1rem; display: block;"></i>
+                    No customer data available for this period
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Back Button -->
+<div style="text-align: center; margin-top: 3rem; margin-bottom: 2rem;">
+    <a href="{% url 'reports:dashboard' %}" class="back-button">
+        <i class="fas fa-arrow-left"></i> Back to Reports Dashboard
+    </a>
+</div>
+{% endblock %}

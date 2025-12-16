@@ -1,0 +1,137 @@
+{% extends 'staff/base.html' %}
+{% load static %}
+
+{% block title %}Customer Inquiries{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h1 class="h2 mb-3">
+            <i class="bi bi-chat-dots"></i> Customer Inquiries
+        </h1>
+    </div>
+</div>
+
+<!-- Filters -->
+<div class="filter-section">
+    <form method="get" class="row g-3">
+        <div class="col-12 col-md-5">
+            <label for="search" class="form-label">Search</label>
+            <input type="text" 
+                   class="form-control" 
+                   id="search" 
+                   name="search" 
+                   placeholder="Subject, message, customer..."
+                   value="{{ search_query }}">
+        </div>
+        <div class="col-12 col-md-4">
+            <label for="status" class="form-label">Status</label>
+            <select class="form-select" id="status" name="status">
+                <option value="all" {% if not status_filter or status_filter == 'all' %}selected{% endif %}>
+                    All Statuses
+                </option>
+                {% for value, label in status_choices %}
+                <option value="{{ value }}" {% if status_filter == value %}selected{% endif %}>
+                    {{ label }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-12 col-md-3 d-flex align-items-end">
+            <button type="submit" class="btn btn-primary me-2">
+                <i class="bi bi-funnel"></i> Filter
+            </button>
+            <a href="{% url 'staff_dashboard:inquiries_list' %}" class="btn btn-outline-secondary">
+                <i class="bi bi-x-circle"></i> Clear
+            </a>
+        </div>
+    </form>
+</div>
+
+<!-- Inquiries Table -->
+<div class="card">
+    <div class="card-header bg-white">
+        <h5 class="mb-0">
+            <i class="bi bi-list-ul"></i> Inquiries List
+            <span class="badge bg-primary ms-2">{{ inquiries.count }} inquir{{ inquiries.count|pluralize:"y,ies" }}</span>
+        </h5>
+    </div>
+    <div class="card-body p-0">
+        {% if inquiries %}
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Subject</th>
+                        <th>Customer</th>
+                        <th>Status</th>
+                        <th>Created</th>
+                        <th>Resolved By</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for inquiry in inquiries %}
+                    <tr>
+                        <td><strong>#{{ inquiry.id }}</strong></td>
+                        <td>
+                            <strong>{{ inquiry.subject|truncatewords:8 }}</strong>
+                            <br><small class="text-muted">{{ inquiry.message|truncatewords:10 }}</small>
+                        </td>
+                        <td>
+                            <i class="bi bi-person"></i> {{ inquiry.customer.username }}
+                            {% if inquiry.customer.email %}
+                            <br><small class="text-muted">{{ inquiry.customer.email }}</small>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if inquiry.status == 'pending' %}
+                                <span class="badge status-pending">Pending</span>
+                            {% elif inquiry.status == 'in_progress' %}
+                                <span class="badge status-in-progress">In Progress</span>
+                            {% elif inquiry.status == 'resolved' %}
+                                <span class="badge status-resolved">Resolved</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <small>
+                                {{ inquiry.created_at|date:"M d, Y" }}<br>
+                                {{ inquiry.created_at|time:"g:i A" }}
+                            </small>
+                        </td>
+                        <td>
+                            {% if inquiry.resolved_by %}
+                            <i class="bi bi-person-check"></i> {{ inquiry.resolved_by.username }}
+                            <br><small class="text-muted">{{ inquiry.resolved_at|date:"M d, Y" }}</small>
+                            {% else %}
+                            <span class="text-muted">-</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a href="{% url 'staff_dashboard:inquiry_detail' inquiry.id %}" 
+                               class="btn btn-sm btn-outline-primary"
+                               data-bs-toggle="tooltip" 
+                               title="View Details">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-5">
+            <i class="bi bi-inbox" style="font-size: 3rem; color: #ccc;"></i>
+            <p class="text-muted mt-3">No inquiries found</p>
+            {% if status_filter or search_query %}
+            <a href="{% url 'staff_dashboard:inquiries_list' %}" class="btn btn-outline-primary">
+                Clear Filters
+            </a>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

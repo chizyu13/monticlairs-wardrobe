@@ -1,0 +1,1132 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Montclair Wardrobe - Premium Fashion Experience</title>
+    <meta name="description" content="Discover curated fashion and boutique essentials at Montclair Wardrobe. Shop premium clothing with express delivery.">
+    <meta name="keywords" content="fashion, boutique, clothing, Montclair Wardrobe, premium fashion">
+    <meta property="og:title" content="Montclair Wardrobe - Curated Fashion">
+    <meta property="og:description" content="Explore our handpicked collection of premium fashion pieces at Montclair Wardrobe.">
+    <meta property="og:image" content="{% static 'images/hero-bg.jpg' %}">
+    <meta property="og:url" content="{{ request.build_absolute_uri }}">
+    <link rel="icon" href="{% static 'images/favicon.ico' %}" type="image/x-icon">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            --primary-dark: #0a0a0a;
+            --secondary-dark: #1a1a1a;
+            --accent-dark: #2a2a2a;
+            --gold-accent: #d4af37;
+            --gold-light: #f4e4a6;
+            --text-primary: #ffffff;
+            --text-secondary: #b0b0b0;
+            --text-muted: #808080;
+            --glass-bg: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --shadow-dark: rgba(0, 0, 0, 0.5);
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--primary-dark);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Animated Background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(212, 175, 55, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(212, 175, 55, 0.08) 0%, transparent 50%),
+                linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 50%, #0f0f0f 100%);
+            z-index: -2;
+        }
+
+        /* Floating particles */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        .particle {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: var(--gold-accent);
+            border-radius: 50%;
+            opacity: 0.3;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); opacity: 0.3; }
+            50% { transform: translateY(-20px) rotate(180deg); opacity: 0.8; }
+        }
+
+        /* Navbar Styles */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--glass-border);
+            padding: 16px 0;
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+
+        .navbar.scrolled {
+            background: rgba(10, 10, 10, 0.95);
+            backdrop-filter: blur(30px);
+        }
+
+        .navbar-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .navbar-brand {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--gold-accent);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .navbar-brand:hover {
+            color: var(--gold-light);
+        }
+
+        .navbar-nav {
+            display: flex;
+            list-style: none;
+            gap: 32px;
+            align-items: center;
+        }
+
+        .nav-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .nav-link.active,
+        .nav-link:hover {
+            color: var(--text-primary);
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--gold-accent);
+            transition: width 0.3s ease;
+        }
+
+        .nav-link.active::after,
+        .nav-link:hover::after {
+            width: 100%;
+        }
+
+        .cart-badge {
+            background: var(--gold-accent);
+            color: var(--primary-dark);
+            font-size: 0.7rem;
+            padding: 2px 6px;
+            border-radius: 10px;
+            margin-left: 4px;
+        }
+
+        .navbar-toggle {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--text-primary);
+            font-size: 1.2rem;
+            cursor: pointer;
+        }
+
+        /* Hero Section */
+        .hero-section {
+            position: relative;
+            height: 100vh;
+            background: linear-gradient(
+                135deg,
+                rgba(212, 175, 55, 0.2) 0%,
+                rgba(0, 0, 0, 0.8) 50%,
+                rgba(0, 0, 0, 0.9) 100%
+            ),
+            url('https://images.unsplash.com/photo-1441986300917-64674bd600d8?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80') center/cover;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: var(--text-primary);
+        }
+
+        .hero-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.4);
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            max-width: 800px;
+            padding: 0 20px;
+        }
+
+        .hero-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 4rem;
+            font-weight: 700;
+            margin-bottom: 24px;
+            color: var(--gold-accent);
+            text-shadow: 0 2px 10px rgba(212, 175, 55, 0.3);
+            letter-spacing: -0.02em;
+            line-height: 1.1;
+        }
+
+        .hero-subtitle {
+            font-size: 1.3rem;
+            margin-bottom: 40px;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        .hero-cta {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            padding: 18px 36px;
+            background: linear-gradient(135deg, var(--gold-accent), #b8941f);
+            color: var(--primary-dark);
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-cta::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .hero-cta:hover::before {
+            left: 100%;
+        }
+
+        .hero-cta:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(212, 175, 55, 0.4);
+            color: var(--primary-dark);
+        }
+
+        /* Section Styles */
+        .section {
+            padding: 100px 0;
+            position: relative;
+        }
+
+        .section-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5rem;
+            font-weight: 600;
+            text-align: center;
+            margin-bottom: 60px;
+            color: var(--gold-accent);
+            letter-spacing: -0.02em;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Category Cards */
+        .categories-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+            margin-top: 60px;
+        }
+
+        .category-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            position: relative;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .category-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px var(--shadow-dark);
+            border-color: var(--gold-accent);
+            color: inherit;
+        }
+
+        .category-image-container {
+            position: relative;
+            height: 220px;
+            overflow: hidden;
+        }
+
+        .category-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+
+        .category-card:hover .category-image {
+            transform: scale(1.1);
+        }
+
+        .category-icon-fallback {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, var(--gold-accent), #b8941f);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary-dark);
+            font-size: 3rem;
+        }
+
+        .category-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(212, 175, 55, 0.8), rgba(184, 148, 31, 0.8));
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .category-card:hover .category-overlay {
+            opacity: 1;
+        }
+
+        .category-overlay-icon {
+            color: var(--primary-dark);
+            font-size: 2.5rem;
+            transform: scale(0.8);
+            transition: transform 0.3s ease;
+        }
+
+        .category-card:hover .category-overlay-icon {
+            transform: scale(1);
+        }
+
+        .category-info {
+            padding: 24px;
+            text-align: center;
+        }
+
+        .category-name {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+
+        .category-description {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-bottom: 16px;
+        }
+
+        .category-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            transition: all 0.3s ease;
+        }
+
+        .category-card:hover .category-btn {
+            background: var(--gold-accent);
+            color: var(--primary-dark);
+            border-color: var(--gold-accent);
+        }
+
+        /* Feature Cards */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 40px;
+            margin-top: 60px;
+        }
+
+        .feature-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--gold-accent);
+        }
+
+        .feature-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, var(--gold-accent), #b8941f);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 24px;
+            font-size: 2rem;
+            color: var(--primary-dark);
+        }
+
+        .feature-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 16px;
+        }
+
+        .feature-description {
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        /* Product Cards */
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 30px;
+            margin-top: 60px;
+        }
+
+        .product-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .product-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px var(--shadow-dark);
+            border-color: var(--gold-accent);
+        }
+
+        .product-image {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+
+        .product-card:hover .product-image {
+            transform: scale(1.05);
+        }
+
+        .product-info {
+            padding: 24px;
+        }
+
+        .product-name {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+
+        .product-description {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            line-height: 1.5;
+            margin-bottom: 16px;
+        }
+
+        .product-price {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--gold-accent);
+            margin-bottom: 8px;
+        }
+
+        .product-stock {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            margin-bottom: 16px;
+        }
+
+        .product-btn {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--gold-accent), #b8941f);
+            color: var(--primary-dark);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(212, 175, 55, 0.3);
+            color: var(--primary-dark);
+        }
+
+        .btn-secondary {
+            background: var(--glass-bg);
+            color: var(--text-secondary);
+            border: 1px solid var(--glass-border);
+        }
+
+        .btn-secondary:hover {
+            background: var(--accent-dark);
+            color: var(--text-primary);
+        }
+
+        .btn-disabled {
+            background: var(--accent-dark);
+            color: var(--text-muted);
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        /* Footer Styles */
+        .footer {
+            background: var(--secondary-dark);
+            border-top: 1px solid var(--accent-dark);
+            padding: 60px 0 30px;
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+
+        .footer-section h3 {
+            font-family: 'Playfair Display', serif;
+            color: var(--gold-accent);
+            font-size: 1.3rem;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .footer-section p,
+        .footer-section a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            line-height: 1.6;
+            transition: color 0.3s ease;
+        }
+
+        .footer-section a:hover {
+            color: var(--gold-accent);
+        }
+
+        .footer-links {
+            list-style: none;
+        }
+
+        .footer-links li {
+            margin-bottom: 10px;
+        }
+
+        .social-links {
+            display: flex;
+            gap: 16px;
+            margin-top: 20px;
+        }
+
+        .social-link {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 45px;
+            height: 45px;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 50%;
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .social-link:hover {
+            background: var(--gold-accent);
+            color: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        .footer-bottom {
+            border-top: 1px solid var(--accent-dark);
+            padding-top: 30px;
+            text-align: center;
+            color: var(--text-muted);
+        }
+
+        /* Modal Styles */
+        .modal-content {
+            background: var(--secondary-dark);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+        }
+
+        .modal-header {
+            border-bottom: 1px solid var(--accent-dark);
+        }
+
+        .modal-title {
+            color: var(--text-primary);
+        }
+
+        .modal-body {
+            color: var(--text-secondary);
+        }
+
+        .modal-footer {
+            border-top: 1px solid var(--accent-dark);
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            border-color: #dc3545;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+            border-color: #bd2130;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .navbar-nav {
+                display: none;
+                position: absolute;
+                top: 100%;
+                left: 0;
+                right: 0;
+                background: var(--secondary-dark);
+                border-top: 1px solid var(--accent-dark);
+                flex-direction: column;
+                padding: 20px;
+                gap: 16px;
+            }
+
+            .navbar-nav.active {
+                display: flex;
+            }
+
+            .navbar-toggle {
+                display: block;
+            }
+
+            .hero-title {
+                font-size: 2.5rem;
+            }
+
+            .hero-subtitle {
+                font-size: 1.1rem;
+            }
+
+            .section {
+                padding: 60px 0;
+            }
+
+            .section-title {
+                font-size: 2rem;
+            }
+
+            .categories-grid,
+            .features-grid,
+            .products-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .footer-content {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+
+            .social-links {
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .hero-title {
+                font-size: 2rem;
+            }
+
+            .navbar-container {
+                padding: 0 15px;
+            }
+
+            .container {
+                padding: 0 15px;
+            }
+
+            .feature-card {
+                padding: 30px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar" id="navbar">
+        <div class="navbar-container">
+            <a href="{% url 'home:main_page' %}" class="navbar-brand">
+                <i class="fas fa-gem"></i>
+                Montclair Wardrobe
+            </a>
+            <ul class="navbar-nav" id="navbarNav">
+                <li><a href="{% url 'home:main_page' %}" class="nav-link active">Home</a></li>
+                <li><a href="{% url 'home:products' %}" class="nav-link">Collections</a></li>
+                <li><a href="{% url 'home:about' %}" class="nav-link">About</a></li>
+                <li><a href="{% url 'home:contact' %}" class="nav-link">Contact</a></li>
+                <li><a href="{% url 'home:clock' %}" class="nav-link">Clock</a></li>
+                {% if user.is_authenticated %}
+                    <li><a href="{% url 'cart:view_cart' %}" class="nav-link">
+                        <i class="fas fa-shopping-cart"></i>
+                        Cart
+                        {% if cart_item_count > 0 %}
+                            <span class="cart-badge">{{ cart_item_count }}</span>
+                        {% endif %}
+                    </a></li>
+                    <li><a href="#" class="nav-link" data-bs-toggle="modal" data-bs-target="#logoutModal">Logout</a></li>
+                {% else %}
+                    <li><a href="{% url 'login' %}" class="nav-link">Sign In</a></li>
+                    <li><a href="{% url 'register' %}" class="nav-link">Register</a></li>
+                {% endif %}
+            </ul>
+            <button class="navbar-toggle" id="navbarToggle">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Floating Particles -->
+    <div class="particles">
+        <div class="particle" style="left: 10%; animation-delay: 0s;"></div>
+        <div class="particle" style="left: 20%; animation-delay: 1s;"></div>
+        <div class="particle" style="left: 30%; animation-delay: 2s;"></div>
+        <div class="particle" style="left: 40%; animation-delay: 3s;"></div>
+        <div class="particle" style="left: 50%; animation-delay: 4s;"></div>
+        <div class="particle" style="left: 60%; animation-delay: 5s;"></div>
+        <div class="particle" style="left: 70%; animation-delay: 0.5s;"></div>
+        <div class="particle" style="left: 80%; animation-delay: 1.5s;"></div>
+        <div class="particle" style="left: 90%; animation-delay: 2.5s;"></div>
+    </div>
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+            <h1 class="hero-title">Montclair Wardrobe</h1>
+            <p class="hero-subtitle">Discover curated fashion and boutique essentials crafted for the discerning individual</p>
+            <a href="{% url 'home:products' %}" class="hero-cta">
+                <i class="fas fa-shopping-bag"></i>
+                Explore Collections
+            </a>
+        </div>
+    </section>
+
+    <!-- Categories Section -->
+    <section class="section">
+        <div class="container">
+            <h2 class="section-title">Shop by Categories</h2>
+            <div class="categories-grid">
+                {% for category in categories %}
+                <a href="{% url 'home:category_products' category.slug %}" class="category-card">
+                    <div class="category-image-container">
+                        {% if category.image %}
+                            <img src="{% static category.image %}" class="category-image" alt="{{ category.name }}" loading="lazy"
+                                onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                            <div class="category-icon-fallback" style="display: none;">
+                                <i class="{{ category.icon }}"></i>
+                            </div>
+                        {% else %}
+                            <div class="category-icon-fallback">
+                                <i class="{{ category.icon }}"></i>
+                            </div>
+                        {% endif %}
+                        <div class="category-overlay">
+                            <i class="{{ category.icon }} category-overlay-icon"></i>
+                        </div>
+                    </div>
+                    <div class="category-info">
+                        <h3 class="category-name">{{ category.name }}</h3>
+                        <p class="category-description">Explore {{ category.name|lower }} collection</p>
+                        <div class="category-btn">
+                            <i class="fas fa-arrow-right"></i>
+                            Browse {{ category.name }}
+                        </div>
+                    </div>
+                </a>
+                {% empty %}
+                <div style="grid-column: 1 / -1; text-align: center; color: var(--text-secondary);">
+                    <p>No categories available at the moment.</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="section">
+        <div class="container">
+            <h2 class="section-title">Why Choose Montclair</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-crown"></i>
+                    </div>
+                    <h3 class="feature-title">Premium Fashion</h3>
+                    <p class="feature-description">Carefully curated pieces from top designers and emerging talents, ensuring you always look your absolute best.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-shipping-fast"></i>
+                    </div>
+                    <h3 class="feature-title">Express Delivery</h3>
+                    <p class="feature-description">Fast and secure shipping across Lusaka with real-time tracking for your peace of mind.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-user-tie"></i>
+                    </div>
+                    <h3 class="feature-title">Style Consultation</h3>
+                    <p class="feature-description">Personal styling advice from fashion experts to help you create the perfect wardrobe.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Featured Products Section -->
+    <section class="section">
+        <div class="container">
+            <h2 class="section-title">Featured Products</h2>
+            <div class="products-grid">
+                {% for product in products %}
+                <div class="product-card">
+                    {% if product.image %}
+                        <img src="{{ product.image.url }}" class="product-image" alt="{{ product.name }}" loading="lazy">
+                    {% else %}
+                        <img src="{% static 'images/placeholder.jpg' %}" class="product-image" alt="Placeholder" loading="lazy">
+                    {% endif %}
+                    <div class="product-info">
+                        <h3 class="product-name">{{ product.name }}</h3>
+                        <p class="product-description">{{ product.description|truncatewords:15 }}</p>
+                        <div class="product-price">ZMW {{ product.price }}</div>
+                        <div class="product-stock">
+                            {% if product.stock > 0 %}
+                                {{ product.stock }} in stock
+                            {% else %}
+                                Out of stock
+                            {% endif %}
+                        </div>
+                        {% if not user.is_authenticated %}
+                            <a href="{% url 'login' %}" class="product-btn btn-secondary">
+                                <i class="fas fa-sign-in-alt"></i>
+                                Login to Purchase
+                            </a>
+                        {% elif user.is_superuser or user.is_staff %}
+                            <button class="product-btn btn-disabled" disabled>
+                                <i class="fas fa-user-shield"></i>
+                                Admin Account
+                            </button>
+                        {% elif product.seller == user %}
+                            <button class="product-btn btn-disabled" disabled>
+                                <i class="fas fa-tag"></i>
+                                Your Product
+                            </button>
+                        {% elif product.is_in_stock %}
+                            <a href="{% url 'cart:add_to_cart' product.id %}" class="product-btn btn-primary">
+                                <i class="fas fa-shopping-cart"></i>
+                                Add to Cart
+                            </a>
+                        {% else %}
+                            <button class="product-btn btn-disabled" disabled>
+                                <i class="fas fa-times-circle"></i>
+                                Out of Stock
+                            </button>
+                        {% endif %}
+                    </div>
+                </div>
+                {% empty %}
+                <div style="grid-column: 1 / -1; text-align: center; color: var(--text-secondary);">
+                    <p>No products available at the moment.</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>Montclair Wardrobe</h3>
+                    <p>Curating exceptional fashion experiences with premium collections and personalized styling services.</p>
+                    <div class="social-links">
+                        <a href="#" class="social-link" aria-label="Facebook">
+                            <i class="fab fa-facebook-f"></i>
+                        </a>
+                        <a href="#" class="social-link" aria-label="Instagram">
+                            <i class="fab fa-instagram"></i>
+                        </a>
+                        <a href="#" class="social-link" aria-label="Twitter">
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                        <a href="#" class="social-link" aria-label="Pinterest">
+                            <i class="fab fa-pinterest"></i>
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>Quick Links</h3>
+                    <ul class="footer-links">
+                        <li><a href="{% url 'home:main_page' %}">Home</a></li>
+                        <li><a href="{% url 'home:products' %}">Collections</a></li>
+                        <li><a href="{% url 'home:about' %}">About Us</a></li>
+                        <li><a href="{% url 'home:contact' %}">Contact</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>Customer Care</h3>
+                    <ul class="footer-links">
+                        <li><a href="#">Size Guide</a></li>
+                        <li><a href="#">Shipping Info</a></li>
+                        <li><a href="#">Returns</a></li>
+                        <li><a href="#">FAQ</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>Contact Info</h3>
+                    <p><i class="fas fa-map-marker-alt" style="margin-right: 8px; color: var(--gold-accent);"></i>123 Fashion Ave, Montclair, NJ</p>
+                    <p><i class="fas fa-phone" style="margin-right: 8px; color: var(--gold-accent);"></i>(555) 123-4567</p>
+                    <p><i class="fas fa-envelope" style="margin-right: 8px; color: var(--gold-accent);"></i>hello@montclairwardrobe.com</p>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2024 Montclair Wardrobe. All rights reserved. | Privacy Policy | Terms of Service</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Logout Modal -->
+    {% if user.is_authenticated %}
+    <div class="modal fade" id="logoutModal" tabindex="-1" aria-labelledby="logoutModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="logoutModalLabel">Confirm Logout</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    Are you sure you want to log out?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <form action="{% url 'logout' %}" method="POST" style="display: inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger">Logout</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Navbar scroll effect
+            const navbar = document.getElementById('navbar');
+            window.addEventListener('scroll', function() {
+                if (window.scrollY > 50) {
+                    navbar.classList.add('scrolled');
+                } else {
+                    navbar.classList.remove('scrolled');
+                }
+            });
+
+            // Mobile navbar toggle
+            const navbarToggle = document.getElementById('navbarToggle');
+            const navbarNav = document.getElementById('navbarNav');
+            
+            navbarToggle.addEventListener('click', function() {
+                navbarNav.classList.toggle('active');
+                const icon = this.querySelector('i');
+                if (navbarNav.classList.contains('active')) {
+                    icon.classList.remove('fa-bars');
+                    icon.classList.add('fa-times');
+                } else {
+                    icon.classList.remove('fa-times');
+                    icon.classList.add('fa-bars');
+                }
+            });
+
+            // Close mobile menu when clicking outside
+            document.addEventListener('click', function(event) {
+                if (!navbar.contains(event.target)) {
+                    navbarNav.classList.remove('active');
+                    const icon = navbarToggle.querySelector('i');
+                    icon.classList.remove('fa-times');
+                    icon.classList.add('fa-bars');
+                }
+            });
+
+            // Animate particles
+            const particles = document.querySelectorAll('.particle');
+            particles.forEach((particle, index) => {
+                particle.style.top = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 6 + 's';
+            });
+
+            // Add to Cart loading state
+            document.querySelectorAll('.btn-primary').forEach(button => {
+                if (button.getAttribute('href') && button.getAttribute('href').includes('add_to_cart')) {
+                    button.addEventListener('click', function(e) {
+                        this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Adding...';
+                        this.style.pointerEvents = 'none';
+                    });
+                }
+            });
+
+            // Intersection Observer for scroll animations
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach((entry, index) => {
+                    if (entry.isIntersecting) {
+                        setTimeout(() => {
+                            entry.target.style.opacity = '1';
+                            entry.target.style.transform = 'translateY(0)';
+                        }, index * 100);
+                    }
+                });
+            }, {
+                threshold: 0.1
+            });
+
+            // Animate cards on scroll
+            document.querySelectorAll('.category-card, .feature-card, .product-card').forEach(card => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(30px)';
+                card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+                observer.observe(card);
+            });
+
+            // Smooth scroll for anchor links
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const target = document.querySelector(this.getAttribute('href'));
+                    if (target) {
+                        target.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'start'
+                        });
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

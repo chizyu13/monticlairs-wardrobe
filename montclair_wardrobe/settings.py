@@ -60,7 +60,8 @@ INSTALLED_APPS = [
     'custom_admin',
     'widget_tweaks',
     'payment',
-   
+    'staff_dashboard',
+    'reports',
 ]
 
 MIDDLEWARE = [
@@ -72,6 +73,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'staff_dashboard.middleware.StaffApprovalMiddleware',  # Staff approval check
 ]
 
 ROOT_URLCONF = 'montclair_wardrobe.urls'

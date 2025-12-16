@@ -31,9 +31,11 @@ urlpatterns = [
     path('cart/', include('cart.urls')),
     path('custom-admin/', include('custom_admin.urls')),
     path('payment/', include(('payment.urls', 'payment'), namespace='payment')),
+    path('staff/', include(('staff_dashboard.urls', 'staff_dashboard'), namespace='staff_dashboard')),
 
     # Home app URLs with namespace
     path('', include(('home.urls', 'home'), namespace='home')),
+    path('', include(('reports.urls', 'reports'), namespace='reports')),
 ]
 
 # Serve media files during development

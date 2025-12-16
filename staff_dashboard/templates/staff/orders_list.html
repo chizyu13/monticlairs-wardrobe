@@ -1,0 +1,138 @@
+{% extends 'staff/base.html' %}
+{% load static %}
+
+{% block title %}Orders Management{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h1 class="h2 mb-3">
+            <i class="bi bi-cart"></i> Orders Management
+        </h1>
+    </div>
+</div>
+
+<!-- Filters -->
+<div class="filter-section">
+    <form method="get" class="row g-3">
+        <div class="col-12 col-md-4">
+            <label for="search" class="form-label">Search</label>
+            <input type="text" 
+                   class="form-control" 
+                   id="search" 
+                   name="search" 
+                   placeholder="Order ID, Customer, Product..."
+                   value="{{ search_query }}">
+        </div>
+        <div class="col-12 col-md-4">
+            <label for="status" class="form-label">Status</label>
+            <select class="form-select" id="status" name="status">
+                <option value="all" {% if not status_filter or status_filter == 'all' %}selected{% endif %}>
+                    All Statuses
+                </option>
+                {% for value, label in status_choices %}
+                <option value="{{ value }}" {% if status_filter == value %}selected{% endif %}>
+                    {{ label }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-12 col-md-4 d-flex align-items-end">
+            <button type="submit" class="btn btn-primary me-2">
+                <i class="bi bi-funnel"></i> Filter
+            </button>
+            <a href="{% url 'staff_dashboard:orders_list' %}" class="btn btn-outline-secondary">
+                <i class="bi bi-x-circle"></i> Clear
+            </a>
+        </div>
+    </form>
+</div>
+
+<!-- Orders Table -->
+<div class="card">
+    <div class="card-header bg-white">
+        <h5 class="mb-0">
+            <i class="bi bi-list-ul"></i> Orders List
+            <span class="badge bg-primary ms-2">{{ orders.count }} order{{ orders.count|pluralize }}</span>
+        </h5>
+    </div>
+    <div class="card-body p-0">
+        {% if orders %}
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>Order #</th>
+                        <th>Customer</th>
+                        <th>Product</th>
+                        <th>Quantity</th>
+                        <th>Total Price</th>
+                        <th>Status</th>
+                        <th>Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for order in orders %}
+                    <tr>
+                        <td><strong>#{{ order.id }}</strong></td>
+                        <td>
+                            <i class="bi bi-person"></i> {{ order.user.username }}
+                            {% if order.user.email %}
+                            <br><small class="text-muted">{{ order.user.email }}</small>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {{ order.product.name|truncatewords:5 }}
+                            <br><small class="text-muted">K{{ order.product.price }}</small>
+                        </td>
+                        <td>{{ order.quantity }}</td>
+                        <td><strong>K{{ order.total_price|floatformat:2 }}</strong></td>
+                        <td>
+                            {% if order.status == 'pending' %}
+                                <span class="badge status-pending">Pending</span>
+                            {% elif order.status == 'processing' %}
+                                <span class="badge status-processing">Processing</span>
+                            {% elif order.status == 'shipped' %}
+                                <span class="badge status-shipped">Shipped</span>
+                            {% elif order.status == 'delivered' %}
+                                <span class="badge status-delivered">Delivered</span>
+                            {% elif order.status == 'cancelled' %}
+                                <span class="badge status-cancelled">Cancelled</span>
+                            {% else %}
+                                <span class="badge bg-secondary">{{ order.status|title }}</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <small>
+                                {{ order.created_at|date:"M d, Y" }}<br>
+                                {{ order.created_at|time:"g:i A" }}
+                            </small>
+                        </td>
+                        <td>
+                            <a href="{% url 'staff_dashboard:order_detail' order.id %}" 
+                               class="btn btn-sm btn-outline-primary"
+                               data-bs-toggle="tooltip" 
+                               title="View Details">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-5">
+            <i class="bi bi-inbox" style="font-size: 3rem; color: #ccc;"></i>
+            <p class="text-muted mt-3">No orders found</p>
+            {% if status_filter or search_query %}
+            <a href="{% url 'staff_dashboard:orders_list' %}" class="btn btn-outline-primary">
+                Clear Filters
+            </a>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,191 @@
+{% extends 'staff/base.html' %}
+{% load static %}
+
+{% block title %}Inquiry #{{ inquiry.id }} - {{ inquiry.subject }}{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'staff_dashboard:home' %}">Dashboard</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'staff_dashboard:inquiries_list' %}">Inquiries</a></li>
+                <li class="breadcrumb-item active">Inquiry #{{ inquiry.id }}</li>
+            </ol>
+        </nav>
+        <h1 class="h2 mb-3">
+            <i class="bi bi-chat-dots"></i> {{ inquiry.subject }}
+        </h1>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Inquiry Details -->
+    <div class="col-12 col-lg-8">
+        <!-- Original Inquiry -->
+        <div class="card mb-4">
+            <div class="card-header bg-white">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="bi bi-envelope"></i> Original Inquiry</h5>
+                    {% if inquiry.status == 'pending' %}
+                        <span class="badge status-pending">Pending</span>
+                    {% elif inquiry.status == 'in_progress' %}
+                        <span class="badge status-in-progress">In Progress</span>
+                    {% elif inquiry.status == 'resolved' %}
+                        <span class="badge status-resolved">Resolved</span>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label class="text-muted small">Subject</label>
+                        <p class="mb-0"><strong>{{ inquiry.subject }}</strong></p>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="text-muted small">Date Submitted</label>
+                        <p class="mb-0">{{ inquiry.created_at|date:"F d, Y" }} at {{ inquiry.created_at|time:"g:i A" }}</p>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="text-muted small">Message</label>
+                    <div class="bg-light p-3 rounded">
+                        <p class="mb-0">{{ inquiry.message }}</p>
+                    </div>
+                </div>
+                {% if inquiry.status == 'resolved' %}
+                <div class="alert alert-success mb-0">
+                    <i class="bi bi-check-circle"></i> 
+                    <strong>Resolved</strong> by {{ inquiry.resolved_by.username }} 
+                    on {{ inquiry.resolved_at|date:"F d, Y" }} at {{ inquiry.resolved_at|time:"g:i A" }}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Responses -->
+        <div class="card mb-4">
+            <div class="card-header bg-white">
+                <h5 class="mb-0"><i class="bi bi-chat-left-text"></i> Responses ({{ responses.count }})</h5>
+            </div>
+            <div class="card-body">
+                {% if responses %}
+                    {% for response in responses %}
+                    <div class="mb-3 {% if not forloop.last %}pb-3 border-bottom{% endif %}">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <div>
+                                <strong><i class="bi bi-person-badge"></i> {{ response.staff_member.username }}</strong>
+                                <span class="badge bg-primary ms-2">Staff</span>
+                            </div>
+                            <small class="text-muted">{{ response.created_at|date:"M d, Y g:i A" }}</small>
+                        </div>
+                        <div class="bg-light p-3 rounded">
+                            <p class="mb-0">{{ response.message }}</p>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                <div class="text-center py-4">
+                    <i class="bi bi-chat" style="font-size: 2rem; color: #ccc;"></i>
+                    <p class="text-muted mt-2 mb-0">No responses yet</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Add Response Form -->
+        {% if inquiry.status != 'resolved' %}
+        <div class="card">
+            <div class="card-header bg-white">
+                <h5 class="mb-0"><i class="bi bi-reply"></i> Add Response</h5>
+            </div>
+            <div class="card-body">
+                <form method="post" action="{% url 'staff_dashboard:inquiry_respond' inquiry.id %}">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="message" class="form-label">Your Response</label>
+                        <textarea class="form-control" 
+                                  id="message" 
+                                  name="message" 
+                                  rows="4" 
+                                  required
+                                  placeholder="Type your response to the customer..."></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-send"></i> Send Response
+                    </button>
+                </form>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Sidebar -->
+    <div class="col-12 col-lg-4">
+        <!-- Customer Information -->
+        <div class="card mb-4">
+            <div class="card-header bg-white">
+                <h5 class="mb-0"><i class="bi bi-person"></i> Customer</h5>
+            </div>
+            <div class="card-body">
+                <p class="mb-2"><strong>{{ inquiry.customer.get_full_name|default:inquiry.customer.username }}</strong></p>
+                <p class="mb-2 text-muted">
+                    <i class="bi bi-envelope"></i> {{ inquiry.customer.email|default:"No email" }}
+                </p>
+                {% if inquiry.customer.profile.phone_number %}
+                <p class="mb-0 text-muted">
+                    <i class="bi bi-telephone"></i> {{ inquiry.customer.profile.phone_number }}
+                </p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="card">
+            <div class="card-header bg-white">
+                <h5 class="mb-0"><i class="bi bi-gear"></i> Actions</h5>
+            </div>
+            <div class="card-body">
+                {% if inquiry.status != 'resolved' %}
+                <form method="post" action="{% url 'staff_dashboard:inquiry_resolve' inquiry.id %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-success w-100 mb-2" data-confirm-status>
+                        <i class="bi bi-check-circle"></i> Mark as Resolved
+                    </button>
+                </form>
+                {% else %}
+                <div class="alert alert-success mb-0">
+                    <i class="bi bi-check-circle"></i> This inquiry has been resolved
+                </div>
+                {% endif %}
+                <a href="{% url 'staff_dashboard:inquiries_list' %}" class="btn btn-outline-secondary w-100">
+                    <i class="bi bi-arrow-left"></i> Back to List
+                </a>
+            </div>
+        </div>
+
+        <!-- Inquiry Info -->
+        <div class="card mt-4">
+            <div class="card-header bg-white">
+                <h5 class="mb-0"><i class="bi bi-info-circle"></i> Info</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-2">
+                    <label class="text-muted small">Inquiry ID</label>
+                    <p class="mb-0"><strong>#{{ inquiry.id }}</strong></p>
+                </div>
+                <div class="mb-2">
+                    <label class="text-muted small">Created</label>
+                    <p class="mb-0">{{ inquiry.created_at|date:"F d, Y" }}<br>
+                    <small>{{ inquiry.created_at|time:"g:i A" }}</small></p>
+                </div>
+                <div class="mb-0">
+                    <label class="text-muted small">Last Updated</label>
+                    <p class="mb-0">{{ inquiry.updated_at|date:"F d, Y" }}<br>
+                    <small>{{ inquiry.updated_at|time:"g:i A" }}</small></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

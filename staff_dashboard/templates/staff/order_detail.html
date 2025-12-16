@@ -1,0 +1,204 @@
+{% extends 'staff/base.html' %}
+{% load static %}
+
+{% block title %}Order #{{ order.id }} Details{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'staff_dashboard:home' %}">Dashboard</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'staff_dashboard:orders_list' %}">Orders</a></li>
+                <li class="breadcrumb-item active">Order #{{ order.id }}</li>
+            </ol>
+        </nav>
+        <h1 class="h2 mb-3">
+            <i class="bi bi-cart"></i> Order #{{ order.id }}
+        </h1>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Order Information -->
+    <div class="col-12 col-lg-8">
+        <div class="card mb-4">
+            <div class="card-header bg-white">
+                <h5 class="mb-0"><i class="bi bi-info-circle"></i> Order Information</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="text-muted small">Order ID</label>
+                        <p class="mb-0"><strong>#{{ order.id }}</strong></p>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="text-muted small">Status</label>
+                        <p class="mb-0">
+                            {% if order.status == 'pending' %}
+                                <span class="badge status-pending">Pending</span>
+                            {% elif order.status == 'processing' %}
+                                <span class="badge status-processing">Processing</span>
+                            {% elif order.status == 'shipped' %}
+                                <span class="badge status-shipped">Shipped</span>
+                            {% elif order.status == 'delivered' %}
+                                <span class="badge status-delivered">Delivered</span>
+                            {% elif order.status == 'cancelled' %}
+                                <span class="badge status-cancelled">Cancelled</span>
+                            {% endif %}
+                        </p>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="text-muted small">Order Date</label>
+                        <p class="mb-0">{{ order.created_at|date:"F d, Y" }} at {{ order.created_at|time:"g:i A" }}</p>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="text-muted small">Last Updated</label>
+                        <p class="mb-0">{{ order.updated_at|date:"F d, Y" }} at {{ order.updated_at|time:"g:i A" }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Product Details -->
+        <div class="card mb-4">
+            <div class="card-header bg-white">
+                <h5 class="mb-0"><i class="bi bi-box-seam"></i> Product Details</h5>
+            </div>
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <h6>{{ order.product.name }}</h6>
+                        <p class="text-muted mb-2">{{ order.product.description|truncatewords:20 }}</p>
+                        <p class="mb-0">
+                            <strong>Unit Price:</strong> K{{ order.product.price|floatformat:2 }}<br>
+                            <strong>Quantity:</strong> {{ order.quantity }}<br>
+                            <strong>Total:</strong> <span class="text-success">K{{ order.total_price|floatformat:2 }}</span>
+                        </p>
+                    </div>
+                    <div class="col-md-4 text-center">
+                        {% if order.product.image %}
+                        <img src="{{ order.product.image.url }}" 
+                             alt="{{ order.product.name }}" 
+                             class="img-fluid rounded"
+                             style="max-height: 150px;">
+                        {% elif order.product.static_image %}
+                        <img src="{% static order.product.static_image %}" 
+                             alt="{{ order.product.name }}" 
+                             class="img-fluid rounded"
+                             style="max-height: 150px;">
+                        {% else %}
+                        <div class="bg-light rounded p-4">
+                            <i class="bi bi-image" style="font-size: 3rem; color: #ccc;"></i>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Delivery Information -->
+        {% if order.checkout %}
+        <div class="card">
+            <div class="card-header bg-white">
+                <h5 class="mb-0"><i class="bi bi-truck"></i> Delivery Information</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="text-muted small">Phone Number</label>
+                        <p class="mb-0">{{ order.checkout.phone_number }}</p>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="text-muted small">Delivery Area</label>
+                        <p class="mb-0">{{ order.checkout.get_location_display }}</p>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="text-muted small">Address</label>
+                        <p class="mb-0">{{ order.checkout.room_number|default:"N/A" }}</p>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="text-muted small">GPS Location</label>
+                        <p class="mb-0">{{ order.checkout.gps_location|default:"N/A" }}</p>
+                    </div>
+                    {% if order.checkout.delivery_address %}
+                    <div class="col-12 mb-3">
+                        <label class="text-muted small">Additional Instructions</label>
+                        <p class="mb-0">{{ order.checkout.delivery_address }}</p>
+                    </div>
+                    {% endif %}
+                    <div class="col-md-6 mb-3">
+                        <label class="text-muted small">Payment Method</label>
+                        <p class="mb-0">{{ order.checkout.get_payment_method_display }}</p>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="text-muted small">Delivery Fee</label>
+                        <p class="mb-0">K{{ order.checkout.delivery_fee|floatformat:2 }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Sidebar -->
+    <div class="col-12 col-lg-4">
+        <!-- Customer Information -->
+        <div class="card mb-4">
+            <div class="card-header bg-white">
+                <h5 class="mb-0"><i class="bi bi-person"></i> Customer</h5>
+            </div>
+            <div class="card-body">
+                <p class="mb-2"><strong>{{ order.user.get_full_name|default:order.user.username }}</strong></p>
+                <p class="mb-2 text-muted">
+                    <i class="bi bi-envelope"></i> {{ order.user.email|default:"No email" }}
+                </p>
+                {% if order.user.profile.phone_number %}
+                <p class="mb-0 text-muted">
+                    <i class="bi bi-telephone"></i> {{ order.user.profile.phone_number }}
+                </p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Update Status -->
+        <div class="card">
+            <div class="card-header bg-white">
+                <h5 class="mb-0"><i class="bi bi-arrow-repeat"></i> Update Status</h5>
+            </div>
+            <div class="card-body">
+                <form method="post" action="{% url 'staff_dashboard:order_update_status' order.id %}">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="status" class="form-label">New Status</label>
+                        <select class="form-select" id="status" name="status" required>
+                            <option value="">Select status...</option>
+                            {% if order.status == 'pending' %}
+                                <option value="processing">Processing</option>
+                                <option value="cancelled">Cancelled</option>
+                            {% elif order.status == 'processing' %}
+                                <option value="shipped">Shipped</option>
+                                <option value="cancelled">Cancelled</option>
+                            {% elif order.status == 'shipped' %}
+                                <option value="delivered">Delivered</option>
+                                <option value="cancelled">Cancelled</option>
+                            {% else %}
+                                <option disabled>No transitions available</option>
+                            {% endif %}
+                        </select>
+                    </div>
+                    {% if order.status not in 'delivered,cancelled' %}
+                    <button type="submit" class="btn btn-primary w-100" data-confirm-status>
+                        <i class="bi bi-check-circle"></i> Update Status
+                    </button>
+                    {% else %}
+                    <div class="alert alert-info mb-0">
+                        <i class="bi bi-info-circle"></i> This order is {{ order.status }} and cannot be updated.
+                    </div>
+                    {% endif %}
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

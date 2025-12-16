@@ -1,0 +1,95 @@
+{% extends 'reports/base.html' %}
+{% load static %}
+
+{% block title %}Reports Dashboard - Montclair Wardrobe{% endblock %}
+
+{% block report_content %}
+<div class="reports-header">
+    <h1 class="reports-title">Reports Dashboard</h1>
+    <p class="reports-subtitle">Access comprehensive business analytics and reports</p>
+</div>
+
+<div class="row">
+    <!-- Daily Sales Report -->
+    <div class="col-md-6 col-lg-4">
+        <div class="report-card">
+            <div style="text-align: center; margin-bottom: 1rem;">
+                <i class="fas fa-chart-line" style="font-size: 3rem; color: #667eea;"></i>
+            </div>
+            <h3>Daily Sales Report</h3>
+            <p>Track daily sales performance, revenue, and customer metrics.</p>
+            <a href="{% url 'reports:daily_sales' %}" class="btn btn-export" style="display: inline-block; width: auto;">
+                <i class="fas fa-arrow-right"></i> View Report
+            </a>
+        </div>
+    </div>
+    
+    <!-- Order Status Report -->
+    <div class="col-md-6 col-lg-4">
+        <div class="report-card">
+            <div style="text-align: center; margin-bottom: 1rem;">
+                <i class="fas fa-shopping-cart" style="font-size: 3rem; color: #667eea;"></i>
+            </div>
+            <h3>Order Status Report</h3>
+            <p>Monitor order fulfillment and processing status across all orders.</p>
+            <a href="{% url 'reports:order_status' %}" class="btn btn-export" style="display: inline-block; width: auto;">
+                <i class="fas fa-arrow-right"></i> View Report
+            </a>
+        </div>
+    </div>
+    
+    <!-- Product Sales Report -->
+    <div class="col-md-6 col-lg-4">
+        <div class="report-card">
+            <div style="text-align: center; margin-bottom: 1rem;">
+                <i class="fas fa-box" style="font-size: 3rem; color: #667eea;"></i>
+            </div>
+            <h3>Product Sales Report</h3>
+            <p>Analyze top-performing products and sales trends by category.</p>
+            <a href="{% url 'reports:product_sales' %}" class="btn btn-export" style="display: inline-block; width: auto;">
+                <i class="fas fa-arrow-right"></i> View Report
+            </a>
+        </div>
+    </div>
+    
+    <!-- Stock Level Report -->
+    <div class="col-md-6 col-lg-4">
+        <div class="report-card">
+            <div style="text-align: center; margin-bottom: 1rem;">
+                <i class="fas fa-warehouse" style="font-size: 3rem; color: #667eea;"></i>
+            </div>
+            <h3>Stock Level Report</h3>
+            <p>Monitor inventory levels and identify low stock items.</p>
+            <a href="{% url 'reports:stock_level' %}" class="btn btn-export" style="display: inline-block; width: auto;">
+                <i class="fas fa-arrow-right"></i> View Report
+            </a>
+        </div>
+    </div>
+    
+    <!-- Customer Growth Report -->
+    <div class="col-md-6 col-lg-4">
+        <div class="report-card">
+            <div style="text-align: center; margin-bottom: 1rem;">
+                <i class="fas fa-users" style="font-size: 3rem; color: #667eea;"></i>
+            </div>
+            <h3>Customer Growth Report</h3>
+            <p>Track customer acquisition, retention, and growth metrics.</p>
+            <a href="{% url 'reports:customer_growth' %}" class="btn btn-export" style="display: inline-block; width: auto;">
+                <i class="fas fa-arrow-right"></i> View Report
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="report-card" style="margin-top: 2rem;">
+    <h3>Quick Links</h3>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem;">
+        <a href="/admin/" class="btn btn-export" style="display: inline-block; width: 100%; text-align: center;">
+            <i class="fas fa-cog"></i> Django Admin
+        </a>
+        <a href="{% url 'custom_admin:dashboard' %}" class="btn btn-export" style="display: inline-block; width: 100%; text-align: center;">
+            <i class="fas fa-tachometer-alt"></i> Admin Dashboard
+        </a>
+    </div>
+</div>
+{% endblock %}

@@ -69,7 +69,6 @@ def login_view(request):
             user = authenticate(request, username=username, password=password)
             if user is not None:
                 login(request, user)
-                messages.success(request, "Welcome back to Montclair Wardrobe!")
                 
                 # Check if user is staff/admin
                 if user.is_staff or user.is_superuser:
@@ -77,9 +76,6 @@ def login_view(request):
                 else:
                     # Regular customers go to home page
                     return redirect('home:main_page')
-        
-        # Only add one error message if authentication fails
-        messages.error(request, "Invalid username or password.")
     else:
         form = AuthenticationForm()
     
@@ -88,7 +84,6 @@ def login_view(request):
 # Logout View (accepts both GET and POST)
 def logout_view(request):
     logout(request)
-    messages.success(request, "You have been logged out successfully.")
     return redirect('home:main_page')
 
 

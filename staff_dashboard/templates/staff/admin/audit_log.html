@@ -1,0 +1,152 @@
+{% extends 'staff/base.html' %}
+{% load static %}
+
+{% block title %}Audit Log{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h1 class="h2 mb-3">
+            <i class="bi bi-journal-text"></i> Audit Log
+        </h1>
+        <p class="text-muted">Track all staff actions and changes</p>
+    </div>
+</div>
+
+<!-- Filters -->
+<div class="filter-section">
+    <form method="get" class="row g-3">
+        <div class="col-12 col-md-5">
+            <label for="staff" class="form-label">Staff Member</label>
+            <select class="form-select" id="staff" name="staff">
+                <option value="all" {% if not staff_filter or staff_filter == 'all' %}selected{% endif %}>
+                    All Staff Members
+                </option>
+                {% for staff in staff_members %}
+                <option value="{{ staff.id }}" {% if staff_filter == staff.id|stringformat:"s" %}selected{% endif %}>
+                    {{ staff.username }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-12 col-md-4">
+            <label for="action" class="form-label">Action Type</label>
+            <select class="form-select" id="action" name="action">
+                <option value="all" {% if not action_filter or action_filter == 'all' %}selected{% endif %}>
+                    All Actions
+                </option>
+                {% for value, label in action_choices %}
+                <option value="{{ value }}" {% if action_filter == value %}selected{% endif %}>
+                    {{ label }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-12 col-md-3 d-flex align-items-end">
+            <button type="submit" class="btn btn-primary me-2">
+                <i class="bi bi-funnel"></i> Filter
+            </button>
+            <a href="{% url 'staff_dashboard:admin_audit_log' %}" class="btn btn-outline-secondary">
+                <i class="bi bi-x-circle"></i> Clear
+            </a>
+        </div>
+    </form>
+</div>
+
+<!-- Audit Log Table -->
+<div class="card">
+    <div class="card-header bg-white">
+        <h5 class="mb-0">
+            <i class="bi bi-list-ul"></i> Activity Log
+            <span class="badge bg-primary ms-2">{{ logs.count }} entr{{ logs.count|pluralize:"y,ies" }}</span>
+        </h5>
+    </div>
+    <div class="card-body p-0">
+        {% if logs %}
+        <div class="table-responsive">
+            <table class="table table-hover table-sm mb-0">
+                <thead>
+                    <tr>
+                        <th>Timestamp</th>
+                        <th>Staff Member</th>
+                        <th>Action</th>
+                        <th>Target</th>
+                        <th>Details</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for log in logs %}
+                    <tr>
+                        <td>
+                            <small>
+                                {{ log.timestamp|date:"M d, Y" }}<br>
+                                {{ log.timestamp|time:"g:i:s A" }}
+                            </small>
+                        </td>
+                        <td>
+                            <i class="bi bi-person-badge"></i> {{ log.staff_member.username }}
+                        </td>
+                        <td>
+                            {% if log.action == 'order_status_update' %}
+                                <span class="badge bg-primary">Order Status Update</span>
+                            {% elif log.action == 'product_update' %}
+                                <span class="badge bg-success">Product Update</span>
+                            {% elif log.action == 'stock_update' %}
+                                <span class="badge bg-warning text-dark">Stock Update</span>
+                            {% elif log.action == 'inquiry_resolved' %}
+                                <span class="badge bg-info">Inquiry Resolved</span>
+                            {% else %}
+                                <span class="badge bg-secondary">{{ log.get_action_display }}</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <strong>{{ log.target_model }}</strong> #{{ log.target_id }}
+                        </td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-secondary" 
+                                    type="button" 
+                                    data-bs-toggle="collapse" 
+                                    data-bs-target="#details-{{ log.id }}">
+                                <i class="bi bi-eye"></i> View
+                            </button>
+                            <div class="collapse mt-2" id="details-{{ log.id }}">
+                                <div class="bg-light p-2 rounded">
+                                    <small>
+                                        <pre class="mb-0" style="font-size: 0.75rem;">{{ log.changes|pprint }}</pre>
+                                    </small>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-5">
+            <i class="bi bi-journal" style="font-size: 3rem; color: #ccc;"></i>
+            <p class="text-muted mt-3">No audit log entries found</p>
+            {% if staff_filter or action_filter %}
+            <a href="{% url 'staff_dashboard:admin_audit_log' %}" class="btn btn-outline-primary">
+                Clear Filters
+            </a>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Info Card -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="alert alert-info">
+            <h5 class="alert-heading"><i class="bi bi-info-circle"></i> About Audit Log</h5>
+            <p class="mb-0">
+                The audit log tracks all actions performed by staff members including order status updates, 
+                product modifications, stock changes, and inquiry resolutions. 
+                Showing the most recent 100 entries.
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}

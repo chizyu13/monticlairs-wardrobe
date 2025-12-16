@@ -1,0 +1,1196 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout - Montclair Wardrobe</title>
+    <meta name="description" content="Complete your purchase at Montclair Wardrobe. Secure checkout with multiple payment options.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            --primary-dark: #0a0a0a;
+            --secondary-dark: #1a1a1a;
+            --accent-dark: #2a2a2a;
+            --gold-accent: #d4af37;
+            --gold-light: #f4e4a6;
+            --text-primary: #ffffff;
+            --text-secondary: #b0b0b0;
+            --text-muted: #808080;
+            --glass-bg: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --shadow-dark: rgba(0, 0, 0, 0.5);
+            --success-color: #28a745;
+            --warning-color: #ffc107;
+            --danger-color: #dc3545;
+            --info-color: #17a2b8;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--primary-dark);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Animated Background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(212, 175, 55, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(212, 175, 55, 0.08) 0%, transparent 50%),
+                linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 50%, #0f0f0f 100%);
+            z-index: -2;
+        }
+
+        /* Floating particles */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        .particle {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: var(--gold-accent);
+            border-radius: 50%;
+            opacity: 0.3;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); opacity: 0.3; }
+            50% { transform: translateY(-20px) rotate(180deg); opacity: 0.8; }
+        }        /*
+ Navbar Styles */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--glass-border);
+            padding: 16px 0;
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+
+        .navbar.scrolled {
+            background: rgba(10, 10, 10, 0.95);
+            backdrop-filter: blur(30px);
+        }
+
+        .navbar-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .navbar-brand {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--gold-accent);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .navbar-brand:hover {
+            color: var(--gold-light);
+        }
+
+        .navbar-nav {
+            display: flex;
+            list-style: none;
+            gap: 32px;
+            align-items: center;
+        }
+
+        .nav-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .nav-link.active,
+        .nav-link:hover {
+            color: var(--text-primary);
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--gold-accent);
+            transition: width 0.3s ease;
+        }
+
+        .nav-link.active::after,
+        .nav-link:hover::after {
+            width: 100%;
+        }        .
+navbar-toggle {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--text-primary);
+            font-size: 1.2rem;
+            cursor: pointer;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .main-content {
+            padding: 120px 0 60px;
+            min-height: 100vh;
+        }
+
+        /* Page Header */
+        .page-header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        .page-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--gold-accent);
+            margin-bottom: 16px;
+            letter-spacing: -0.02em;
+        }
+
+        .page-subtitle {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Progress Steps */
+        .progress-steps {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 50px;
+            padding: 0 20px;
+        }
+
+        .step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            margin: 0 30px;
+        }
+
+        .step::before {
+            content: '';
+            position: absolute;
+            top: 20px;
+            left: 50px;
+            width: 60px;
+            height: 2px;
+            background: var(--glass-border);
+            z-index: 1;
+        }
+
+        .step:last-child::before {
+            display: none;
+        }
+
+        .step-circle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--glass-bg);
+            border: 2px solid var(--glass-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-secondary);
+            font-weight: 600;
+            position: relative;
+            z-index: 2;
+            margin-bottom: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .step-circle.active {
+            background: linear-gradient(135deg, var(--gold-accent), #b8941f);
+            border-color: var(--gold-accent);
+            color: var(--primary-dark);
+        }
+
+        .step-circle.completed {
+            background: var(--success-color);
+            border-color: var(--success-color);
+            color: white;
+        }
+
+        .step-label {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            text-align: center;
+            font-weight: 500;
+        }
+
+        .step-circle.active + .step-label,
+        .step-circle.completed + .step-label {
+            color: var(--gold-accent);
+        } 
+       /* Checkout Layout */
+        .checkout-container {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 40px;
+            align-items: start;
+        }
+
+        /* Checkout Form */
+        .checkout-form {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 40px;
+            transition: all 0.3s ease;
+        }
+
+        .checkout-form:hover {
+            border-color: var(--gold-accent);
+        }
+
+        .form-section {
+            margin-bottom: 40px;
+        }
+
+        .section-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--gold-accent);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+            display: block;
+        }
+
+        .form-control {
+            background: var(--glass-bg);
+            border: 2px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 14px 16px;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--gold-accent);
+            box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .form-control::placeholder {
+            color: var(--text-muted);
+        }
+
+        .form-control:invalid {
+            border-color: var(--danger-color);
+        }
+
+        .form-control:invalid:focus {
+            box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.1);
+        }
+
+        .form-text {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            margin-top: 6px;
+        }
+
+        .invalid-feedback {
+            color: var(--danger-color);
+            font-size: 0.85rem;
+            margin-top: 6px;
+            display: none;
+        }
+
+        .form-control:invalid ~ .invalid-feedback {
+            display: block;
+        }
+
+        /* Map Container */
+        .map-container {
+            background: var(--glass-bg);
+            border: 2px solid var(--glass-border);
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 16px;
+            height: 300px;
+            position: relative;
+        }
+
+        #map {
+            width: 100%;
+            height: 100%;
+        }
+
+        .map-overlay {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            z-index: 10;
+        }
+
+        .btn-location {
+            background: var(--gold-accent);
+            color: var(--primary-dark);
+            border: none;
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-location:hover {
+            background: var(--gold-light);
+            transform: translateY(-2px);
+        }       
+ /* Order Summary */
+        .order-summary {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 30px;
+            position: sticky;
+            top: 140px;
+            transition: all 0.3s ease;
+        }
+
+        .order-summary:hover {
+            border-color: var(--gold-accent);
+        }
+
+        .summary-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--gold-accent);
+            margin-bottom: 24px;
+            text-align: center;
+        }
+
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .summary-item:last-child {
+            border-bottom: none;
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 2px solid var(--gold-accent);
+        }
+
+        .item-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .item-value {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        .total-value {
+            color: var(--gold-accent);
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 14px 24px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            border: none;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--gold-accent), #b8941f);
+            color: var(--primary-dark);
+            width: 100%;
+            justify-content: center;
+            font-size: 1rem;
+            padding: 16px 24px;
+        }
+
+        .btn-primary:hover {
+            box-shadow: 0 8px 25px rgba(212, 175, 55, 0.4);
+            color: var(--primary-dark);
+        }
+
+        .btn-secondary {
+            background: var(--glass-bg);
+            border: 2px solid var(--glass-border);
+            color: var(--text-secondary);
+        }
+
+        .btn-secondary:hover {
+            background: var(--accent-dark);
+            color: var(--text-primary);
+            border-color: var(--accent-dark);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn:disabled:hover {
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* Loading Spinner */
+        .spinner {
+            width: 16px;
+            height: 16px;
+            border: 2px solid transparent;
+            border-top: 2px solid currentColor;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            display: none;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Alert Messages */
+        .alert {
+            padding: 16px 20px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .alert-success {
+            background: rgba(40, 167, 69, 0.1);
+            border: 1px solid rgba(40, 167, 69, 0.3);
+            color: var(--success-color);
+        }
+
+        .alert-danger {
+            background: rgba(220, 53, 69, 0.1);
+            border: 1px solid rgba(220, 53, 69, 0.3);
+            color: var(--danger-color);
+        }
+
+        .alert-warning {
+            background: rgba(255, 193, 7, 0.1);
+            border: 1px solid rgba(255, 193, 7, 0.3);
+            color: var(--warning-color);
+        }
+
+        .alert-info {
+            background: rgba(23, 162, 184, 0.1);
+            border: 1px solid rgba(23, 162, 184, 0.3);
+            color: var(--info-color);
+        }        /*
+ Responsive Design */
+        @media (max-width: 768px) {
+            .navbar-nav {
+                display: none;
+                position: absolute;
+                top: 100%;
+                left: 0;
+                right: 0;
+                background: var(--secondary-dark);
+                border-top: 1px solid var(--accent-dark);
+                flex-direction: column;
+                padding: 20px;
+                gap: 16px;
+            }
+
+            .navbar-nav.active {
+                display: flex;
+            }
+
+            .navbar-toggle {
+                display: block;
+            }
+
+            .main-content {
+                padding: 100px 0 40px;
+            }
+
+            .page-title {
+                font-size: 2rem;
+            }
+
+            .progress-steps {
+                flex-direction: column;
+                gap: 20px;
+            }
+
+            .step {
+                margin: 0;
+            }
+
+            .step::before {
+                display: none;
+            }
+
+            .checkout-container {
+                grid-template-columns: 1fr;
+                gap: 30px;
+            }
+
+            .order-summary {
+                position: static;
+                order: -1;
+            }
+
+            .checkout-form {
+                padding: 30px 20px;
+            }
+
+            .map-container {
+                height: 250px;
+            }
+
+            .container {
+                padding: 0 15px;
+            }
+
+            .navbar-container {
+                padding: 0 15px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .page-title {
+                font-size: 1.8rem;
+            }
+
+            .checkout-form,
+            .order-summary {
+                padding: 20px 16px;
+            }
+
+            .form-section {
+                margin-bottom: 30px;
+            }
+
+            .map-container {
+                height: 200px;
+            }
+        }
+
+        /* Hidden Elements */
+        .hidden {
+            display: none !important;
+        }
+
+        /* Show/Hide Animation */
+        .fade-in {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head><body>
+   
+ <!-- Navbar -->
+    <nav class="navbar" id="navbar">
+        <div class="navbar-container">
+            <a href="{% url 'home:main_page' %}" class="navbar-brand">
+                <i class="fas fa-gem"></i>
+                Montclair Wardrobe
+            </a>
+            <ul class="navbar-nav" id="navbarNav">
+                <li><a href="{% url 'home:main_page' %}" class="nav-link">Home</a></li>
+                <li><a href="{% url 'home:about' %}" class="nav-link">Boutique</a></li>
+                <li><a href="{% url 'home:about' %}" class="nav-link">About</a></li>
+                <li><a href="{% url 'home:contact' %}" class="nav-link">Contact</a></li>
+                <li><a href="{% url 'home:products' %}" class="nav-link">Shop</a></li>
+                {% if user.is_authenticated %}
+                    <li><a href="{% url 'cart:view_cart' %}" class="nav-link active">
+                        <i class="fas fa-shopping-cart"></i>
+                        Cart
+                    </a></li>
+                    <li><a href="{% url 'logout' %}" class="nav-link">Logout</a></li>
+                {% else %}
+                    <li><a href="{% url 'login' %}" class="nav-link">Sign In</a></li>
+                    <li><a href="{% url 'register' %}" class="nav-link">Register</a></li>
+                {% endif %}
+            </ul>
+            <button class="navbar-toggle" id="navbarToggle">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Floating Particles -->
+    <div class="particles">
+        <div class="particle" style="left: 10%; animation-delay: 0s;"></div>
+        <div class="particle" style="left: 20%; animation-delay: 1s;"></div>
+        <div class="particle" style="left: 30%; animation-delay: 2s;"></div>
+        <div class="particle" style="left: 40%; animation-delay: 3s;"></div>
+        <div class="particle" style="left: 50%; animation-delay: 4s;"></div>
+        <div class="particle" style="left: 60%; animation-delay: 5s;"></div>
+        <div class="particle" style="left: 70%; animation-delay: 0.5s;"></div>
+        <div class="particle" style="left: 80%; animation-delay: 1.5s;"></div>
+        <div class="particle" style="left: 90%; animation-delay: 2.5s;"></div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+            <!-- Page Header -->
+            <div class="page-header">
+                <h1 class="page-title">
+                    <i class="fas fa-credit-card"></i>
+                    Secure Checkout
+                </h1>
+                <p class="page-subtitle">Complete your purchase with confidence</p>
+            </div>
+
+            <!-- Progress Steps -->
+            <div class="progress-steps">
+                <div class="step">
+                    <div class="step-circle completed">
+                        <i class="fas fa-check"></i>
+                    </div>
+                    <div class="step-label">Cart Review</div>
+                </div>
+                <div class="step">
+                    <div class="step-circle active">2</div>
+                    <div class="step-label">Checkout</div>
+                </div>
+                <div class="step">
+                    <div class="step-circle">3</div>
+                    <div class="step-label">Confirmation</div>
+                </div>
+            </div>
+
+            <!-- Alert Messages -->
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }}">
+                        <i class="fas fa-{% if message.tags == 'success' %}check-circle{% elif message.tags == 'error' or message.tags == 'danger' %}exclamation-circle{% elif message.tags == 'warning' %}exclamation-triangle{% else %}info-circle{% endif %}"></i>
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+            <!-- Checkout Container -->
+            <div class="checkout-container">
+                <!-- Checkout Form -->
+                <div class="checkout-form">
+                    <form method="POST" id="checkout-form" novalidate>
+                        {% csrf_token %}
+                        
+                        <!-- Delivery Information -->
+                        <div class="form-section">
+                            <h3 class="section-title">
+                                <i class="fas fa-map-marker-alt"></i>
+                                Delivery Information
+                            </h3>
+                            
+                            <div class="form-group">
+                                <label for="location" class="form-label">Delivery Location</label>
+                                <select id="location" name="location" class="form-control" required>
+                                    <option value="">Select delivery location</option>
+                                    <option value="inside">Inside Campus</option>
+                                    <option value="outside">Outside Campus</option>
+                                </select>
+                                <div class="form-text">Choose your preferred delivery location</div>
+                            </div>
+
+                            <div id="hostel-container" class="form-group hidden">
+                                <label for="hostel_name" class="form-label">Hostel Name</label>
+                                <input type="text" id="hostel_name" name="hostel_name" class="form-control" 
+                                       placeholder="Enter your hostel name">
+                                <div class="form-text">Specify your hostel for campus delivery</div>
+                            </div>
+
+                            <div id="room-number-container" class="form-group hidden">
+                                <label for="room_number" class="form-label">Room Number</label>
+                                <input type="text" id="room_number" name="room_number" class="form-control" 
+                                       placeholder="Enter your room number">
+                                <div class="form-text">Optional: Provide room number for precise delivery</div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="phone_number" class="form-label">Phone Number</label>
+                                <input type="tel" id="phone_number" name="phone_number" class="form-control" 
+                                       required placeholder="+260XXXXXXXXX" pattern="^\+260\d{9}$">
+                                <div class="form-text">Enter a valid Zambian number (e.g., +260971234567)</div>
+                                <div class="invalid-feedback">Please enter a valid phone number starting with +260 followed by 9 digits</div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="gps_location" class="form-label">GPS Location</label>
+                                <input type="text" id="gps_location" name="gps_location" class="form-control" 
+                                       required readonly placeholder="Click map to set location">
+                                <div class="form-text">Click the map or use current location button</div>
+                            </div>
+
+                            <div class="map-container">
+                                <div id="map"></div>
+                                <div class="map-overlay">
+                                    <button type="button" id="use-current-location" class="btn-location">
+                                        <i class="fas fa-crosshairs"></i>
+                                        Use Current Location
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Payment Information -->
+                        <div class="form-section">
+                            <h3 class="section-title">
+                                <i class="fas fa-credit-card"></i>
+                                Payment Method
+                            </h3>
+                            
+                            <div class="form-group">
+                                <label for="payment-method" class="form-label">Choose Payment Method</label>
+                                <select id="payment-method" name="payment_method" class="form-control" required>
+                                    <option value="">Select payment method</option>
+                                    <option value="cash">Cash on Delivery</option>
+                                    <option value="delivery">Payment on Delivery</option>
+                                    <option value="mtn">MTN Mobile Money</option>
+                                    <option value="airtel">Airtel Money</option>
+                                </select>
+                                <div class="form-text">Choose your preferred payment method</div>
+                            </div>
+
+                            <div id="delivery-fee-container" class="form-group hidden">
+                                <label for="delivery-fee" class="form-label">Delivery Fee</label>
+                                <input type="text" id="delivery-fee" class="form-control" value="50" readonly>
+                                <div class="form-text">Additional fee for payment on delivery service</div>
+                            </div>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <button type="submit" class="btn btn-primary" id="submit-btn">
+                            <i class="fas fa-lock"></i>
+                            Complete Secure Checkout
+                            <span class="spinner" id="loading-spinner"></span>
+                        </button>
+                    </form>
+                </div>""         
+       <!-- Order Summary -->
+                <div class="order-summary">
+                    <h3 class="summary-title">
+                        <i class="fas fa-receipt"></i>
+                        Order Summary
+                    </h3>
+                    
+                    <div class="summary-item">
+                        <span class="item-label">Subtotal</span>
+                        <span class="item-value" id="subtotal">ZMW {{ subtotal|default:total_price|floatformat:2 }}</span>
+                    </div>
+                    
+                    <div class="summary-item">
+                        <span class="item-label">Delivery Fee</span>
+                        <span class="item-value" id="delivery-cost">ZMW 50.00</span>
+                    </div>
+                    
+                    <div class="summary-item">
+                        <span class="item-label">Tax</span>
+                        <span class="item-value">ZMW 0.00</span>
+                    </div>
+                    
+                    <div class="summary-item">
+                        <span class="item-label"><strong>Total</strong></span>
+                        <span class="item-value total-value" id="total-price">ZMW {{ total_price|floatformat:2 }}</span>
+                    </div>
+                    
+                    <div style="margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--glass-border);">
+                        <div style="display: flex; align-items: center; gap: 8px; color: var(--success-color); font-size: 0.9rem;">
+                            <i class="fas fa-shield-alt"></i>
+                            <span>Secure SSL Encryption</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 8px; color: var(--success-color); font-size: 0.9rem; margin-top: 8px;">
+                            <i class="fas fa-truck"></i>
+                            <span>Fast & Reliable Delivery</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Google Maps API -->
+    <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_GOOGLE_MAPS_API_KEY&callback=initMap" async defer></script>
+
+    <script>
+        let map;
+        let marker;
+        const basePrice = parseFloat('{{ subtotal|default:total_price }}') || 0;
+
+        // Initialize Google Maps
+        function initMap() {
+            const initialLocation = { lat: -15.4081, lng: 28.2871 }; // Lusaka, Zambia
+            
+            map = new google.maps.Map(document.getElementById('map'), {
+                zoom: 13,
+                center: initialLocation,
+                styles: [
+                    {
+                        "featureType": "all",
+                        "elementType": "geometry.fill",
+                        "stylers": [{"color": "#1a1a1a"}]
+                    },
+                    {
+                        "featureType": "all",
+                        "elementType": "labels.text.fill",
+                        "stylers": [{"color": "#ffffff"}]
+                    },
+                    {
+                        "featureType": "water",
+                        "elementType": "geometry.fill",
+                        "stylers": [{"color": "#2a2a2a"}]
+                    }
+                ]
+            });
+
+            marker = new google.maps.Marker({
+                position: initialLocation,
+                map: map,
+                draggable: true,
+                icon: {
+                    path: google.maps.SymbolPath.CIRCLE,
+                    scale: 8,
+                    fillColor: '#d4af37',
+                    fillOpacity: 1,
+                    strokeColor: '#ffffff',
+                    strokeWeight: 2
+                }
+            });
+
+            document.getElementById('gps_location').value = `${initialLocation.lat}, ${initialLocation.lng}`;
+
+            // Event listeners for map interactions
+            google.maps.event.addListener(marker, 'dragend', function() {
+                const position = marker.getPosition();
+                document.getElementById('gps_location').value = `${position.lat()}, ${position.lng()}`;
+            });
+
+            google.maps.event.addListener(map, 'click', function(event) {
+                marker.setPosition(event.latLng);
+                document.getElementById('gps_location').value = `${event.latLng.lat()}, ${event.latLng.lng()}`;
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Navbar scroll effect
+            const navbar = document.getElementById('navbar');
+            window.addEventListener('scroll', function() {
+                if (window.scrollY > 50) {
+                    navbar.classList.add('scrolled');
+                } else {
+                    navbar.classList.remove('scrolled');
+                }
+            });
+
+            // Mobile navbar toggle
+            const navbarToggle = document.getElementById('navbarToggle');
+            const navbarNav = document.getElementById('navbarNav');
+            
+            if (navbarToggle && navbarNav) {
+                navbarToggle.addEventListener('click', function() {
+                    navbarNav.classList.toggle('active');
+                    const icon = this.querySelector('i');
+                    if (navbarNav.classList.contains('active')) {
+                        icon.classList.remove('fa-bars');
+                        icon.classList.add('fa-times');
+                    } else {
+                        icon.classList.remove('fa-times');
+                        icon.classList.add('fa-bars');
+                    }
+                });
+
+                // Close mobile menu when clicking outside
+                document.addEventListener('click', function(event) {
+                    if (!navbar.contains(event.target)) {
+                        navbarNav.classList.remove('active');
+                        const icon = navbarToggle.querySelector('i');
+                        icon.classList.remove('fa-times');
+                        icon.classList.add('fa-bars');
+                    }
+                });
+            }
+
+            // Animate particles
+            const particles = document.querySelectorAll('.particle');
+            particles.forEach((particle, index) => {
+                particle.style.top = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 6 + 's';
+            });
+
+            // Location change handler
+            document.getElementById('location').addEventListener('change', updateLocationUI);
+            
+            // Payment method change handler
+            document.getElementById('payment-method').addEventListener('change', updatePaymentUI);
+            
+            // Use current location button
+            document.getElementById('use-current-location').addEventListener('click', getCurrentLocation);
+            
+            // Phone number validation
+            document.getElementById('phone_number').addEventListener('input', validatePhoneNumber);
+            
+            // Form submission
+            document.getElementById('checkout-form').addEventListener('submit', handleFormSubmission);
+
+            // Initialize UI
+            updateLocationUI();
+            updatePaymentUI();
+        });""  
+      // Update UI based on location selection
+        function updateLocationUI() {
+            const location = document.getElementById('location').value;
+            const hostelContainer = document.getElementById('hostel-container');
+            const roomNumberContainer = document.getElementById('room-number-container');
+            const deliveryCost = document.getElementById('delivery-cost');
+            const totalPrice = document.getElementById('total-price');
+            
+            let deliveryFee = 50;
+            
+            if (location === 'inside') {
+                hostelContainer.classList.remove('hidden');
+                roomNumberContainer.classList.remove('hidden');
+                hostelContainer.classList.add('fade-in');
+                roomNumberContainer.classList.add('fade-in');
+                deliveryFee = 20;
+            } else {
+                hostelContainer.classList.add('hidden');
+                roomNumberContainer.classList.add('hidden');
+                deliveryFee = 50;
+            }
+            
+            deliveryCost.textContent = `ZMW ${deliveryFee.toFixed(2)}`;
+            totalPrice.textContent = `ZMW ${(basePrice + deliveryFee).toFixed(2)}`;
+            
+            // Update hidden delivery fee input
+            const deliveryFeeInput = document.getElementById('delivery-fee');
+            if (deliveryFeeInput) {
+                deliveryFeeInput.value = deliveryFee;
+            }
+        }
+
+        // Update UI based on payment method selection
+        function updatePaymentUI() {
+            const paymentMethod = document.getElementById('payment-method').value;
+            const deliveryFeeContainer = document.getElementById('delivery-fee-container');
+            
+            if (paymentMethod === 'delivery') {
+                deliveryFeeContainer.classList.remove('hidden');
+                deliveryFeeContainer.classList.add('fade-in');
+            } else {
+                deliveryFeeContainer.classList.add('hidden');
+            }
+        }
+
+        // Get current location
+        function getCurrentLocation() {
+            const button = document.getElementById('use-current-location');
+            const originalText = button.innerHTML;
+            
+            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Getting Location...';
+            button.disabled = true;
+            
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        const pos = {
+                            lat: position.coords.latitude,
+                            lng: position.coords.longitude
+                        };
+                        
+                        if (map && marker) {
+                            map.setCenter(pos);
+                            marker.setPosition(pos);
+                            document.getElementById('gps_location').value = `${pos.lat}, ${pos.lng}`;
+                        }
+                        
+                        button.innerHTML = originalText;
+                        button.disabled = false;
+                    },
+                    (error) => {
+                        alert('Error: Unable to retrieve your location. Please enable location services and try again.');
+                        button.innerHTML = originalText;
+                        button.disabled = false;
+                    },
+                    {
+                        enableHighAccuracy: true,
+                        timeout: 10000,
+                        maximumAge: 60000
+                    }
+                );
+            } else {
+                alert('Error: Geolocation is not supported by this browser.');
+                button.innerHTML = originalText;
+                button.disabled = false;
+            }
+        }
+
+        // Validate phone number
+        function validatePhoneNumber() {
+            const phoneInput = document.getElementById('phone_number');
+            const phonePattern = /^\+260\d{9}$/;
+            
+            if (phoneInput.value && !phonePattern.test(phoneInput.value)) {
+                phoneInput.classList.add('is-invalid');
+            } else {
+                phoneInput.classList.remove('is-invalid');
+            }
+        }
+
+        // Handle form submission
+        function handleFormSubmission(e) {
+            const form = e.target;
+            const submitBtn = document.getElementById('submit-btn');
+            const spinner = document.getElementById('loading-spinner');
+            
+            // Validate form
+            if (!form.checkValidity()) {
+                e.preventDefault();
+                e.stopPropagation();
+                form.classList.add('was-validated');
+                
+                // Scroll to first invalid field
+                const firstInvalid = form.querySelector(':invalid');
+                if (firstInvalid) {
+                    firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    firstInvalid.focus();
+                }
+                return;
+            }
+            
+            // Show loading state
+            submitBtn.disabled = true;
+            spinner.style.display = 'inline-block';
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing... <span class="spinner" style="display: inline-block;"></span>';
+            
+            // Form will submit normally after this
+        }
+
+        // Initialize map fallback if Google Maps fails to load
+        window.addEventListener('load', function() {
+            setTimeout(function() {
+                if (typeof google === 'undefined' || !google.maps) {
+                    document.getElementById('map').innerHTML = 
+                        '<div style="display: flex; align-items: center; justify-content: center; height: 100%; background: var(--accent-dark); color: var(--text-secondary); text-align: center; padding: 20px;">' +
+                        '<div><i class="fas fa-map-marked-alt" style="font-size: 2rem; margin-bottom: 16px; color: var(--gold-accent);"></i><br>' +
+                        'Map temporarily unavailable<br><small>Please enter your location manually</small></div></div>';
+                    
+                    // Make GPS location input editable
+                    document.getElementById('gps_location').readOnly = false;
+                    document.getElementById('gps_location').placeholder = 'Enter your GPS coordinates (lat, lng)';
+                }
+            }, 5000);
+        });
+    </script>
+</body>
+</html>

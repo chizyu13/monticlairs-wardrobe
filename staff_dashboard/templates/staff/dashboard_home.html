@@ -1,0 +1,215 @@
+{% extends 'staff/base.html' %}
+{% load static %}
+
+{% block title %}Dashboard Home{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h1 class="h2 mb-3">
+            <i class="bi bi-speedometer2"></i> Dashboard Overview
+        </h1>
+    </div>
+</div>
+
+<!-- Statistics Cards -->
+<div class="row g-4 mb-4">
+    <!-- Today's Orders -->
+    <div class="col-12 col-sm-6 col-lg-3">
+        <div class="card stat-card border-start border-primary border-4">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <p class="stat-label mb-1">Today's Orders</p>
+                        <h3 class="stat-value text-primary mb-0">{{ total_orders_today }}</h3>
+                    </div>
+                    <div class="stat-icon text-primary">
+                        <i class="bi bi-cart-check"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pending Orders -->
+    <div class="col-12 col-sm-6 col-lg-3">
+        <div class="card stat-card border-start border-warning border-4">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <p class="stat-label mb-1">Pending Orders</p>
+                        <h3 class="stat-value text-warning mb-0">{{ pending_orders_count }}</h3>
+                    </div>
+                    <div class="stat-icon text-warning">
+                        <i class="bi bi-hourglass-split"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Low Stock Products -->
+    <div class="col-12 col-sm-6 col-lg-3">
+        <div class="card stat-card border-start border-danger border-4">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <p class="stat-label mb-1">Low Stock</p>
+                        <h3 class="stat-value text-danger mb-0">{{ low_stock_count }}</h3>
+                    </div>
+                    <div class="stat-icon text-danger">
+                        <i class="bi bi-exclamation-triangle"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Monthly Revenue -->
+    <div class="col-12 col-sm-6 col-lg-3">
+        <div class="card stat-card border-start border-success border-4">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <p class="stat-label mb-1">Monthly Revenue</p>
+                        <h3 class="stat-value text-success mb-0">K{{ total_revenue|floatformat:2 }}</h3>
+                    </div>
+                    <div class="stat-icon text-success">
+                        <i class="bi bi-currency-dollar"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Orders -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-white">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="bi bi-clock-history"></i> Recent Orders
+                    </h5>
+                    <a href="{% url 'staff_dashboard:orders_list' %}" class="btn btn-sm btn-primary">
+                        View All <i class="bi bi-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+            <div class="card-body p-0">
+                {% if recent_orders %}
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>Order #</th>
+                                <th>Customer</th>
+                                <th>Product</th>
+                                <th>Quantity</th>
+                                <th>Total</th>
+                                <th>Status</th>
+                                <th>Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for order in recent_orders %}
+                            <tr>
+                                <td><strong>#{{ order.id }}</strong></td>
+                                <td>
+                                    <i class="bi bi-person"></i> {{ order.user.username }}
+                                </td>
+                                <td>{{ order.product.name|truncatewords:5 }}</td>
+                                <td>{{ order.quantity }}</td>
+                                <td><strong>K{{ order.total_price|floatformat:2 }}</strong></td>
+                                <td>
+                                    {% if order.status == 'pending' %}
+                                        <span class="badge status-pending">Pending</span>
+                                    {% elif order.status == 'processing' %}
+                                        <span class="badge status-processing">Processing</span>
+                                    {% elif order.status == 'shipped' %}
+                                        <span class="badge status-shipped">Shipped</span>
+                                    {% elif order.status == 'delivered' %}
+                                        <span class="badge status-delivered">Delivered</span>
+                                    {% elif order.status == 'cancelled' %}
+                                        <span class="badge status-cancelled">Cancelled</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">{{ order.status|title }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <small>{{ order.created_at|date:"M d, Y" }}<br>
+                                    {{ order.created_at|time:"g:i A" }}</small>
+                                </td>
+                                <td>
+                                    <a href="{% url 'staff_dashboard:order_detail' order.id %}" 
+                                       class="btn btn-sm btn-outline-primary"
+                                       data-bs-toggle="tooltip" 
+                                       title="View Details">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-5">
+                    <i class="bi bi-inbox" style="font-size: 3rem; color: #ccc;"></i>
+                    <p class="text-muted mt-3">No recent orders found</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-lightning"></i> Quick Actions
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-12 col-md-4">
+                        <a href="{% url 'staff_dashboard:orders_list' %}" class="btn btn-outline-primary w-100">
+                            <i class="bi bi-cart"></i> Manage Orders
+                        </a>
+                    </div>
+                    <div class="col-12 col-md-4">
+                        <a href="{% url 'staff_dashboard:products_list' %}" class="btn btn-outline-success w-100">
+                            <i class="bi bi-box-seam"></i> Manage Products
+                        </a>
+                    </div>
+                    <div class="col-12 col-md-4">
+                        <a href="{% url 'staff_dashboard:inquiries_list' %}" class="btn btn-outline-info w-100">
+                            <i class="bi bi-chat-dots"></i> View Inquiries
+                        </a>
+                    </div>
+                    <div class="col-12 col-md-4">
+                        <a href="{% url 'reports:daily_sales' %}" class="btn btn-outline-warning w-100">
+                            <i class="bi bi-graph-up"></i> Daily Sales
+                        </a>
+                    </div>
+                    <div class="col-12 col-md-4">
+                        <a href="{% url 'reports:order_status' %}" class="btn btn-outline-secondary w-100">
+                            <i class="bi bi-bag-check"></i> Order Status
+                        </a>
+                    </div>
+                    <div class="col-12 col-md-4">
+                        <a href="{% url 'reports:stock_level' %}" class="btn btn-outline-danger w-100">
+                            <i class="bi bi-exclamation-circle"></i> Stock Level
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

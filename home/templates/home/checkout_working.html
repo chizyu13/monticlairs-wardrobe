@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout - Montclair Wardrobe</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-dark: #0a0a0a;
+            --gold-accent: #d4af37;
+            --text-primary: #ffffff;
+            --text-secondary: #b0b0b0;
+            --text-muted: #808080;
+            --glass-bg: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --warning-color: #ffc107;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--primary-dark);
+            color: var(--text-primary);
+            min-height: 100vh;
+        }
+
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--glass-border);
+            padding: 16px 0;
+            z-index: 1000;
+        }
+
+        .navbar-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .navbar-brand {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--gold-accent);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .navbar-nav {
+            display: flex;
+            list-style: none;
+            gap: 32px;
+            align-items: center;
+        }
+
+        .nav-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .nav-link:hover {
+            color: var(--text-primary);
+        }
+
+        .main-content {
+            padding: 120px 0 60px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .page-header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        .page-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--gold-accent);
+            margin-bottom: 16px;
+        }
+
+        .checkout-container {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 40px;
+            align-items: start;
+        }
+
+        .checkout-form {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 40px;
+        }
+
+        .form-section {
+            margin-bottom: 40px;
+        }
+
+        .section-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--gold-accent);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .form-control {
+            background: var(--glass-bg);
+            border: 2px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 14px 16px;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            width: 100%;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--gold-accent);
+            box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1);
+        }
+
+        .form-control::placeholder {
+            color: var(--text-muted);
+        }
+
+        .form-text {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            margin-top: 6px;
+        }
+
+        .btn {
+            padding: 16px 24px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--gold-accent), #b8941f);
+            color: var(--primary-dark);
+            width: 100%;
+            justify-content: center;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(212, 175, 55, 0.4);
+        }
+
+        .order-summary {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 30px;
+            position: sticky;
+            top: 140px;
+        }
+
+        .summary-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--gold-accent);
+            margin-bottom: 24px;
+            text-align: center;
+        }
+
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .summary-item:last-child {
+            border-bottom: none;
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 2px solid var(--gold-accent);
+        }
+
+        .item-label {
+            color: var(--text-secondary);
+        }
+
+        .item-value {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        .total-value {
+            color: var(--gold-accent);
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* OTP Modal */
+        .otp-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .otp-modal.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .otp-container {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+        }
+
+        .otp-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: var(--gold-accent);
+            margin-bottom: 16px;
+        }
+
+        .otp-subtitle {
+            color: var(--text-secondary);
+            margin-bottom: 30px;
+        }
+
+        .test-mode-notice {
+            background: rgba(255, 193, 7, 0.1);
+            border: 1px solid rgba(255, 193, 7, 0.3);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: var(--warning-color);
+        }
+
+        .payment-info {
+            background: rgba(42, 42, 42, 0.8);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 30px;
+        }
+
+        .payment-details {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .payment-icon {
+            width: 50px;
+            height: 50px;
+            background: var(--gold-accent);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary-dark);
+            font-size: 1.2rem;
+        }
+
+        .payment-text {
+            flex: 1;
+            text-align: left;
+        }
+
+        .payment-title {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+
+        .payment-email {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .payment-amount {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .otp-input-container {
+            margin-bottom: 30px;
+        }
+
+        .otp-label {
+            display: block;
+            color: var(--text-primary);
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        .otp-input {
+            background: var(--glass-bg);
+            border: 2px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 16px;
+            color: var(--text-primary);
+            font-size: 1.1rem;
+            font-weight: 600;
+            text-align: center;
+            width: 100%;
+            max-width: 300px;
+            margin: 0 auto;
+            display: block;
+        }
+
+        .otp-input:focus {
+            outline: none;
+            border-color: var(--gold-accent);
+            box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1);
+        }
+
+        .otp-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .btn-otp-confirm {
+            background: linear-gradient(135deg, var(--gold-accent), #b8941f);
+            color: var(--primary-dark);
+            border: none;
+            border-radius: 12px;
+            padding: 16px 24px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+
+        .btn-otp-confirm:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(212, 175, 55, 0.4);
+        }
+
+        .btn-resend {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+
+        .btn-resend:hover {
+            color: var(--gold-accent);
+        }
+
+        @media (max-width: 768px) {
+            .checkout-container {
+                grid-template-columns: 1fr;
+                gap: 30px;
+            }
+
+            .order-summary {
+                position: static;
+                order: -1;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="{% url 'home:main_page' %}" class="navbar-brand">
+                <i class="fas fa-gem"></i>
+                Montclair Wardrobe
+            </a>
+            <ul class="navbar-nav">
+                <li><a href="{% url 'home:main_page' %}" class="nav-link">Home</a></li>
+                <li><a href="{% url 'home:about' %}" class="nav-link">About</a></li>
+                <li><a href="{% url 'home:contact' %}" class="nav-link">Contact</a></li>
+                <li><a href="{% url 'home:products' %}" class="nav-link">Shop</a></li>
+                {% if user.is_authenticated %}
+                <li><a href="{% url 'cart:view_cart' %}" class="nav-link">Cart</a></li>
+                <li><a href="{% url 'logout' %}" class="nav-link">Logout</a></li>
+                {% else %}
+                <li><a href="{% url 'login' %}" class="nav-link">Sign In</a></li>
+                {% endif %}
+            </ul>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <div class="container">
+            <div class="page-header">
+                <h1 class="page-title">
+                    <i class="fas fa-credit-card"></i>
+                    Secure Checkout
+                </h1>
+                <p>Complete your purchase with confidence</p>
+            </div>
+
+            <div class="checkout-container">
+                <div class="checkout-form">
+                    <form method="POST" id="checkout-form" action="{% url 'home:checkout_process' %}">
+                        {% csrf_token %}
+
+                        <div class="form-section">
+                            <h3 class="section-title">
+                                <i class="fas fa-map-marker-alt"></i>
+                                Delivery Information
+                            </h3>
+
+                            <div class="form-group">
+                                <label for="location" class="form-label">Delivery Area in Lusaka</label>
+                                <select id="location" name="location" class="form-control" required>
+                                    <option value="">Select delivery area</option>
+                                    <option value="city_center">City Center (CBD)</option>
+                                    <option value="residential">Residential Areas</option>
+                                    <option value="compounds">Compounds</option>
+                                    <option value="suburbs">Suburbs</option>
+                                </select>
+                                <div class="form-text">Choose your area in Lusaka for delivery fee calculation</div>
+                            </div>
+
+                            <div id="area-container" class="form-group hidden">
+                                <label for="area_name" class="form-label">Specific Area/Neighborhood</label>
+                                <input type="text" id="area_name" name="area_name" class="form-control"
+                                    placeholder="e.g., Kabulonga, Woodlands, Chelston, Matero, etc.">
+                                <div class="form-text">Enter your specific area or neighborhood name</div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="phone_number" class="form-label">Phone Number</label>
+                                <input type="tel" id="phone_number" name="phone_number" class="form-control" required
+                                    placeholder="+260XXXXXXXXX">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="address" class="form-label">Delivery Address</label>
+                                <textarea id="address" name="address" class="form-control" required
+                                    placeholder="Enter your full delivery address" rows="3"></textarea>
+                            </div>
+                        </div>
+
+                        <div class="form-section">
+                            <h3 class="section-title">
+                                <i class="fas fa-credit-card"></i>
+                                Payment Method
+                            </h3>
+
+                            <div class="form-group">
+                                <label for="payment-method" class="form-label">Choose Payment Method</label>
+                                <select id="payment-method" name="payment_method" class="form-control" required>
+                                    <option value="">Select payment method</option>
+                                    <option value="cash">Cash on Delivery</option>
+                                    <option value="mtn">MTN Mobile Money (Requires OTP)</option>
+                                    <option value="airtel">Airtel Money (Requires OTP)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <input type="hidden" name="total_price" id="total_price_input" value="{{ total_price }}">
+                        <input type="hidden" name="gps_location" value="-15.4081, 28.2871">
+
+                        <button type="submit" class="btn btn-primary" id="submit-btn">
+                            <i class="fas fa-lock"></i>
+                            Complete Secure Checkout
+                        </button>
+                    </form>
+                </div>
+
+                <div class="order-summary">
+                    <h3 class="summary-title">
+                        <i class="fas fa-receipt"></i>
+                        Order Summary
+                    </h3>
+
+                    <div class="summary-item">
+                        <span class="item-label">Subtotal</span>
+                        <span class="item-value">ZMW {{ base_price|floatformat:2 }}</span>
+                    </div>
+
+                    <div class="summary-item">
+                        <span class="item-label">Delivery Fee</span>
+                        <span class="item-value" id="delivery-cost">ZMW 30.00</span>
+                    </div>
+
+                    <div class="summary-item">
+                        <span class="item-label">Tax</span>
+                        <span class="item-value">ZMW 0.00</span>
+                    </div>
+
+                    <div class="summary-item">
+                        <span class="item-label"><strong>Total</strong></span>
+                        <span class="item-value total-value" id="total-price">ZMW {{ total_price|floatformat:2 }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- OTP Modal -->
+    <div class="otp-modal" id="otpModal">
+        <div class="otp-container">
+            <h2 class="otp-title">OTP VERIFICATION CODE</h2>
+            <p class="otp-subtitle">One time pin that provides dynamic security mechanism and can only be used once.</p>
+
+            <div class="test-mode-notice">
+                <i class="fas fa-info-circle"></i>
+                <span>You're currently in test mode, all transactions are mocked in this environment.</span>
+            </div>
+
+            <div class="payment-info">
+                <div class="payment-details">
+                    <div class="payment-icon">
+                        <i class="fas fa-graduation-cap"></i>
+                    </div>
+                    <div class="payment-text">
+                        <div class="payment-title">Paying for school fees</div>
+                        <div class="payment-email">{{ user.email|default:"user@example.com" }}</div>
+                    </div>
+                    <div class="payment-amount" id="otpAmount">ZMW {{ total_price|floatformat:2 }}</div>
+                </div>
+            </div>
+
+            <p style="color: var(--text-secondary); margin-bottom: 30px;">
+                Please enter the OTP sent to the mobile number or email registered with your bank to complete this
+                transaction
+            </p>
+
+            <div class="otp-input-container">
+                <label for="otpInput" class="otp-label">ENTER THE OTP</label>
+                <input type="password" id="otpInput" class="otp-input" placeholder="12345" maxlength="6">
+            </div>
+
+            <div class="otp-actions">
+                <button type="button" class="btn-otp-confirm" id="confirmOtpBtn">
+                    <i class="fas fa-lock"></i>
+                    Confirm OTP
+                </button>
+                <button type="button" class="btn-resend" id="resendOtpBtn">
+                    Resend OTP
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const form = document.getElementById('checkout-form');
+            const locationSelect = document.getElementById('location');
+            const areaContainer = document.getElementById('area-container');
+            const deliveryCost = document.getElementById('delivery-cost');
+            const totalPrice = document.getElementById('total-price');
+            const totalPriceInput = document.getElementById('total_price_input');
+            const basePrice = parseFloat('{{ base_price }}') || 0;
+
+            // Location change handler
+            locationSelect.addEventListener('change', function () {
+                let deliveryFee = 30; // Default fee
+                
+                if (this.value === 'city_center') {
+                    areaContainer.classList.remove('hidden');
+                    deliveryFee = 30; // City center - standard rate
+                    deliveryCost.textContent = 'ZMW 30.00';
+                } else if (this.value === 'residential') {
+                    areaContainer.classList.remove('hidden');
+                    deliveryFee = 40; // Residential areas
+                    deliveryCost.textContent = 'ZMW 40.00';
+                } else if (this.value === 'compounds') {
+                    areaContainer.classList.remove('hidden');
+                    deliveryFee = 35; // Compounds
+                    deliveryCost.textContent = 'ZMW 35.00';
+                } else if (this.value === 'suburbs') {
+                    areaContainer.classList.remove('hidden');
+                    deliveryFee = 50; // Suburbs - furthest
+                    deliveryCost.textContent = 'ZMW 50.00';
+                } else {
+                    areaContainer.classList.add('hidden');
+                    deliveryFee = 30;
+                    deliveryCost.textContent = 'ZMW 30.00';
+                }
+                
+                const newTotal = basePrice + deliveryFee;
+                totalPrice.textContent = newTotal.toFixed(2);
+                totalPriceInput.value = newTotal.toFixed(2);
+            });
+
+            // Form submission handler
+            form.addEventListener('submit', function (e) {
+                e.preventDefault();
+
+                const paymentMethod = document.getElementById('payment-method').value;
+
+                if (paymentMethod === 'mtn' || paymentMethod === 'airtel') {
+                    showOtpModal();
+                } else {
+                    // Submit form directly for cash payments
+                    this.submit();
+                }
+            });
+
+            // OTP Modal functions
+            function showOtpModal() {
+                const modal = document.getElementById('otpModal');
+                modal.classList.add('active');
+                document.body.style.overflow = 'hidden';
+
+                setTimeout(() => {
+                    document.getElementById('otpInput').focus();
+                }, 300);
+            }
+
+            function hideOtpModal() {
+                const modal = document.getElementById('otpModal');
+                modal.classList.remove('active');
+                document.body.style.overflow = '';
+                document.getElementById('otpInput').value = '';
+            }
+
+            // OTP Confirmation
+            document.getElementById('confirmOtpBtn').addEventListener('click', function () {
+                const otpInput = document.getElementById('otpInput');
+                const otpValue = otpInput.value.trim();
+
+                if (!otpValue || otpValue.length < 4) {
+                    alert('Please enter a valid OTP');
+                    return;
+                }
+
+                this.disabled = true;
+                this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Verifying...';
+
+                setTimeout(() => {
+                    hideOtpModal();
+                    alert('Payment verified successfully! Processing your order...');
+                    setTimeout(() => {
+                        form.submit();
+                    }, 1000);
+                }, 2000);
+            });
+
+            // OTP Resend
+            document.getElementById('resendOtpBtn').addEventListener('click', function () {
+                this.disabled = true;
+                this.textContent = 'Sending...';
+
+                setTimeout(() => {
+                    alert('OTP has been resent to your registered mobile number');
+                    this.disabled = false;
+                    this.textContent = 'Resend OTP';
+                }, 1500);
+            });
+
+            // Enter key for OTP
+            document.getElementById('otpInput').addEventListener('keypress', function (e) {
+                if (e.key === 'Enter') {
+                    document.getElementById('confirmOtpBtn').click();
+                }
+            });
+
+            // Close modal on escape
+            document.addEventListener('keydown', function (e) {
+                if (e.key === 'Escape') {
+                    const modal = document.getElementById('otpModal');
+                    if (modal.classList.contains('active')) {
+                        hideOtpModal();
+                    }
+                }
+            });
+
+            // Close modal on outside click
+            document.getElementById('otpModal').addEventListener('click', function (e) {
+                if (e.target === this) {
+                    hideOtpModal();
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>

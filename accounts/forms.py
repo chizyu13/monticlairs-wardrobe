@@ -1,6 +1,8 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
+from django.core.exceptions import ValidationError
+import re
 from home.models import Profile  # Import from home app
 
 class SignUpForm(UserCreationForm):
@@ -29,6 +31,27 @@ class SignUpForm(UserCreationForm):
             'class': 'form-control',
             'placeholder': 'Confirm your password'
         })
+    
+    def clean_email(self):
+        """Validate email format and check if it already exists."""
+        email = self.cleaned_data.get('email')
+        
+        if not email:
+            raise ValidationError("Email is required.")
+        
+        # Email format validation - must contain @ and domain
+        email_pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+        if not re.match(email_pattern, email):
+            raise ValidationError(
+                "Please enter a valid email address (e.g., munachizyuka@gmail.com). "
+                "Email must contain '@' and a valid domain."
+            )
+        
+        # Check if email already exists
+        if User.objects.filter(email=email).exists():
+            raise ValidationError("This email address is already registered.")
+        
+        return email
         
 class UserRegisterForm(forms.ModelForm):
     password = forms.CharField(widget=forms.PasswordInput(attrs={
@@ -49,6 +72,27 @@ class UserRegisterForm(forms.ModelForm):
                 'placeholder': 'your.email@example.com'
             }),
         }
+    
+    def clean_email(self):
+        """Validate email format and check if it already exists."""
+        email = self.cleaned_data.get('email')
+        
+        if not email:
+            raise ValidationError("Email is required.")
+        
+        # Email format validation - must contain @ and domain
+        email_pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+        if not re.match(email_pattern, email):
+            raise ValidationError(
+                "Please enter a valid email address (e.g., munachizyuka@gmail.com). "
+                "Email must contain '@' and a valid domain."
+            )
+        
+        # Check if email already exists
+        if User.objects.filter(email=email).exists():
+            raise ValidationError("This email address is already registered.")
+        
+        return email
 
 class ProfileForm(forms.ModelForm):
     class Meta:

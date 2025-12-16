@@ -838,23 +838,15 @@
                                     <strong>Email</strong><br>
                                     <a href="mailto:contact@montclairwardrobe.com">contact@montclairwardrobe.com</a>
                                 </div>
-                            </li>   
-                         <li class="contact-item">
+                            </li>
+                            <li class="contact-item">
                                 <div class="contact-icon">
                                     <i class="fas fa-clock"></i>
                                 </div>
                                 <div>
-                                    <strong>Business Hours</strong>
-                                    <div style="margin-top: 8px; line-height: 1.8;">
-                                        <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
-                                            <span style="color: var(--text-secondary);">Mon - Sat:</span>
-                                            <span style="color: var(--text-secondary); margin-left: 12px;">9:00 AM - 8:00 PM</span>
-                                        </div>
-                                        <div style="display: flex; justify-content: space-between;">
-                                            <span style="color: var(--text-secondary);">Sunday:</span>
-                                            <span style="color: var(--text-secondary); margin-left: 12px;">11:00 AM - 6:00 PM</span>
-                                        </div>
-                                    </div>
+                                    <strong>Business Hours</strong><br>
+                                    Mon - Sat: 9:00 AM - 8:00 PM<br>
+                                    Sunday: 11:00 AM - 6:00 PM
                                 </div>
                             </li>
                         </ul>
@@ -1023,10 +1015,10 @@
            <div class="footer-section">
                     <h3>Customer Care</h3>
                     <ul class="footer-links">
-                        <li><a href="#">Size Guide</a></li>
-                        <li><a href="#">Delivery Info</a></li>
-                        <li><a href="#">Returns</a></li>
-                        <li><a href="#">FAQ</a></li>
+                        <li><a href="{% url 'home:size_guide' %}">Size Guide</a></li>
+                        <li><a href="{% url 'home:delivery_info' %}">Delivery Info</a></li>
+                        <li><a href="{% url 'home:returns' %}">Returns</a></li>
+                        <li><a href="{% url 'home:faq' %}">FAQ</a></li>
                     </ul>
                 </div>
                 

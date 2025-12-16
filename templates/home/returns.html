@@ -1,0 +1,156 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Returns & Exchanges - Montclair Wardrobe</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary-dark: #0a0a0a;
+            --secondary-dark: #1a1a1a;
+            --gold-accent: #d4af37;
+            --text-primary: #ffffff;
+            --text-secondary: #b0b0b0;
+            --glass-bg: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--primary-dark);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 100px 20px 60px;
+        }
+        h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5rem;
+            color: var(--gold-accent);
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        .info-section {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 40px;
+            margin-bottom: 30px;
+        }
+        h2 {
+            font-family: 'Playfair Display', serif;
+            color: var(--gold-accent);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        p {
+            color: var(--text-secondary);
+            margin-bottom: 15px;
+        }
+        ul, ol {
+            color: var(--text-secondary);
+            margin-left: 20px;
+            margin-bottom: 15px;
+        }
+        .highlight {
+            background: var(--secondary-dark);
+            padding: 20px;
+            border-radius: 12px;
+            border-left: 4px solid var(--gold-accent);
+            margin: 20px 0;
+        }
+        .btn-back {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: linear-gradient(135deg, var(--gold-accent), #b8941f);
+            color: var(--primary-dark);
+            padding: 12px 24px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: transform 0.3s;
+        }
+        .btn-back:hover {
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1><i class="fas fa-undo"></i> Returns & Exchanges</h1>
+        
+        <div class="info-section">
+            <h2><i class="fas fa-calendar-check"></i> Return Policy</h2>
+            <p>We want you to be completely satisfied with your purchase. If you're not happy, we offer:</p>
+            <ul>
+                <li><strong>7-Day Return Window:</strong> Return items within 7 days of delivery</li>
+                <li><strong>Full Refund:</strong> Get your money back for unworn, unused items</li>
+                <li><strong>Free Exchange:</strong> Exchange for a different size or color</li>
+            </ul>
+            <div class="highlight">
+                <strong>Important:</strong> Items must be in original condition with tags attached.
+            </div>
+        </div>
+
+        <div class="info-section">
+            <h2><i class="fas fa-check-circle"></i> Eligible Items</h2>
+            <p>The following items can be returned or exchanged:</p>
+            <ul>
+                <li>Clothing with original tags attached</li>
+                <li>Unworn shoes in original packaging</li>
+                <li>Accessories in unused condition</li>
+                <li>Items without damage or alterations</li>
+            </ul>
+        </div>
+
+        <div class="info-section">
+            <h2><i class="fas fa-times-circle"></i> Non-Returnable Items</h2>
+            <p>For hygiene and safety reasons, we cannot accept returns on:</p>
+            <ul>
+                <li>Underwear and intimate apparel</li>
+                <li>Earrings and pierced jewelry</li>
+                <li>Sale or clearance items (marked as final sale)</li>
+                <li>Customized or personalized items</li>
+            </ul>
+        </div>
+
+        <div class="info-section">
+            <h2><i class="fas fa-clipboard-list"></i> How to Return</h2>
+            <p>Follow these simple steps to return your item:</p>
+            <ol>
+                <li>Contact us at +260 77-117-2699 or contact@montclairwardrobe.com</li>
+                <li>Provide your order number and reason for return</li>
+                <li>Pack the item securely with original tags</li>
+                <li>We'll arrange pickup or you can drop off at our boutique</li>
+                <li>Refund processed within 3-5 business days</li>
+            </ol>
+        </div>
+
+        <div class="info-section">
+            <h2><i class="fas fa-exchange-alt"></i> Exchanges</h2>
+            <p>Need a different size or color? Exchanges are easy:</p>
+            <ul>
+                <li>Contact us within 7 days of delivery</li>
+                <li>We'll check availability of your preferred item</li>
+                <li>Free exchange delivery within Lusaka</li>
+                <li>Exchange processed within 2-3 business days</li>
+            </ul>
+        </div>
+
+        <div style="text-align: center; margin-top: 40px;">
+            <a href="{% url 'home:main_page' %}" class="btn-back">
+                <i class="fas fa-arrow-left"></i> Back to Home
+            </a>
+        </div>
+    </div>
+</body>
+</html>

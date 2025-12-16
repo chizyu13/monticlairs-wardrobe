@@ -17,6 +17,12 @@ urlpatterns = [
     path('contact/', contact_view, name='contact'),
     path('privacy/', views.privacy_policy, name='privacy_policy'),
     path('terms/', views.terms_of_service, name='terms_of_service'),
+    
+    # Customer Care Pages
+    path('size-guide/', views.size_guide, name='size_guide'),
+    path('delivery-info/', views.delivery_info, name='delivery_info'),
+    path('returns/', views.returns, name='returns'),
+    path('faq/', views.faq, name='faq'),
     path('clock/', views.clock_view, name='clock'),
     path('category/<str:category_slug>/', views.category_products, name='category_products'),
     path('profile/', views.profile_view, name='profile'),
@@ -48,4 +54,10 @@ urlpatterns = [
     path('chat/send/<str:session_id>/', views.send_message, name='send_message'),
     path('chat/messages/<str:session_id>/', views.get_messages, name='get_messages'),
     path('chat/close/<str:session_id>/', views.close_chat, name='close_chat'),
+    
+    # Reports URLs
+    path('reports/', views.reports_dashboard, name='reports_dashboard'),
+    path('reports/monthly/', views.generate_monthly_report, name='monthly_report'),
+    path('reports/annual/', views.generate_annual_report, name='annual_report'),
+    path('reports/products/', views.product_performance_report, name='product_performance'),
 ]

@@ -1,0 +1,141 @@
+{% extends 'custom_admin/base.html' %}
+{% load static %}
+
+{% block title %}Refund Details - Admin{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h3 class="mb-0">
+                        <i class="fas fa-receipt"></i> Refund #{{ refund.id }}
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <!-- Status Badge -->
+                    <div class="mb-4">
+                        {% if refund.status == 'pending' %}
+                            <span class="badge badge-warning badge-lg">Pending</span>
+                        {% elif refund.status == 'approved' %}
+                            <span class="badge badge-info badge-lg">Approved</span>
+                        {% elif refund.status == 'completed' %}
+                            <span class="badge badge-success badge-lg">Completed</span>
+                        {% elif refund.status == 'rejected' %}
+                            <span class="badge badge-danger badge-lg">Rejected</span>
+                        {% endif %}
+                    </div>
+
+                    <h4>Refund Information</h4>
+                    <table class="table table-bordered">
+                        <tr>
+                            <th>Refund ID:</th>
+                            <td>#{{ refund.id }}</td>
+                        </tr>
+                        <tr>
+                            <th>Amount:</th>
+                            <td class="text-danger"><strong>ZMW {{ refund.amount }}</strong></td>
+                        </tr>
+                        <tr>
+                            <th>Status:</th>
+                            <td>{{ refund.get_status_display }}</td>
+                        </tr>
+                        <tr>
+                            <th>Reason:</th>
+                            <td>{{ refund.reason }}</td>
+                        </tr>
+                        <tr>
+                            <th>Requested By:</th>
+                            <td>{{ refund.requested_by.get_full_name|default:refund.requested_by.username }}</td>
+                        </tr>
+                        <tr>
+                            <th>Created At:</th>
+                            <td>{{ refund.created_at|date:"M d, Y H:i" }}</td>
+                        </tr>
+                        {% if refund.approved_by %}
+                        <tr>
+                            <th>Approved By:</th>
+                            <td>{{ refund.approved_by.get_full_name|default:refund.approved_by.username }}</td>
+                        </tr>
+                        <tr>
+                            <th>Approved At:</th>
+                            <td>{{ refund.approved_at|date:"M d, Y H:i" }}</td>
+                        </tr>
+                        {% endif %}
+                        {% if refund.completed_at %}
+                        <tr>
+                            <th>Completed At:</th>
+                            <td>{{ refund.completed_at|date:"M d, Y H:i" }}</td>
+                        </tr>
+                        {% endif %}
+                    </table>
+
+                    <h4 class="mt-4">Order Details</h4>
+                    <table class="table table-bordered">
+                        <tr>
+                            <th>Order ID:</th>
+                            <td><a href="{% url 'custom_admin:order_detail' refund.order.id %}">#{{ refund.order.id }}</a></td>
+                        </tr>
+                        <tr>
+                            <th>Customer:</th>
+                            <td>{{ refund.order.user.get_full_name|default:refund.order.user.username }}</td>
+                        </tr>
+                        <tr>
+                            <th>Product:</th>
+                            <td>{{ refund.order.product.name }}</td>
+                        </tr>
+                        <tr>
+                            <th>Payment Reference:</th>
+                            <td>{{ refund.payment.reference }}</td>
+                        </tr>
+                    </table>
+
+                    <!-- Process Refund Section -->
+                    {% if refund.status == 'pending' %}
+                    <div class="mt-4 p-4 bg-light border rounded">
+                        <h4 class="text-danger">
+                            <i class="fas fa-lock"></i> Process Refund - PIN Required
+                        </h4>
+                        <p class="text-muted">Enter your admin PIN to authorize this refund. The amount will be deducted from the system account.</p>
+                        
+                        <form method="post" action="{% url 'custom_admin:process_refund' refund.id %}" id="refundForm">
+                            {% csrf_token %}
+                            <div class="form-group">
+                                <label for="pin">Admin PIN:</label>
+                                <input type="password" name="pin" id="pin" class="form-control" required 
+                                       placeholder="Enter your password" autocomplete="current-password">
+                                <small class="form-text text-muted">Use your admin account password as PIN</small>
+                            </div>
+
+                            <div class="alert alert-warning mt-3">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                <strong>Warning:</strong> This action will:
+                                <ul class="mb-0 mt-2">
+                                    <li>Deduct ZMW {{ refund.amount }} from the system account</li>
+                                    <li>Mark the payment as cancelled</li>
+                                    <li>Complete the refund process</li>
+                                </ul>
+                            </div>
+
+                            <button type="submit" class="btn btn-danger btn-lg mt-3" onclick="return confirm('Are you sure you want to process this refund? This action cannot be undone.')">
+                                <i class="fas fa-check-circle"></i> Process Refund (ZMW {{ refund.amount }})
+                            </button>
+                        </form>
+                    </div>
+                    {% endif %}
+
+                    <div class="mt-4">
+                        <a href="{% url 'custom_admin:manage_refunds' %}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Back to Refunds
+                        </a>
+                        <a href="{% url 'custom_admin:order_detail' refund.order.id %}" class="btn btn-info">
+                            <i class="fas fa-eye"></i> View Order
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

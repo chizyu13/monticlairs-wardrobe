@@ -359,10 +359,54 @@ def update_order_status(request, order_id):
     
     if request.method == 'POST':
         new_status = request.POST.get('status')
+        cancellation_reason = request.POST.get('cancellation_reason', '')
+        
         if new_status in dict(Order.StatusChoices.choices):
             old_status = order.status
             order.status = new_status
+            
+            # Save cancellation reason if order is being cancelled
+            if new_status == 'cancelled' and cancellation_reason:
+                order.cancellation_reason = cancellation_reason
+                order.cancelled_by = request.user
+            
             order.save()
+            
+            # Automatically mark payment as completed when order is delivered
+            if new_status == 'delivered' and order.checkout:
+                checkout = order.checkout
+                if checkout.payment_status != 'completed':
+                    checkout.payment_status = 'completed'
+                    checkout.save()
+                    
+                    # Also update related Payment record if exists
+                    from payment.models import Payment
+                    payment = Payment.objects.filter(
+                        user=order.user,
+                        reference=checkout.transaction_id
+                    ).first()
+                    
+                    if payment and payment.status != 'completed':
+                        payment.mark_as_completed()
+                        messages.info(request, 'Payment automatically marked as completed for delivered order')
+            
+            # Handle refund when order is cancelled
+            if new_status == 'cancelled' and order.checkout:
+                checkout = order.checkout
+                # Check if payment was completed
+                if checkout.payment_status == 'completed':
+                    from payment.models import Payment
+                    payment = Payment.objects.filter(
+                        user=order.user,
+                        reference=checkout.transaction_id,
+                        status='completed'
+                    ).first()
+                    
+                    if payment:
+                        # Redirect to refund confirmation page
+                        messages.warning(request, 'Order cancelled. Please process refund for the customer.')
+                        return redirect('custom_admin:initiate_refund', order_id=order.id)
+            
             messages.success(request, f'Order #{order.id} status updated from {old_status} to {new_status}')
         else:
             messages.error(request, 'Invalid status selected')
@@ -551,20 +595,32 @@ def approve_payment(request, payment_id):
         messages.warning(request, f'Payment {payment.reference} is already {payment.status}')
         return redirect('custom_admin:payment_detail', payment_id=payment_id)
     
-    # Mark payment as completed
-    payment.mark_as_completed()
-    
-    # Update related checkout status
+    # Get related checkout
     checkout = Checkout.objects.filter(
         user=payment.user,
         transaction_id=payment.reference
     ).first()
     
+    # Check if this is cash on delivery - only complete if order is delivered
+    if checkout and checkout.payment_method in ['cash', 'delivery']:
+        # Check if all orders are delivered
+        orders = Order.objects.filter(checkout=checkout)
+        all_delivered = orders.exists() and all(order.status == 'delivered' for order in orders)
+        
+        if not all_delivered:
+            messages.error(request, 
+                'Cannot approve cash on delivery payment until order is marked as delivered. '
+                'Please update order status to "Delivered" first.')
+            return redirect('custom_admin:payment_detail', payment_id=payment_id)
+    
+    # Mark payment as completed
+    payment.mark_as_completed()
+    
     if checkout:
         checkout.payment_status = 'completed'
         checkout.save()
         
-        # Update related orders to processing
+        # Update related orders to processing (only if not already delivered)
         Order.objects.filter(checkout=checkout, status='pending').update(
             status='processing',
             updated_at=timezone.now()
@@ -857,3 +913,158 @@ def delete_guide_attachment(request, attachment_id):
     
     messages.success(request, 'Attachment deleted successfully!')
     return redirect('custom_admin:edit_guide', guide_id=guide_id)
+
+
+# --- Refund Management ---
+@login_required
+@user_passes_test(is_admin)
+def initiate_refund(request, order_id):
+    """Initiate refund for a cancelled order"""
+    from payment.models import Payment, Refund
+    
+    order = get_object_or_404(Order, id=order_id)
+    
+    # Check if order is cancelled
+    if order.status != 'cancelled':
+        messages.error(request, 'Refunds can only be initiated for cancelled orders')
+        return redirect('custom_admin:order_detail', order_id=order_id)
+    
+    # Check if refund already exists
+    existing_refund = Refund.objects.filter(order=order).first()
+    if existing_refund:
+        messages.info(request, f'Refund already exists for this order (Status: {existing_refund.get_status_display()})')
+        return redirect('custom_admin:refund_detail', refund_id=existing_refund.id)
+    
+    # Get payment
+    checkout = order.checkout
+    if not checkout:
+        messages.error(request, 'No checkout information found for this order')
+        return redirect('custom_admin:order_detail', order_id=order_id)
+    
+    payment = Payment.objects.filter(
+        user=order.user,
+        reference=checkout.transaction_id
+    ).first()
+    
+    if not payment:
+        messages.error(request, 'No payment record found for this order')
+        return redirect('custom_admin:order_detail', order_id=order_id)
+    
+    if payment.status != 'completed':
+        messages.error(request, 'Payment was not completed. No refund needed.')
+        return redirect('custom_admin:order_detail', order_id=order_id)
+    
+    if request.method == 'POST':
+        reason = request.POST.get('reason', 'Order cancelled by admin')
+        
+        # Create refund
+        refund = Refund.objects.create(
+            payment=payment,
+            order=order,
+            amount=order.total_price,
+            reason=reason,
+            requested_by=request.user,
+            status='pending'
+        )
+        
+        messages.success(request, f'Refund initiated for Order #{order.id}. Amount: ZMW {order.total_price}')
+        return redirect('custom_admin:refund_detail', refund_id=refund.id)
+    
+    context = {
+        'order': order,
+        'payment': payment,
+        'checkout': checkout,
+    }
+    return render(request, 'custom_admin/initiate_refund.html', context)
+
+
+@login_required
+@user_passes_test(is_admin)
+def refund_detail(request, refund_id):
+    """View refund details"""
+    from payment.models import Refund
+    
+    refund = get_object_or_404(Refund, id=refund_id)
+    
+    context = {
+        'refund': refund,
+    }
+    return render(request, 'custom_admin/refund_detail.html', context)
+
+
+@login_required
+@user_passes_test(is_admin)
+def process_refund(request, refund_id):
+    """Process refund with PIN verification"""
+    from payment.models import Refund
+    from django.contrib.auth.hashers import check_password
+    
+    refund = get_object_or_404(Refund, id=refund_id)
+    
+    if refund.status != 'pending':
+        messages.warning(request, f'Refund is already {refund.get_status_display()}')
+        return redirect('custom_admin:refund_detail', refund_id=refund_id)
+    
+    if request.method == 'POST':
+        pin = request.POST.get('pin')
+        
+        # Verify PIN (using user's password as PIN for security)
+        if check_password(pin, request.user.password):
+            # PIN verified
+            refund.verify_pin()
+            refund.approve_refund(request.user)
+            refund.complete_refund()
+            
+            # Update payment status
+            refund.payment.status = 'cancelled'
+            refund.payment.save()
+            
+            # Update checkout status
+            if refund.order.checkout:
+                refund.order.checkout.payment_status = 'failed'
+                refund.order.checkout.save()
+            
+            messages.success(request, 
+                f'Refund processed successfully! ZMW {refund.amount} has been reversed from system account.')
+            return redirect('custom_admin:refund_detail', refund_id=refund_id)
+        else:
+            messages.error(request, 'Invalid PIN. Refund not processed.')
+            return redirect('custom_admin:refund_detail', refund_id=refund_id)
+    
+    return redirect('custom_admin:refund_detail', refund_id=refund_id)
+
+
+@login_required
+@user_passes_test(is_admin)
+def manage_refunds(request):
+    """View all refunds"""
+    from payment.models import Refund
+    
+    # Get filter parameters
+    status_filter = request.GET.get('status', 'all')
+    
+    refunds = Refund.objects.select_related('payment', 'order', 'requested_by', 'approved_by').order_by('-created_at')
+    
+    if status_filter and status_filter != 'all':
+        refunds = refunds.filter(status=status_filter)
+    
+    # Pagination
+    paginator = Paginator(refunds, 20)
+    page_number = request.GET.get('page')
+    refunds = paginator.get_page(page_number)
+    
+    # Get counts
+    pending_count = Refund.objects.filter(status='pending').count()
+    approved_count = Refund.objects.filter(status='approved').count()
+    completed_count = Refund.objects.filter(status='completed').count()
+    rejected_count = Refund.objects.filter(status='rejected').count()
+    
+    context = {
+        'refunds': refunds,
+        'status_filter': status_filter,
+        'pending_count': pending_count,
+        'approved_count': approved_count,
+        'completed_count': completed_count,
+        'rejected_count': rejected_count,
+    }
+    return render(request, 'custom_admin/manage_refunds.html', context)

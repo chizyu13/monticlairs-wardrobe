@@ -829,7 +829,7 @@
                 <a href="{% url 'home:category_products' category.slug %}" class="category-card">
                     <div class="category-image-container">
                         {% if category.image %}
-                            <img src="{% static category.image %}" class="category-image" alt="{{ category.name }}" loading="lazy"
+                            <img src="{{ category.image }}" class="category-image" alt="{{ category.name }}" loading="lazy"
                                 onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                             <div class="category-icon-fallback" style="display: none;">
                                 <i class="{{ category.icon }}"></i>

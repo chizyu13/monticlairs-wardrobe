@@ -81,7 +81,7 @@ def login_view(request):
 # Logout View (accepts both GET and POST)
 def logout_view(request):
     logout(request)
-    return redirect('home:main_page')
+    return render(request, 'logout.html')
 
 
 # Note: Dashboard functionality is handled by custom_admin app

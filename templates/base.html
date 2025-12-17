@@ -530,9 +530,9 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <form action="{% url 'logout' %}" method="POST">
+                    <form action="{% url 'logout' %}" method="POST" style="display: inline;">
                         {% csrf_token %}
-                        <button type="submit" class="btn btn-danger btn-sm">Logout</button>
+                        <button type="submit" class="btn btn-danger">Logout</button>
                     </form>
                 </div>
             </div>

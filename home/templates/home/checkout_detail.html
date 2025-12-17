@@ -694,34 +694,34 @@
                                 <div class="timeline-date">{{ order.created_at|date:"F d, Y g:i A" }}</div>
                             </div>
                         </div>
-                        <div class="timeline-item {% if order.status != 'pending' %}completed{% endif %}">
-                            <div class="timeline-content {% if order.status != 'pending' %}active{% endif %}">
+                        <div class="timeline-item {% if order.status|lower != 'pending' %}completed{% endif %}">
+                            <div class="timeline-content {% if order.status|lower != 'pending' %}active{% endif %}">
                                 <strong>Payment Confirmed</strong>
-                                {% if order.status != 'pending' %}
+                                {% if order.status|lower != 'pending' %}
                                 <div class="timeline-date">{{ order.updated_at|date:"F d, Y g:i A" }}</div>
                                 {% endif %}
                             </div>
                         </div>
-                        <div class="timeline-item {% if order.status == 'processing' or order.status == 'shipped' or order.status == 'completed' %}active{% endif %}">
-                            <div class="timeline-content {% if order.status == 'processing' or order.status == 'shipped' or order.status == 'completed' %}active{% endif %}">
+                        <div class="timeline-item {% if order.status|lower == 'processing' or order.status|lower == 'shipped' or order.status|lower == 'delivered' %}completed{% endif %}">
+                            <div class="timeline-content {% if order.status|lower == 'processing' or order.status|lower == 'shipped' or order.status|lower == 'delivered' %}active{% endif %}">
                                 <strong>Order Processing</strong>
-                                {% if order.status == 'processing' or order.status == 'Delivered' or order.status == 'completed' %}
+                                {% if order.status|lower == 'processing' or order.status|lower == 'shipped' or order.status|lower == 'delivered' %}
                                 <div class="timeline-date">In progress</div>
                                 {% endif %}
                             </div>
                         </div>
-                        <div class="timeline-item {% if order.status == 'shipped' or order.status == 'completed' %}active{% endif %}">
-                            <div class="timeline-content {% if order.status == 'shipped' or order.status == 'completed' %}active{% endif %}">
+                        <div class="timeline-item {% if order.status|lower == 'shipped' or order.status|lower == 'delivered' %}completed{% endif %}">
+                            <div class="timeline-content {% if order.status|lower == 'shipped' or order.status|lower == 'delivered' %}active{% endif %}">
                                 <strong>Courier Is On The Way</strong>
-                                {% if order.status == 'Delivered' or order.status == 'completed' %}
+                                {% if order.status|lower == 'shipped' or order.status|lower == 'delivered' %}
                                 <div class="timeline-date">On the way</div>
                                 {% endif %}
                             </div>
                         </div>
-                        <div class="timeline-item {% if order.status == 'completed' %}completed{% endif %}">
-                            <div class="timeline-content {% if order.status == 'completed' %}active{% endif %}">
+                        <div class="timeline-item {% if order.status|lower == 'delivered' %}completed{% endif %}">
+                            <div class="timeline-content {% if order.status|lower == 'delivered' %}active{% endif %}">
                                 <strong>Order Delivered</strong>
-                                {% if order.status == 'completed' %}
+                                {% if order.status|lower == 'delivered' %}
                                 <div class="timeline-date">Completed</div>
                                 {% endif %}
                             </div>

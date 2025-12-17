@@ -29,6 +29,7 @@ urlpatterns = [
 
     # App-specific URLs
     path('cart/', include('cart.urls')),
+    path('chat/', include('chat.urls')),
     path('custom-admin/', include('custom_admin.urls')),
     path('payment/', include(('payment.urls', 'payment'), namespace='payment')),
     path('staff/', include(('staff_dashboard.urls', 'staff_dashboard'), namespace='staff_dashboard')),

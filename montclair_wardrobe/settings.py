@@ -55,6 +55,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'crispy_forms',
     'cart',
+    'chat',
     'home',
     'accounts',
     'custom_admin',

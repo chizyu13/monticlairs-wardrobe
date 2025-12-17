@@ -49,10 +49,7 @@ def register_view(request):
                 print(f"Profile creation warning: {e}")
             
             login(request, user)
-            messages.success(request, "Welcome to Montclair Wardrobe! Your account has been created successfully.")
             return redirect('home:main_page')
-        else:
-            messages.error(request, "Please correct the errors below.")
     else:
         user_form = SignUpForm()
         profile_form = ProfileForm()

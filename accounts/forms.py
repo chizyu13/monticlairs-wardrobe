@@ -8,11 +8,11 @@ from home.models import Profile  # Import from home app
 def validate_password_strength(password):
     """
     Validate password strength:
-    - Must be less than 8 characters
+    - Must be at least 8 characters
     - Must contain a mixture of characters and symbols
     """
-    if len(password) >= 8:
-        raise ValidationError("Password must be less than 8 characters.")
+    if len(password) < 8:
+        raise ValidationError("Password must be at least 8 characters.")
     
     # Check for at least one letter
     has_letter = re.search(r'[a-zA-Z]', password)

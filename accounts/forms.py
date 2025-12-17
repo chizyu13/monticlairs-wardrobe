@@ -5,6 +5,26 @@ from django.core.exceptions import ValidationError
 import re
 from home.models import Profile  # Import from home app
 
+def validate_password_strength(password):
+    """
+    Validate password strength:
+    - Must be less than 8 characters
+    - Must contain a mixture of characters and symbols
+    """
+    if len(password) >= 8:
+        raise ValidationError("Password must be less than 8 characters.")
+    
+    # Check for at least one letter
+    has_letter = re.search(r'[a-zA-Z]', password)
+    # Check for at least one symbol (special character)
+    has_symbol = re.search(r'[!@#$%^&*()_+\-=\[\]{};:\'",.<>?/\\|`~]', password)
+    
+    if not has_letter or not has_symbol:
+        raise ValidationError(
+            "Password must contain a mixture of characters and symbols. "
+            "Example: Pass@1 or Pwd#2"
+        )
+
 class SignUpForm(UserCreationForm):
     email = forms.EmailField(required=True)
     
@@ -31,6 +51,13 @@ class SignUpForm(UserCreationForm):
             'class': 'form-control',
             'placeholder': 'Confirm your password'
         })
+    
+    def clean_password1(self):
+        """Validate password strength."""
+        password1 = self.cleaned_data.get('password1')
+        if password1:
+            validate_password_strength(password1)
+        return password1
     
     def clean_email(self):
         """Validate email format and check if it already exists."""
@@ -72,6 +99,13 @@ class UserRegisterForm(forms.ModelForm):
                 'placeholder': 'your.email@example.com'
             }),
         }
+    
+    def clean_password(self):
+        """Validate password strength."""
+        password = self.cleaned_data.get('password')
+        if password:
+            validate_password_strength(password)
+        return password
     
     def clean_email(self):
         """Validate email format and check if it already exists."""
